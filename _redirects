@@ -1,0 +1,156 @@
+# Greenhse 301 redirects - old Magento URLs to new static pages
+# Generated from greenhse-products-full.json
+# Deploy to Netlify site root as: _redirects
+
+
+# Catch-all fallbacks for old category paths
+/products/lighting-perth/*  /lighting-perth/:splat  301
+/automation/*  /automation/:splat  301
+
+# Anything else under old product tree -> products index
+/products/*  /categories/  301
+
+# Blog posts migrated from Magento
+/blogs  /blog/  301
+/blogs/  /blog/  301
+/blogs/post/australia-cheaper-home-batteries-program-greencharge  /blog/australia-cheaper-home-batteries-program-greencharge.html  301
+/blogs/post/best-lighting-products-in-perth  /blog/best-lighting-products-in-perth.html  301
+/blogs/post/choose-led-ceiling-lights-perth-home  /blog/choose-led-ceiling-lights-perth-home.html  301
+/blogs/post/choose-right-led-industrial-lighting-perth  /blog/choose-right-led-industrial-lighting-perth.html  301
+/blogs/post/energy-efficient-led-office-lighting-perth  /blog/energy-efficient-led-office-lighting-perth.html  301
+/blogs/post/guide-to-choosing-outdoor-wall-lighting-perth-homes  /blog/guide-to-choosing-outdoor-wall-lighting-perth-homes.html  301
+/blogs/post/high-bay-lights-perth-warehouse  /blog/high-bay-lights-perth-warehouse.html  301
+/blogs/post/how-smart-lighting-works-guide-perth-homes  /blog/how-smart-lighting-works-guide-perth-homes.html  301
+/blogs/post/top-10-modern-lighting-fixtures-for-home-perth  /blog/top-10-modern-lighting-fixtures-for-home-perth.html  301
+/blogs/post/understanding-strip-lighting-guide-perth  /blog/understanding-strip-lighting-guide-perth.html  301
+/blogs/post/upgrade-your-home-lighting-in-perth  /blog/upgrade-your-home-lighting-in-perth.html  301
+/blogs/post/what-is-free-home-battery-storage-australians  /blog/what-is-free-home-battery-storage-australians.html  301
+/blogs/*  /blog/  301
+
+# Magento API, proxied server-side by Netlify so the browser makes a
+# same-origin request and CORS never comes into it.
+/mag/*  https://greenhse.com/:splat  200
+
+# Spec sheets. Same trick as /mag/* above: Netlify fetches these server-side
+# from the Magento media folder, so the product pages can link to a plain
+# /docs/<file>.pdf path. At the domain cutover this one line moves to
+# mag.greenhse.com and all 194 pages keep working. Drop the real PDFs into
+# /docs/ and they win automatically — Netlify serves a real file before it
+# applies a rewrite.
+/docs/*  https://greenhse.com/media/sparsh/product_attachment/:splat  200
+
+# Client logos on the Applications section, proxied the same way as /docs.
+/brand/*  https://greenhse.com/media/wysiwyg/:splat  200
+
+/installation/  /installation.html  301
+/installation  /installation.html  301
+
+# Shop pages — friendly paths and the old Magento equivalents
+/account/login/  /account.html  301
+/account/create/  /account.html?new=1  301
+/customer/account/login/  /account.html  301
+/customer/account/create/  /account.html?new=1  301
+/customer/account/*  /account.html  301
+/account/*  /account.html  301
+/checkout/onepage/success/  /order-complete.html  301
+/checkout/*  /checkout.html  301
+/cart/  /index.html#shop  301
+
+# Blog posts carried over from the Next.js build (/blogs/<slug> -> /blog/<slug>.html)
+/blogs/australia-cheaper-home-batteries-program-greencharge  /blog/australia-cheaper-home-batteries-program-greencharge.html  301
+/blogs/australia-cheaper-home-batteries-program-greencharge/  /blog/australia-cheaper-home-batteries-program-greencharge.html  301
+/blogs/bad-lighting-easy-solution  /blog/bad-lighting-easy-solution.html  301
+/blogs/bad-lighting-easy-solution/  /blog/bad-lighting-easy-solution.html  301
+/blogs/best-lighting-products-in-perth  /blog/best-lighting-products-in-perth.html  301
+/blogs/best-lighting-products-in-perth/  /blog/best-lighting-products-in-perth.html  301
+/blogs/best-smart-home-devices-australia  /blog/best-smart-home-devices-australia.html  301
+/blogs/best-smart-home-devices-australia/  /blog/best-smart-home-devices-australia.html  301
+/blogs/bluetooth-mesh-gateway-connection  /blog/bluetooth-mesh-gateway-connection.html  301
+/blogs/bluetooth-mesh-gateway-connection/  /blog/bluetooth-mesh-gateway-connection.html  301
+/blogs/brilliant-warranty-repair  /blog/brilliant-warranty-repair.html  301
+/blogs/brilliant-warranty-repair/  /blog/brilliant-warranty-repair.html  301
+/blogs/choose-led-ceiling-lights-perth-home  /blog/choose-led-ceiling-lights-perth-home.html  301
+/blogs/choose-led-ceiling-lights-perth-home/  /blog/choose-led-ceiling-lights-perth-home.html  301
+/blogs/choose-right-led-industrial-lighting-perth  /blog/choose-right-led-industrial-lighting-perth.html  301
+/blogs/choose-right-led-industrial-lighting-perth/  /blog/choose-right-led-industrial-lighting-perth.html  301
+/blogs/common-lighting-mistakes-perth-homeowners-make  /blog/common-lighting-mistakes-perth-homeowners-make.html  301
+/blogs/common-lighting-mistakes-perth-homeowners-make/  /blog/common-lighting-mistakes-perth-homeowners-make.html  301
+/blogs/connect-smart-devices-with-smart-life-app  /blog/connect-smart-devices-with-smart-life-app.html  301
+/blogs/connect-smart-devices-with-smart-life-app/  /blog/connect-smart-devices-with-smart-life-app.html  301
+/blogs/connecting-and-set-up-of-smart-switches  /blog/connecting-and-set-up-of-smart-switches.html  301
+/blogs/connecting-and-set-up-of-smart-switches/  /blog/connecting-and-set-up-of-smart-switches.html  301
+/blogs/creating-groups-with-smart-life-app  /blog/creating-groups-with-smart-life-app.html  301
+/blogs/creating-groups-with-smart-life-app/  /blog/creating-groups-with-smart-life-app.html  301
+/blogs/energy-efficient-led-office-lighting-perth  /blog/energy-efficient-led-office-lighting-perth.html  301
+/blogs/energy-efficient-led-office-lighting-perth/  /blog/energy-efficient-led-office-lighting-perth.html  301
+/blogs/everything-you-need-to-know-about-strip-lighting  /blog/everything-you-need-to-know-about-strip-lighting.html  301
+/blogs/everything-you-need-to-know-about-strip-lighting/  /blog/everything-you-need-to-know-about-strip-lighting.html  301
+/blogs/garden-light-connection-guide-single-colour  /blog/garden-light-connection-guide-single-colour.html  301
+/blogs/garden-light-connection-guide-single-colour/  /blog/garden-light-connection-guide-single-colour.html  301
+/blogs/guide-connecting-led-rgbw-garden-lights  /blog/guide-connecting-led-rgbw-garden-lights.html  301
+/blogs/guide-connecting-led-rgbw-garden-lights/  /blog/guide-connecting-led-rgbw-garden-lights.html  301
+/blogs/guide-to-choosing-outdoor-wall-lighting-perth-homes  /blog/guide-to-choosing-outdoor-wall-lighting-perth-homes.html  301
+/blogs/guide-to-choosing-outdoor-wall-lighting-perth-homes/  /blog/guide-to-choosing-outdoor-wall-lighting-perth-homes.html  301
+/blogs/guide-to-effective-led-area-lights  /blog/guide-to-effective-led-area-lights.html  301
+/blogs/guide-to-effective-led-area-lights/  /blog/guide-to-effective-led-area-lights.html  301
+/blogs/high-bay-led-lights-energy-savings  /blog/high-bay-led-lights-energy-savings.html  301
+/blogs/high-bay-led-lights-energy-savings/  /blog/high-bay-led-lights-energy-savings.html  301
+/blogs/high-bay-lights-perth-warehouse  /blog/high-bay-lights-perth-warehouse.html  301
+/blogs/high-bay-lights-perth-warehouse/  /blog/high-bay-lights-perth-warehouse.html  301
+/blogs/high-voltage-240v-strip-lighting  /blog/high-voltage-240v-strip-lighting.html  301
+/blogs/high-voltage-240v-strip-lighting/  /blog/high-voltage-240v-strip-lighting.html  301
+/blogs/how-led-lighting-can-create-a-sustainable-home  /blog/how-led-lighting-can-create-a-sustainable-home.html  301
+/blogs/how-led-lighting-can-create-a-sustainable-home/  /blog/how-led-lighting-can-create-a-sustainable-home.html  301
+/blogs/how-smart-lighting-works-guide-perth-homes  /blog/how-smart-lighting-works-guide-perth-homes.html  301
+/blogs/how-smart-lighting-works-guide-perth-homes/  /blog/how-smart-lighting-works-guide-perth-homes.html  301
+/blogs/how-to-change-5ghz-to-24ghz-to-connect-smart-devices  /blog/how-to-change-5ghz-to-24ghz-to-connect-smart-devices.html  301
+/blogs/how-to-change-5ghz-to-24ghz-to-connect-smart-devices/  /blog/how-to-change-5ghz-to-24ghz-to-connect-smart-devices.html  301
+/blogs/led-batten-lights-and-batten-fittings-perth  /blog/led-batten-lights-and-batten-fittings-perth.html  301
+/blogs/led-batten-lights-and-batten-fittings-perth/  /blog/led-batten-lights-and-batten-fittings-perth.html  301
+/blogs/led-downlights-everything-you-need-to-know  /blog/led-downlights-everything-you-need-to-know.html  301
+/blogs/led-downlights-everything-you-need-to-know/  /blog/led-downlights-everything-you-need-to-know.html  301
+/blogs/led-track-lighting-perth  /blog/led-track-lighting-perth.html  301
+/blogs/led-track-lighting-perth/  /blog/led-track-lighting-perth.html  301
+/blogs/lighting-layout-guidelines  /blog/lighting-layout-guidelines.html  301
+/blogs/lighting-layout-guidelines/  /blog/lighting-layout-guidelines.html  301
+/blogs/low-glare-architectural-downlights  /blog/low-glare-architectural-downlights.html  301
+/blogs/low-glare-architectural-downlights/  /blog/low-glare-architectural-downlights.html  301
+/blogs/lumens-vs-watts-whats-the-difference  /blog/lumens-vs-watts-whats-the-difference.html  301
+/blogs/lumens-vs-watts-whats-the-difference/  /blog/lumens-vs-watts-whats-the-difference.html  301
+/blogs/popular-smart-lighting-products-perth  /blog/popular-smart-lighting-products-perth.html  301
+/blogs/popular-smart-lighting-products-perth/  /blog/popular-smart-lighting-products-perth.html  301
+/blogs/smart-devices-connection  /blog/smart-devices-connection.html  301
+/blogs/smart-devices-connection/  /blog/smart-devices-connection.html  301
+/blogs/smart-kinetic-rf-switches  /blog/smart-kinetic-rf-switches.html  301
+/blogs/smart-kinetic-rf-switches/  /blog/smart-kinetic-rf-switches.html  301
+/blogs/smart-life-connection  /blog/smart-life-connection.html  301
+/blogs/smart-life-connection/  /blog/smart-life-connection.html  301
+/blogs/smart-switches-everything-you-need-to-know  /blog/smart-switches-everything-you-need-to-know.html  301
+/blogs/smart-switches-everything-you-need-to-know/  /blog/smart-switches-everything-you-need-to-know.html  301
+/blogs/star-light-connection-guide  /blog/star-light-connection-guide.html  301
+/blogs/star-light-connection-guide/  /blog/star-light-connection-guide.html  301
+/blogs/top-10-modern-lighting-fixtures-for-home-perth  /blog/top-10-modern-lighting-fixtures-for-home-perth.html  301
+/blogs/top-10-modern-lighting-fixtures-for-home-perth/  /blog/top-10-modern-lighting-fixtures-for-home-perth.html  301
+/blogs/ubiquiti-wifi-extender-setup-guide  /blog/ubiquiti-wifi-extender-setup-guide.html  301
+/blogs/ubiquiti-wifi-extender-setup-guide/  /blog/ubiquiti-wifi-extender-setup-guide.html  301
+/blogs/understanding-strip-lighting-guide-perth  /blog/understanding-strip-lighting-guide-perth.html  301
+/blogs/understanding-strip-lighting-guide-perth/  /blog/understanding-strip-lighting-guide-perth.html  301
+/blogs/upgrade-your-home-lighting-in-perth  /blog/upgrade-your-home-lighting-in-perth.html  301
+/blogs/upgrade-your-home-lighting-in-perth/  /blog/upgrade-your-home-lighting-in-perth.html  301
+/blogs/what-are-low-glare-downlights-perth  /blog/what-are-low-glare-downlights-perth.html  301
+/blogs/what-are-low-glare-downlights-perth/  /blog/what-are-low-glare-downlights-perth.html  301
+/blogs/what-do-you-need-to-make-you-home-smart  /blog/what-do-you-need-to-make-you-home-smart.html  301
+/blogs/what-do-you-need-to-make-you-home-smart/  /blog/what-do-you-need-to-make-you-home-smart.html  301
+/blogs/what-is-free-home-battery-storage-australians  /blog/what-is-free-home-battery-storage-australians.html  301
+/blogs/what-is-free-home-battery-storage-australians/  /blog/what-is-free-home-battery-storage-australians.html  301
+/blogs/why-are-dc-fans-better-than-ac-fans  /blog/why-are-dc-fans-better-than-ac-fans.html  301
+/blogs/why-are-dc-fans-better-than-ac-fans/  /blog/why-are-dc-fans-better-than-ac-fans.html  301
+/blogs/why-choose-24v-strip-light  /blog/why-choose-24v-strip-light.html  301
+/blogs/why-choose-24v-strip-light/  /blog/why-choose-24v-strip-light.html  301
+/blogs/why-choose-8w-led-downlight  /blog/why-choose-8w-led-downlight.html  301
+/blogs/why-choose-8w-led-downlight/  /blog/why-choose-8w-led-downlight.html  301
+
+# About page
+/aboutus  /about.html  301
+/aboutus/  /about.html  301
+/about  /about.html  301

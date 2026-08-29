@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Complete | Greenhse Technologies Perth</title>
+<meta name="description" content="Your Greenhse Technologies order confirmation.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://greenhse.com/order-complete.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site-v4.css">
+<style>
+/* [hidden] must beat the display rules below, or a hidden panel still shows. */
+[hidden]{display:none !important}
+.shop{max-width:1080px;margin:0 auto;padding:44px 20px 72px}
+.shop h1{font-size:2.1rem;margin-bottom:6px}
+.shop .sub{color:#5d6151;margin-bottom:30px}
+.shop-grid{display:grid;grid-template-columns:1.25fr .85fr;gap:34px;align-items:start}
+@media(max-width:860px){.shop-grid{grid-template-columns:1fr}}
+.panel-c{background:#fff;border:1px solid #dfe3d8;border-radius:9px;padding:24px 26px;margin-bottom:18px}
+.panel-c h2{font-size:1.15rem;margin:0 0 4px}
+.panel-c .hint{color:var(--ink-muted);font-size:.9rem;margin-bottom:16px}
+.fld{margin-bottom:14px}
+.fld label{display:block;font-weight:600;font-size:.9rem;margin-bottom:5px}
+.fld input,.fld select{width:100%;padding:11px 12px;border:1px solid #cfcec2;border-radius:6px;font:inherit;background:#fff}
+.fld input:focus,.fld select:focus{outline:2px solid #00a800;outline-offset:-1px;border-color:#00a800}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.row2{grid-template-columns:1fr}}
+.btn-p{padding:13px 26px;background:#14150f;color:#fff;border:0;border-radius:6px;font:inherit;font-weight:600;cursor:pointer}
+.btn-p:hover:not(:disabled){background:#00a800}
+.btn-p:disabled{opacity:.5;cursor:not-allowed}
+.btn-s{padding:11px 20px;background:#fff;color:#14150f;border:1px solid #cfcec2;border-radius:6px;font:inherit;font-weight:600;cursor:pointer}
+.btn-s:hover{border-color:#00a800;color:#00a800}
+.linkbtn{background:none;border:0;color:var(--green-link);font:inherit;font-weight:600;cursor:pointer;padding:0;text-decoration:underline}
+.msg{padding:12px 14px;border-radius:6px;margin-bottom:16px;font-size:.93rem;line-height:1.5}
+.msg-err{background:#FDF0EC;border:1px solid #E8B4A4;color:#9A3412}
+.msg-ok{background:#EFF6F1;border:1px solid #b9d6c4;color:#00a800}
+.summ{background:#F4F6F1;border:1px solid #dfe3d8;border-radius:9px;padding:22px 24px;position:sticky;top:20px}
+.summ h2{font-size:1.05rem;margin:0 0 14px}
+.sline{display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:.92rem;color:#3a3d33}
+.sline.tot{border-top:1px solid #dfe3d8;margin-top:8px;padding-top:14px;font-size:1.15rem;font-weight:700;color:#14150f}
+.citem{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #e6e9df;font-size:.92rem}
+.citem:last-of-type{border-bottom:0}
+.citem .qty{color:var(--ink-muted)}
+.ship-opt{display:flex;align-items:center;gap:11px;border:1px solid #cfcec2;border-radius:7px;padding:13px 15px;margin-bottom:9px;cursor:pointer}
+.ship-opt:hover{border-color:#00a800}
+.ship-opt.on{border-color:#00a800;background:#F4F6F1;box-shadow:inset 3px 0 0 #00a800}
+.ship-opt input{margin:0}
+.ship-opt .t{flex:1;font-weight:600;font-size:.94rem}
+.ship-opt .p{font-weight:700}
+.steps{display:flex;gap:8px;margin-bottom:26px;flex-wrap:wrap}
+.steps span{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:#9a9d90;padding:6px 12px;border-radius:99px;background:#f0f1ea}
+.steps span.on{background:#14150f;color:#fff}
+.steps span.done{background:#EFF6F1;color:#00a800}
+.tabs{display:flex;gap:4px;margin-bottom:22px;border-bottom:1px solid #dfe3d8}
+.tabs button{background:none;border:0;padding:11px 18px;font:inherit;font-weight:600;color:var(--ink-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button.on{color:#14150f;border-bottom-color:#00a800}
+.ordrow{border:1px solid #dfe3d8;border-radius:8px;padding:16px 18px;margin-bottom:12px}
+.ordrow .top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.ordrow .num{font-weight:700}
+.ordrow .st{font-size:.82rem;text-transform:uppercase;letter-spacing:.05em;color:#00a800;background:#EFF6F1;padding:3px 10px;border-radius:99px}
+.ordrow .li{font-size:.9rem;color:#5d6151;padding:3px 0}
+.empty{text-align:center;padding:44px 20px;color:var(--ink-muted)}
+.pay-note{background:#F4F6F1;border:1px solid #dfe3d8;border-radius:7px;padding:14px 16px;font-size:.9rem;line-height:1.6;color:#3a3d33;margin-bottom:18px}
+.spin{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes sp{to{transform:rotate(360deg)}}
+</style>
+
+</head>
+<body>
+<input type="checkbox" id="ghd-mtoggle" class="ghd-mchk">
+<header class="ghd"><div class="ghd-wrap"><nav class="ghd-nav" aria-label="Main">
+  <a class="ghd-brand" href="/"><img src="/img/inline/greenhse-mark.webp" alt="Greenhse Technologies" width="34" height="34"><span class="ghd-name">green<b>hse</b></span></a>
+  <ul class="ghd-main">
+    <li>
+      <button aria-haspopup="true">Products <i class="ghd-caret"></i></button>
+      <div class="ghd-mega" role="menu">
+        <div class="ghd-mgrid"><a href="/products/lighting-perth/australian-certified-12v-24v-transformers-greenhouse-technologies/">12V/24V Transformers / Controllers</a><a href="/products/lighting-perth/air-flow/">Air Flow / Ceiling Fans</a><a href="/lighting-perth/led-batten-lights-perth/">Batten Fittings / Batten Lights</a><a href="/lighting-perth/led-ceiling-lights-perth/">Ceiling / Panel / Oyster Lights</a><a href="/products/lighting-perth/led-downlights-perth/">Downlights</a><a href="/products/lighting-perth/emergency-lights/">Emergency Lights</a><a href="/products/lighting-perth/led-flood-lights-perth/">Flood / Sports Lighting</a><a href="/products/lighting-perth/high-bay-lights/">High Bay Lights</a><a href="/lighting-perth/industrial-lighting-perth/">Industrial Lighting</a><a href="/products/lighting-perth/led-garden-pool-lights-perth/">Landscape / Garden Lighting</a><a href="/products/lighting-perth/led-outdoor-wall-lights-perth/">Outdoor / Wall Lights</a><a href="/lighting-perth/commercial-lighting-perth/">School &amp; Commercial LED Lighting</a><a href="/products/lighting-perth/security-sensors/">Security / Sensors</a><a href="/products/lighting-perth/led-star-lights/">Star Lights</a><a href="/products/lighting-perth/led-strip-lights/">Strip Lights</a><a href="/products/lighting-perth/led-track-lights-perth/">LED Track / Linear Lights</a><a href="/products/lighting-perth/glass-light-switch-perth-html/">Switches / Powerpoints</a><a href="/automation/smart-lights-perth/">Smart Life</a></div>
+        <div class="ghd-mfoot"><span>18 categories · 1000s of certified fittings</span><a href="/layout.html">Plan your layout ↗</a><a href="/categories/">Browse the full range →</a></div>
+      </div>
+    </li>
+    <li><a class="ghd-dot" href="/index.html#dl-finder">Downlights</a></li>
+    <li><a class="ghd-dot" href="/index.html#strip-finder">Strip Lights</a></li>
+    <li><a href="/automation/smart-lights-perth/">Smart Life</a></li>
+    <li><a href="/index.html#energy">Energy &amp; Battery</a></li>
+    <li><a href="/light-lab.html">Light Lab</a></li>
+    <li><a href="/blog/">Blog</a></li>
+    <li><a href="/index.html#resources">Resources</a></li>
+    <li><a href="/installation.html">Installation</a></li>
+    <li><a href="/index.html#faq">FAQ</a></li>
+    <li><a href="/index.html#contact">Contact</a></li>
+  </ul>
+  <div class="ghd-tools">
+    <a class="ghd-ic ghd-ic--search" href="/categories/" aria-label="Browse all products">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </a>
+    <a class="ghd-ic" href="/account.html" aria-label="Your account">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/></svg>
+    </a>
+    <a class="ghd-ic" href="/index.html#shop" aria-label="Cart">
+      <svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+    </a>
+    <label for="ghd-mtoggle" class="ghd-burger" aria-label="Open menu">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </label>
+  </div>
+</nav></div></header>
+<label for="ghd-mtoggle" class="ghd-scrim"></label>
+<aside class="ghd-mnav" aria-label="Menu">
+  <div class="ghd-mnav-head"><span class="ghd-name">green<b>hse</b></span><label for="ghd-mtoggle" class="ghd-mclose">×</label></div>
+  <a class="ghd-mlink" href="/categories/">All Products</a>
+  <a class="ghd-mlink" href="/index.html#dl-finder">Downlights</a>
+  <a class="ghd-mlink" href="/index.html#strip-finder">Strip Lights</a>
+  <a class="ghd-mlink" href="/automation/smart-lights-perth/">Smart Life</a>
+  <a class="ghd-mlink" href="/index.html#energy">Energy &amp; Battery</a>
+  <a class="ghd-mlink" href="/light-lab.html">Light Lab</a>
+  <a class="ghd-mlink" href="/blog/">Blog</a>
+  <a class="ghd-mlink" href="/index.html#resources">Resources</a>
+  <a class="ghd-mlink" href="/installation.html">Installation</a>
+  <a class="ghd-mlink" href="/index.html#faq">FAQ</a>
+  <a class="ghd-mlink" href="/index.html#contact">Contact</a>
+  <a class="ghd-mlink" href="/account.html">My account</a>
+  <a class="ghd-mlink" href="/layout.html">Layout App ↗</a>
+</aside>
+
+<main class="shop" style="max-width:720px">
+  <div id="oc-body">
+    <h1 id="oc-title">Checking your payment…</h1>
+    <p class="sub" id="oc-sub">One moment while we confirm with ANZ Worldline.</p>
+    <div class="panel-c">
+      <div class="sline"><span>Order number</span><b id="oc-num">—</b></div>
+      <div class="sline"><span>Status</span><b id="oc-status">Checking…</b></div>
+    </div>
+    <div id="oc-next"></div>
+  </div>
+</main>
+
+
+
+<footer class="ftr">
+  <div class="ftr-in">
+    <div>
+      <b>Greenhse Technologies</b><br>
+      5/1 Locke Ln, Ellenbrook WA 6069<br>
+      <a href="tel:+61892972969">(08) 9297 2969</a> · Mon–Fri 8AM–5PM
+    </div>
+    <div class="ftr-cats">
+      <a href="/products/lighting-perth/australian-certified-12v-24v-transformers-greenhouse-technologies/">12V/24V Transformers / Controllers</a><a href="/products/lighting-perth/air-flow/">Air Flow / Ceiling Fans</a><a href="/lighting-perth/led-batten-lights-perth/">Batten Fittings / Batten Lights</a><a href="/lighting-perth/led-ceiling-lights-perth/">Ceiling / Panel / Oyster Lights</a><a href="/products/lighting-perth/led-downlights-perth/">Downlights</a><a href="/products/lighting-perth/emergency-lights/">Emergency Lights</a><a href="/products/lighting-perth/led-flood-lights-perth/">Flood / Sports Lighting</a><a href="/products/lighting-perth/high-bay-lights/">High Bay Lights</a><a href="/lighting-perth/industrial-lighting-perth/">Industrial Lighting</a><a href="/products/lighting-perth/led-garden-pool-lights-perth/">Landscape / Garden Lighting</a><a href="/products/lighting-perth/led-outdoor-wall-lights-perth/">Outdoor / Wall Lights</a><a href="/lighting-perth/commercial-lighting-perth/">School &amp; Commercial LED Lighting</a><a href="/products/lighting-perth/security-sensors/">Security / Sensors</a><a href="/products/lighting-perth/led-star-lights/">Star Lights</a><a href="/products/lighting-perth/led-strip-lights/">Strip Lights</a><a href="/products/lighting-perth/led-track-lights-perth/">LED Track / Linear Lights</a><a href="/products/lighting-perth/glass-light-switch-perth-html/">Switches / Powerpoints</a><a href="/automation/smart-lights-perth/">Smart Life</a>
+    </div>
+  </div>
+  <div class="ftr-legal"><a href="/about.html">About</a> &middot; <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="/returns.html">Returns &amp; Shipping</a> · <a href="/contact.html">Contact</a><br>© 2026 Greenhse Technologies. Prices exclude GST unless stated.
+    Specifications are supplier figures and may change without notice.</div>
+</footer>
+  <script src="/assets/sku-map.js"></script>
+  <script src="/assets/account.js"></script>
+  <script src="/assets/checkout.js"></script>
+<script>
+(function(){
+  var C = window.GreenhseCheckout;
+  var $ = function(s){ return document.querySelector(s); };
+  function param(n){
+    var m = location.search.match(new RegExp('[?&]'+n+'=([^&]*)'));
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+  /* ANZ returns with the order reference in the query string; different
+     Worldline configurations name it differently, so accept the usual set and
+     fall back to what checkout stored before redirecting. */
+  var num = param('order') || param('orderId') || param('incrementId') || param('reference');
+  if(!num){ try{ num = sessionStorage.getItem('greenhse_last_order'); }catch(e){} }
+
+  function paint(title, sub, status, next){
+    $('#oc-title').textContent = title;
+    $('#oc-sub').textContent = sub;
+    $('#oc-status').textContent = status;
+    $('#oc-num').textContent = num || '—';
+    $('#oc-next').innerHTML = next || '';
+  }
+
+  var shopLinks = '<p style="margin-top:22px">'+
+    '<a class="btn-s" href="/account.html" style="text-decoration:none">View your orders</a> '+
+    '<a class="btn-s" href="/categories/" style="text-decoration:none;margin-left:8px">Keep shopping</a></p>';
+
+  if(!num){
+    paint('We could not find your order',
+      'If you were just paying, check your email for a confirmation before trying again.',
+      'Unknown', shopLinks);
+    return;
+  }
+
+  if(param('noredirect')){
+    paint('Order received — payment still to come',
+      'Your order is in our system but has not been paid yet. Call us on (08) 9297 2969 and we will take payment or send you a payment link.',
+      'Awaiting payment',
+      '<p style="margin-top:22px"><a class="btn-p" href="tel:+61892972969" style="text-decoration:none;display:inline-block">Call (08) 9297 2969</a></p>'+shopLinks);
+    return;
+  }
+
+  /* Ask Magento what actually happened rather than trusting the return URL —
+     a customer can land here having cancelled on ANZ's page. */
+  C.finalise(num).then(function(r){
+    if(r.paid === true){
+      paint('Thanks — your order is confirmed',
+        'We have emailed your receipt. Our Perth team will be in touch about delivery or pickup.',
+        'Paid', shopLinks);
+    } else if(r.paid === false){
+      paint('Payment was not completed',
+        'Your order is saved but unpaid — nothing has been charged. You can call us to pay, or place it again.',
+        'Not paid',
+        '<p style="margin-top:22px"><a class="btn-p" href="tel:+61892972969" style="text-decoration:none;display:inline-block">Call (08) 9297 2969</a></p>'+shopLinks);
+    } else {
+      paint('Order received',
+        'We could not confirm the payment status automatically. If you completed payment, your receipt will arrive by email — call us if anything looks wrong.',
+        'Awaiting confirmation', shopLinks);
+    }
+  }).catch(function(){
+    paint('Order received',
+      'We could not confirm the payment status automatically. Check your email for a receipt, or call us on (08) 9297 2969.',
+      'Awaiting confirmation', shopLinks);
+  });
+})();
+</script>
+</body>
+</html>

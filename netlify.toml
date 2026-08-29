@@ -1,0 +1,23 @@
+# The Greenhse website is a plain static build - nothing to compile.
+[build]
+  publish = "."
+  # Explicitly empty. Netlify's UI still holds an "npm run build" command from
+  # the Next.js attempt; an empty command here overrides it. Without this line
+  # the deploy fails trying to run a build that does not exist.
+  command = ""
+
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
