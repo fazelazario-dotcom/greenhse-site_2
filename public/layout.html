@@ -4911,7 +4911,11 @@ function wire(){
     hidePlanHint();
     // Overlay cards sit inside the canvas. Capturing the pointer here would
     // send their click to the canvas instead of the button, so leave them alone.
-    if(e.target.closest&&e.target.closest('.blankcard,.navhint')) return;
+    /* The rooms-finished panel and the legend also live inside the canvas.
+       Capturing their pointerdown sent every click on the panel header - and
+       on its per-room fitting dropdowns - to the canvas instead, which is why
+       the panel read as a dead box. */
+    if(e.target.closest&&e.target.closest('.blankcard,.navhint,.donep,.fxlegend')) return;
     el.canvas.setPointerCapture(e.pointerId);onDown(e);
   });
   el.canvas.addEventListener('pointermove',onMove);
