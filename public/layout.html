@@ -2543,8 +2543,15 @@ function nextAction(){
   if(unlit.length)
     return {n:3,t:unlit.length===1?'One room still to finish':unlit.length+' rooms still to finish',
             s:'Open the room below and press the green \u201cFill this room\u201d button.'};
-  return {n:5,t:'That is everything \u2014 get your list',
-          s:'Every room is lit. Open your list to print it or send it to Greenhse.'};
+  /* Every DRAWN room is lit - but with one or two rooms boxed on a plan that
+     almost certainly has more, "that is everything" was telling people to stop
+     four rooms early. Keep them drawing until the plan is plausibly covered,
+     and always leave the get-your-list path visible as the way out. */
+  if(S.rooms.length<3)
+    return {n:3,t:(S.rooms.length===1?'First room lit \u2014 box in the next one':'Nice \u2014 keep boxing rooms'),
+            s:'Drag a box around the next room, the same way. Boxed every room on the plan? Open step 05 \u2014 your list is ready.'};
+  return {n:5,t:'Looks like everything \u2014 get your list',
+          s:'Every room you boxed is lit. Still one to do? Just drag a box around it. Otherwise open your list to print it or send it to Greenhse.'};
 }
 function renderNext(){
   var b=document.getElementById('nextup');
@@ -3363,8 +3370,13 @@ function renderRoomList(){
       var r=S.rooms.filter(function(x){return x.id===b.dataset.fillroom;})[0];
       /* Pressing the button IS an answer - they have looked at the question
          and chosen to go ahead without a fan. */
-      if(r){ delete S.roomAskFan[r.id]; if(S.roomFan[r.id]==null) S.roomFan[r.id]='none';
-             delete S.roomOpen[r.id]; doFill(r); }
+      if(r){ var fresh=!!S.roomAskFan[r.id];
+             delete S.roomAskFan[r.id]; if(S.roomFan[r.id]==null) S.roomFan[r.id]='none';
+             delete S.roomOpen[r.id]; doFill(r);
+             /* The question interrupted a marking-up run, so hand the pen
+                back: the room tool re-arms for the next room. Answering the
+                same controls later, on a finished room, changes nothing. */
+             if(fresh){ setTool('room'); toast('Now drag the next room \u2014 or press Esc if you\u2019re done'); } }
     };
   });
   /* Ticking either box re-plans the room straight away - no separate
@@ -3375,12 +3387,14 @@ function renderRoomList(){
       if(!r) return;
       /* "No fan" has to stick even when there is a fan sitting in the box,
          so it is stored rather than just cleared. */
+      var fresh=!!S.roomAskFan[r.id];
       S.roomFan[r.id]=sel.value||'none';
       /* Set by hand, so the whole-house fan answer must not overwrite it later. */
       S.roomFanManual[r.id]=true;
       delete S.roomAskFan[r.id];
       S.roomOpen[r.id]=true;
       if(S.mpp) doFill(r); else renderRoomList();
+      if(fresh&&S.mpp){ setTool('room'); toast('Now drag the next room \u2014 or press Esc if you\u2019re done'); }
       renderAll();
     };
   });
@@ -3746,7 +3760,14 @@ function placeGroupAt(x,y){
 function doFill(r){
   fanRelayGuard=true;
   try{ return doFillInner(r); }
-  finally{ fanRelayGuard=false; }
+  finally{
+    fanRelayGuard=false;
+    /* Every fill path - drawing a room, answering the fan question, pressing
+       "Fill this room", re-laying after a comfort change - left the new lights
+       selected: heavy rings over every symbol and the whole room one Delete
+       press from gone. A filled room starts calm. */
+    S.sel=[];
+  }
 }
 function doFillInner(r){
   if(!S.mpp){toast('Set the scale before filling a room');return;}
@@ -4173,7 +4194,7 @@ function onUp(e){
     var x=Math.min(d.a.x,d.b.x),y=Math.min(d.a.y,d.b.y),
         w=Math.abs(d.b.x-d.a.x),h=Math.abs(d.b.y-d.a.y);
     guideClear();
-    if(w<12||h<12){toast('That box is too small');setTool('select');return;}
+    if(w<12||h<12){toast('That box is too small \u2014 try again, corner to corner');return;}
     snapshot();
     var nr={id:'r'+(S.seq++),type:S.roomType,x:x,y:y,w:w,h:h};
     S.rooms.push(nr); delete S.roomOpen[nr.id];
@@ -4182,19 +4203,37 @@ function onUp(e){
     var nb=ROOMS[nr.type]||ROOMS.other;
     if(nb.fan && (S.fanPlan==='light'||S.fanPlan==='nolight')) S.roomFan[nr.id]=S.fanPlan;
     else if(S.fanPlan==='none') S.roomFan[nr.id]='none';
-    setTool('select');
     /* A room that can take a fan and has no answer yet asks first, and stays
        empty until it gets one. Every other room is lit the moment it is
        marked - the whole point of the tool is that you shouldn't have to ask
        for the obvious next step. */
     var mustAskFan = nb.fan && S.roomFan[nr.id]==null;
     if(mustAskFan){
+      /* Drop back to select so their attention goes to the question. */
+      setTool('select');
       S.roomAskFan[nr.id]=true;
       S.roomOpen[nr.id]=true;
       toast(nb.label+' marked \u2014 is there a fan in this room?');
+      /* The question renders at the bottom of the rail, which on most screens
+         is below the fold - the app would sit waiting on an answer the user
+         could not see. Bring the card to them. */
+      setTimeout(function(){
+        var card=document.querySelector('[data-toggle="'+nr.id+'"]');
+        if(card&&card.scrollIntoView) card.scrollIntoView({block:'center',behavior:'smooth'});
+      },150);
     } else if(S.mpp){
       doFill(nr);
+      /* Freshly placed lights arrive selected, which painted every fitting in
+         the heavy selection ring and left the whole room one Delete press from
+         gone. A filled room starts calm. */
+      S.sel=[];
+      /* Marking up a house is five or six rooms in a row, so the tool stays
+         armed for the next one instead of making them re-press the button for
+         every room. Esc (or the Cancel chip) puts it away. */
+      setTool('room');
+      toast('Now drag the next room \u2014 or press Esc if you\u2019re done');
     } else {
+      setTool('select');
       toast((ROOMS[S.roomType]||ROOMS.other).label+' marked \u2014 set the scale to lay the lights');
     }
     renderAll();
@@ -6105,7 +6144,14 @@ window.__GHQA=function(){
     G.S.rooms=[{id:'nx',type:'bedroom',x:0,y:0,w:400,h:400}];
     eq('an empty room keeps you in step 3',G.nextAction().n,3);
     G.doFill(G.S.rooms[0]);
-    eq('and once every room is lit it sends you to the list',G.nextAction().n,5);
+    /* One lit room used to jump straight to "that is everything", which told
+       people to stop four rooms early. Now it keeps them boxing until the
+       plan is plausibly covered. */
+    eq('one lit room keeps you boxing, not at the list',G.nextAction().n,3);
+    G.S.rooms.push({id:'nx2',type:'kitchen',x:500,y:0,w:400,h:400});
+    G.S.rooms.push({id:'nx3',type:'living',x:0,y:500,w:400,h:400});
+    G.doFill(G.S.rooms[1]); G.doFill(G.S.rooms[2]);
+    eq('and once the plan is covered it sends you to the list',G.nextAction().n,5);
     ok('every step of the way it says something in plain words',
        ['t','s'].every(function(k){return typeof G.nextAction()[k]==='string'&&G.nextAction()[k].length>8;}),
        'empty next-step text');

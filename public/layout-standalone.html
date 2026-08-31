@@ -2072,6 +2072,12 @@ function symbolFor(cat,p){
      cat==='industrial'||cat==='emergency'||cat==='transformers') return 'square';
   return 'round';
 }
+function scaleStrokes(svg, z){
+  if(!z || z===1) return svg;
+  return svg.replace(/stroke-width="([\d.]+)"/g, function(m,w){
+    return 'stroke-width="'+(parseFloat(w)/z).toFixed(2)+'"';
+  });
+}
 function symbolSvg(shape,x,y,r,col,p,rot){
   col = col || FX_COLOURS.other;
   var ink=col.ink, fill=col.fill;
@@ -2270,7 +2276,7 @@ function renderFixtures(){
     var p=byId(f.pid); if(!p) return;
     var beam=parseBeam(p.beam);
     var cut=parseCutout(p)||90;
-    var rPix=Math.max(6/S.zoom, m2px(cut/1000)/2);
+    var rPix=Math.max(7.5/S.zoom, m2px(cut/1000)/2);
     /* A batten is a 1.2 m tube, not a 90 mm cut-out. Drawing it from the
        cut-out made it a stub on the plan and gave no sense of how much of the
        garage it actually covers. The bar symbol is 4.4r long, so work back
@@ -2332,7 +2338,7 @@ function renderFixtures(){
 
     marks+='<g class="fx'+(on?' sel':'')+'" data-id="'+f.id+'">'+
       (on?'<circle class="fx-ring" cx="'+f.x+'" cy="'+f.y+'" r="'+(rPix+7)+'"/>':'')+
-      symbolSvg(symbolFor(p.cat,p),f.x,f.y,rPix,col,p,f.rot)+
+      scaleStrokes(symbolSvg(symbolFor(p.cat,p),f.x,f.y,rPix,col,p,f.rot), S.zoom)+
       (S.showLabels?'<text class="fx-lab" x="'+(f.x+rPix+3)+'" y="'+(f.y-rPix-2)+'" font-size="'+labelSize+'">'+esc(f.pid)+'</text>':'')+
       '<circle class="fx-hit" cx="'+f.x+'" cy="'+f.y+'" r="'+(rPix+9/S.zoom)+'" fill="transparent"/>'+
     '</g>';
@@ -2512,8 +2518,11 @@ function nextAction(){
   if(unlit.length)
     return {n:3,t:unlit.length===1?'One room still to finish':unlit.length+' rooms still to finish',
             s:'Open the room below and press the green \u201cFill this room\u201d button.'};
-  return {n:5,t:'That is everything \u2014 get your list',
-          s:'Every room is lit. Open your list to print it or send it to Greenhse.'};
+  if(S.rooms.length<3)
+    return {n:3,t:(S.rooms.length===1?'First room lit \u2014 box in the next one':'Nice \u2014 keep boxing rooms'),
+            s:'Drag a box around the next room, the same way. Boxed every room on the plan? Open step 05 \u2014 your list is ready.'};
+  return {n:5,t:'Looks like everything \u2014 get your list',
+          s:'Every room you boxed is lit. Still one to do? Just drag a box around it. Otherwise open your list to print it or send it to Greenhse.'};
 }
 function renderNext(){
   var b=document.getElementById('nextup');
@@ -3332,8 +3341,10 @@ function renderRoomList(){
       var r=S.rooms.filter(function(x){return x.id===b.dataset.fillroom;})[0];
       /* Pressing the button IS an answer - they have looked at the question
          and chosen to go ahead without a fan. */
-      if(r){ delete S.roomAskFan[r.id]; if(S.roomFan[r.id]==null) S.roomFan[r.id]='none';
-             delete S.roomOpen[r.id]; doFill(r); }
+      if(r){ var fresh=!!S.roomAskFan[r.id];
+             delete S.roomAskFan[r.id]; if(S.roomFan[r.id]==null) S.roomFan[r.id]='none';
+             delete S.roomOpen[r.id]; doFill(r);
+             if(fresh){ setTool('room'); toast('Now drag the next room \u2014 or press Esc if you\u2019re done'); } }
     };
   });
   /* Ticking either box re-plans the room straight away - no separate
@@ -3344,12 +3355,14 @@ function renderRoomList(){
       if(!r) return;
       /* "No fan" has to stick even when there is a fan sitting in the box,
          so it is stored rather than just cleared. */
+      var fresh=!!S.roomAskFan[r.id];
       S.roomFan[r.id]=sel.value||'none';
       /* Set by hand, so the whole-house fan answer must not overwrite it later. */
       S.roomFanManual[r.id]=true;
       delete S.roomAskFan[r.id];
       S.roomOpen[r.id]=true;
       if(S.mpp) doFill(r); else renderRoomList();
+      if(fresh&&S.mpp){ setTool('room'); toast('Now drag the next room \u2014 or press Esc if you\u2019re done'); }
       renderAll();
     };
   });
@@ -3715,7 +3728,7 @@ function placeGroupAt(x,y){
 function doFill(r){
   fanRelayGuard=true;
   try{ return doFillInner(r); }
-  finally{ fanRelayGuard=false; }
+  finally{ fanRelayGuard=false; S.sel=[]; }
 }
 function doFillInner(r){
   if(!S.mpp){toast('Set the scale before filling a room');return;}
@@ -4142,7 +4155,7 @@ function onUp(e){
     var x=Math.min(d.a.x,d.b.x),y=Math.min(d.a.y,d.b.y),
         w=Math.abs(d.b.x-d.a.x),h=Math.abs(d.b.y-d.a.y);
     guideClear();
-    if(w<12||h<12){toast('That box is too small');setTool('select');return;}
+    if(w<12||h<12){toast('That box is too small \u2014 try again, corner to corner');return;}
     snapshot();
     var nr={id:'r'+(S.seq++),type:S.roomType,x:x,y:y,w:w,h:h};
     S.rooms.push(nr); delete S.roomOpen[nr.id];
@@ -4151,19 +4164,23 @@ function onUp(e){
     var nb=ROOMS[nr.type]||ROOMS.other;
     if(nb.fan && (S.fanPlan==='light'||S.fanPlan==='nolight')) S.roomFan[nr.id]=S.fanPlan;
     else if(S.fanPlan==='none') S.roomFan[nr.id]='none';
-    setTool('select');
-    /* A room that can take a fan and has no answer yet asks first, and stays
-       empty until it gets one. Every other room is lit the moment it is
-       marked - the whole point of the tool is that you shouldn't have to ask
-       for the obvious next step. */
     var mustAskFan = nb.fan && S.roomFan[nr.id]==null;
     if(mustAskFan){
+      setTool('select');
       S.roomAskFan[nr.id]=true;
       S.roomOpen[nr.id]=true;
       toast(nb.label+' marked \u2014 is there a fan in this room?');
+      setTimeout(function(){
+        var card=document.querySelector('[data-toggle="'+nr.id+'"]');
+        if(card&&card.scrollIntoView) card.scrollIntoView({block:'center',behavior:'smooth'});
+      },150);
     } else if(S.mpp){
       doFill(nr);
+      S.sel=[];
+      setTool('room');
+      toast('Now drag the next room \u2014 or press Esc if you\u2019re done');
     } else {
+      setTool('select');
       toast((ROOMS[S.roomType]||ROOMS.other).label+' marked \u2014 set the scale to lay the lights');
     }
     renderAll();
@@ -4233,16 +4250,17 @@ function measureContent(img,w,h){
    for the declutter from steps 1-2. Returns null when the scan fails,
    and the original plan stays. */
 function activePlanSrc(){ return S.plan.src; }
-function loadImageSrc(src,name,openTo,skipScan){
+function loadImageSrc(src,name,openTo,knownMpp){
   var img=new Image();
   img.onload=function(){
     var w=img.naturalWidth||1600, h=img.naturalHeight||1100;
     S.plan={src:src,name:name||'plan',w:w,h:h,loaded:true,
             content:measureContent(img,w,h)};
-    S.mpp=null;S.cal={a:null,b:null};
+    S.mpp=knownMpp||null;S.cal={a:null,b:null};
     renderAll();fitView();
     openStep(openTo||2);
     if(!openTo) toast('Plan loaded — now set the scale');
+    else if(knownMpp) toast('Sample plan loaded, already to scale — box in a room to light it');
   };
   img.onerror=function(){toast('That image would not load');};
   img.src=src;
@@ -4344,7 +4362,7 @@ function samplePlan(){
   wall(120,960,320,960); wall(120,950,120,970); wall(320,950,320,970);
   x.font='400 20px "JetBrains Mono",monospace';
   x.fillText('2.00 m',150,945);
-  loadImageSrc(c.toDataURL('image/png'),'Sample plan',null,true); /* already clean - no scan */
+  loadImageSrc(c.toDataURL('image/png'),'Sample plan',3,2.00/200);
 }
 
 /* ============================================================
@@ -6070,7 +6088,11 @@ window.__GHQA=function(){
     G.S.rooms=[{id:'nx',type:'bedroom',x:0,y:0,w:400,h:400}];
     eq('an empty room keeps you in step 3',G.nextAction().n,3);
     G.doFill(G.S.rooms[0]);
-    eq('and once every room is lit it sends you to the list',G.nextAction().n,5);
+    eq('one lit room keeps you boxing, not at the list',G.nextAction().n,3);
+    G.S.rooms.push({id:'nx2',type:'kitchen',x:500,y:0,w:400,h:400});
+    G.S.rooms.push({id:'nx3',type:'living',x:0,y:500,w:400,h:400});
+    G.doFill(G.S.rooms[1]); G.doFill(G.S.rooms[2]);
+    eq('and once the plan is covered it sends you to the list',G.nextAction().n,5);
     ok('every step of the way it says something in plain words',
        ['t','s'].every(function(k){return typeof G.nextAction()[k]==='string'&&G.nextAction()[k].length>8;}),
        'empty next-step text');
