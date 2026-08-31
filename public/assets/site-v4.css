@@ -1,0 +1,600 @@
+/* ===================================================================
+   Greenhse — site stylesheet
+   Design system ported from the Next.js build (greenhse-demolights),
+   read off the running page 27 Aug 2026. Poppins + JetBrains Mono,
+   #00c400 green, light header, dark section banding, near-black footer.
+
+   Every selector the previous stylesheet carried is still here — the
+   markup on 282 pages did not change, only what it looks like.
+   =================================================================== */
+html{scrollbar-gutter:stable;overflow-y:scroll}
+:root{
+  /* ---- ink ---- */
+  --ink:#14150f;            /* body text                                */
+  --ink-soft:#4a4d44;       /* secondary                                */
+  --ink-new-mute:#5d6151;   /* body copy on light                       */
+  --ink-muted:#666a5f;      /* tertiary  — 5.0:1 on --bg (was #797d72, 3.6:1) */
+  --ink-faint:#666a5e;      /* faintest  — 4.8:1 on --bg (was #9ca093, 2.6:1) */
+  --muted:#666a5f;          /* legacy alias, kept so old rules resolve   */
+
+  /* ---- surfaces ---- */
+  --bg:#eee;                /* page background                          */
+  --bg-card:#f4f2ec;        /* warm card / section                      */
+  --bg-plate:#fff;          /* white plate                              */
+  --bg-raised:#faf9f6;      /* raised surface                           */
+  --bg-tile:#101010;        /* dark tile / footer                       */
+  --bg-deep:#0d1210;        /* dark section band                        */
+  --bg-hero:#0a0a09;        /* hero photo backdrop                      */
+  --paper:#eee;             /* legacy alias                             */
+  --paper-2:#f4f2ec;        /* legacy alias                             */
+
+  /* ---- line ---- */
+  --line:#dedbd1;
+  --line-strong:#c9c6ba;
+  --line-soft:#dedbd1;
+
+  /* ---- green ---- */
+  --green:#00c400;
+  --green-bright:#00c400;
+  --green-hover:#00a800;    /* darker green for BACKGROUNDS (button hover) */
+  --green-link:#007d00;     /* green for TEXT on light — 4.5:1 on --bg.
+                               #00a800 as text measured 2.7:1 and failed. */
+  --hover-bg:#00c4001a;
+  --glow:#00c400;           /* legacy alias                             */
+  --glow-hot:#00c400;
+  --eco:#00a800;            /* legacy alias                             */
+  --eco-link:#007d00;       /* legacy alias of --green-link             */
+  --eco-bright:#00c400;
+
+  /* ---- radius ---- */
+  --radius-sm:4px;
+  --radius-md:6px;
+  --radius-lg:10px;
+  --radius:6px;             /* legacy alias                             */
+
+  /* ---- type ---- */
+  --font-body:"Poppins","Inter",system-ui,-apple-system,sans-serif;
+  --font-display:"Poppins","Avenir Next",system-ui,-apple-system,sans-serif;
+  --font-mono:"JetBrains Mono","SFMono-Regular",Menlo,Consolas,monospace;
+
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.55;
+}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;letter-spacing:-.02em}
+.mono{font-family:var(--font-mono)}
+
+/* The eyebrow is the signature of this design: small uppercase mono with
+   wide positive tracking, green on dark, muted on light. */
+.eyebrow{
+  font-family:var(--font-mono);font-size:11px;font-weight:500;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--green-link);
+  margin-bottom:16px;display:block;
+}
+
+/* legacy header (2 pages) */
+.hdr{
+  display:flex;align-items:center;gap:20px;padding:0 26px;height:69px;
+  background:#f8f8f8;color:var(--ink);position:sticky;top:0;z-index:20;
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:9px}
+.brand b{font-size:19px;letter-spacing:-.03em;font-weight:600}
+.brand span{font-family:var(--font-mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--green)}
+.nav{margin-left:auto;display:flex;gap:20px;font-size:14.5px;font-weight:500}
+.nav a:hover{color:var(--green-link)}
+
+/* breadcrumbs */
+.crumbs{
+  max-width:1280px;margin:0 auto;padding:20px 28px 0;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink-muted);
+}
+.crumbs a:hover{color:var(--green-link)}
+.crumbs span{margin:0 6px}
+.crumbs .here{color:var(--ink);margin:0}
+
+/* home */
+.hero{max-width:1280px;margin:0 auto;padding:56px 28px 32px}
+.hero h1{font-size:clamp(2.1rem,4.4vw,4.25rem);letter-spacing:-.03em;line-height:1.06;margin-bottom:16px}
+.hero p{font-size:16px;color:var(--ink-new-mute);max-width:60ch}
+.cgrid{
+  max-width:1280px;margin:0 auto 64px;padding:0 28px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:18px;
+}
+.ccard{
+  border:1px solid var(--line);background:var(--bg-plate);overflow:hidden;
+  border-radius:var(--radius-lg);transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+.ccard:hover{border-color:var(--line-strong);box-shadow:0 10px 30px rgba(20,21,15,.08);transform:translateY(-2px)}
+.ccard img{width:100%;aspect-ratio:1913/822;object-fit:cover}
+.cname{display:block;padding:14px 16px 2px;font-size:15px;font-weight:600;letter-spacing:-.01em}
+.ccount{display:block;padding:0 16px 15px;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted)}
+
+/* category */
+.cat-hero{margin:0;padding:0;background:var(--bg-hero)}
+.cat-hero .banner{width:100%;height:auto;aspect-ratio:1913/822;object-fit:cover;border:0;display:block}
+.hero-wrap{position:relative;background:var(--bg-hero)}
+.hero-wrap .hot{position:absolute;top:74%;height:12%;display:block;border-radius:var(--radius-md)}
+.hero-wrap .hot:focus-visible{outline:2px solid var(--green)}
+.hero-wrap .hot.h1st{left:2%;width:14.8%}
+.hero-wrap .hot.h1st.wide{width:16%}
+.hero-wrap .hot.h2nd{left:17.8%;width:15.5%}
+/* Phones: the category banner carries its headline, body copy and two buttons
+   baked into the artwork. At 390px wide that copy renders around 7px tall and
+   the buttons come out ~24px high — under the 44px tap-target minimum, and the
+   hotspot links over them are just as small. So crop to the photograph and let
+   the real <h1>, description and finder CTA underneath do the work. */
+@media(max-width:720px){
+  .cat-hero .banner{aspect-ratio:1/1;object-fit:cover;object-position:100% center}
+  .hero-wrap .hot{display:none}
+}
+.cat-copy{max-width:1280px;margin:0 auto;padding:26px 28px 30px}
+/* .cat-copy sits INSIDE .cat-hero, which is near-black (#0a0a09). It was
+   inheriting the default dark ink, so the H1 measured 1.08:1 against its
+   background — effectively invisible on all 16 category landing pages. */
+.cat-hero .cat-copy h1{color:#fff}
+.cat-hero .cat-copy p{color:rgba(255,255,255,.74)}
+.cat-hero .cat-copy .count{color:rgba(255,255,255,.58)}
+
+.cat-copy p{max-width:70ch}
+.cat-copy h1{font-size:clamp(1.9rem,3.4vw,2.8rem);letter-spacing:-.03em;margin-bottom:12px;line-height:1.1}
+.cat-copy p{font-size:15.5px;color:var(--ink-new-mute)}
+.count{margin-top:12px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-muted)}
+
+/* finder band — a dark band, the way the demo breaks up a light page */
+.finder-band{background:var(--bg-deep);color:#fff}
+.fb-in{max-width:1280px;margin:0 auto;padding:22px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px 24px;flex-wrap:wrap}
+.fb-in p{font-size:14.5px;color:rgba(255,255,255,.68);margin:0}
+.fb-in p b{color:#fff;font-weight:600}
+.fb-btn{
+  background:var(--green);color:#08210a;font-weight:600;font-size:14px;
+  padding:13px 22px;border-radius:var(--radius-md);white-space:nowrap;
+  transition:background .18s,transform .18s;display:inline-flex;align-items:center;gap:9px;
+}
+/* the markup already carries its own arrow, so no pseudo-element here */
+.fb-btn:hover{background:var(--green-hover)}
+
+/* product grids */
+.pgrid{
+  max-width:1280px;margin:0 auto 64px;padding:0 28px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:18px;
+}
+.pcard{
+  border:1px solid var(--line);background:var(--bg-plate);padding:0;display:flex;flex-direction:column;
+  border-radius:var(--radius-lg);overflow:hidden;transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+.pcard:hover{border-color:var(--line-strong);box-shadow:0 10px 30px rgba(20,21,15,.08);transform:translateY(-2px)}
+.pcard img{aspect-ratio:1;object-fit:contain;margin:0;padding:18px;background:var(--bg-plate)}
+.noimg{display:block;aspect-ratio:1;background:var(--bg-card);margin:0}
+.noimg.lg{display:grid;place-items:center;font-family:var(--font-mono);font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint)}
+.pname{font-size:14.5px;font-weight:600;line-height:1.35;flex:1;letter-spacing:-.01em;padding:0 16px}
+.pcode{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);margin-top:8px;letter-spacing:.14em;text-transform:uppercase;padding:0 16px}
+.pprice{font-size:22px;font-weight:600;margin-top:10px;letter-spacing:-.02em;padding:0 16px 18px}
+.pprice small,.rprice small{display:block;font-family:var(--font-mono);font-size:10px;font-weight:400;color:var(--ink-faint);letter-spacing:.1em;margin-top:2px}
+
+/* product detail */
+.pdp{
+  max-width:1280px;margin:0 auto;padding:24px 28px 12px;
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;
+}
+.pdp-media{border:1px solid var(--line);background:var(--bg-plate);padding:28px;border-radius:var(--radius-lg)}
+.pdp-media img{width:100%;aspect-ratio:1;object-fit:contain}
+.pdp-info h1{font-size:clamp(1.7rem,3vw,2.5rem);letter-spacing:-.03em;line-height:1.12;margin-bottom:14px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
+.chip{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  border:1px solid var(--line);padding:5px 10px;color:var(--ink-soft);border-radius:var(--radius-sm);
+  background:var(--bg-raised);
+}
+.price{font-size:2.3rem;font-weight:600;letter-spacing:-.03em;margin-bottom:18px}
+.price small{display:block;font-size:11px;font-weight:400;color:var(--ink-faint);font-family:var(--font-mono);letter-spacing:.1em;margin-top:6px;text-transform:uppercase}
+.desc{font-size:15px;color:var(--ink-new-mute);margin-bottom:22px;line-height:1.65}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.btn{
+  border:1px solid var(--ink);padding:13px 22px;font-size:14px;font-weight:600;
+  border-radius:var(--radius-md);transition:background .18s,color .18s,border-color .18s;
+  display:inline-flex;align-items:center;gap:9px;background:var(--bg-plate);
+}
+.btn:hover{background:var(--hover-bg);border-color:var(--green);color:var(--green-link)}
+.btn.dark{background:var(--green);color:#08210a;border-color:var(--green)}
+.btn.dark:hover{background:var(--green-hover);border-color:var(--green-hover);color:#08210a}
+.pickup{font-size:12.5px;color:var(--ink-muted)}
+
+.block{max-width:1280px;margin:0 auto;padding:38px 28px 0}
+.block h2{font-size:1.35rem;letter-spacing:-.025em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.spec{width:100%;border-collapse:collapse;font-size:14px}
+.spec th{
+  text-align:left;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-faint);font-weight:400;padding:11px 16px 11px 0;
+  border-bottom:1px solid var(--line);width:230px;vertical-align:top;
+}
+.spec td{padding:11px 0;border-bottom:1px solid var(--line);font-weight:500}
+.bul{list-style:none;font-size:14.5px;columns:2;column-gap:36px}
+.bul li{padding:7px 0 7px 20px;position:relative;break-inside:avoid}
+.bul li::before{content:"";position:absolute;left:0;top:15px;width:7px;height:7px;background:var(--green);border-radius:50%}
+.opts{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.opts li{border:1px solid var(--line);background:var(--bg-plate);padding:15px;border-radius:var(--radius-md)}
+.opts b{display:block;font-size:14px;margin-bottom:6px}
+.opts span{font-family:var(--font-mono);font-size:11px;color:var(--ink-muted)}
+
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.rcard{
+  border:1px solid var(--line);background:var(--bg-plate);padding:0;display:flex;flex-direction:column;
+  border-radius:var(--radius-lg);overflow:hidden;transition:border-color .18s,box-shadow .18s,transform .18s;
+}
+.rcard:hover{border-color:var(--line-strong);box-shadow:0 10px 30px rgba(20,21,15,.08);transform:translateY(-2px)}
+.rcard img{aspect-ratio:1;object-fit:contain;margin:0;padding:16px}
+.rname{font-size:13.5px;font-weight:600;line-height:1.35;flex:1;padding:0 15px}
+.rprice{font-size:18px;font-weight:600;margin-top:8px;letter-spacing:-.02em;padding:0 15px 16px}
+
+/* ---- footer: near-black, the way the demo closes every page ---- */
+.ftr{border-top:0;margin-top:72px;background:var(--bg-tile);color:rgba(255,255,255,.62)}
+.ftr-in{
+  max-width:1280px;margin:0 auto;padding:56px 28px 34px;
+  display:grid;grid-template-columns:300px 1fr;gap:48px;font-size:13.5px;
+}
+.ftr-in b{color:#fff;font-weight:600;font-size:15px;letter-spacing:-.01em;display:inline-block;margin-bottom:6px}
+.ftr-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:9px 24px}
+.ftr-cats a{color:rgba(255,255,255,.62);transition:color .18s}
+.ftr-cats a:hover{color:var(--green);text-decoration:none}
+.ftr-legal{
+  max-width:1280px;margin:0 auto;padding:22px 28px 44px;font-size:11.5px;
+  color:rgba(255,255,255,.4);line-height:1.6;border-top:1px solid rgba(255,255,255,.1);
+}
+.ftr-legal a{color:rgba(255,255,255,.6)}
+.ftr-legal a:hover{color:var(--green)}
+
+@media (max-width:860px){
+  .pdp{grid-template-columns:1fr;gap:26px}
+  .ftr-in{grid-template-columns:1fr;gap:28px}
+  .bul{columns:1}
+  .spec th{width:140px}
+}
+
+/* ---- secondary nav (legacy, kept) ---- */
+.nav2{position:sticky;top:0;z-index:40;background:rgba(248,248,248,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav2-in{max-width:1280px;margin:0 auto;padding:0 28px;height:69px;display:flex;align-items:center;gap:26px}
+.nav2-brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:600;font-size:21px;letter-spacing:-.03em;flex-shrink:0}
+.nav2-brand b{color:var(--green)}
+.nav2-brand img{display:block}
+.nav2-links{display:flex;gap:24px;font-size:14.5px;font-weight:500;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav2-links::-webkit-scrollbar{display:none}
+.nav2-links a{white-space:nowrap;padding:24px 0 22px;border-bottom:2px solid transparent;transition:color .18s,border-color .18s}
+.nav2-links a:hover{color:var(--green-link)}
+.nav2-links a.on{border-color:var(--green);color:var(--ink)}
+.nav2-tel{font-family:var(--font-mono);font-size:12px;white-space:nowrap;color:var(--ink-new-mute);flex-shrink:0}
+.nav2-tel:hover{color:var(--green-link)}
+@media(max-width:920px){.nav2-tel{display:none}.nav2-in{gap:16px;padding:0 16px}.nav2-links{gap:16px}}
+
+/* sectioned product listings */
+.psec{max-width:1280px;margin:0 auto;padding:44px 28px 0}
+.psec-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.psec-head h2{font-size:clamp(1.4rem,2.6vw,2rem);letter-spacing:-.03em}
+.psec-head .n{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap}
+.psec-sub{font-size:14.5px;color:var(--ink-new-mute);max-width:76ch;margin:10px 0 20px}
+.psec .pgrid{padding:0;margin:0}
+.page-intro{max-width:1280px;margin:0 auto;padding:32px 28px 6px;display:flex;flex-wrap:wrap;gap:14px 28px;align-items:baseline;justify-content:space-between}
+.page-intro h1{font-size:clamp(2rem,3.6vw,3rem);letter-spacing:-.03em;flex-basis:100%;margin-bottom:4px;line-height:1.08}
+.page-intro .lede{font-size:16px;color:var(--ink-new-mute);max-width:62ch}
+.page-intro .count{margin-top:10px}
+.jump-nav{display:flex;gap:8px;flex-wrap:wrap}
+.jump-nav a{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  border:1px solid var(--line);padding:9px 15px;background:var(--bg-plate);border-radius:99px;transition:all .18s;
+}
+.jump-nav a:hover{border-color:var(--green);background:var(--green);color:#08210a}
+.page-end{height:64px}
+
+/* smart-life teaser — dark band */
+.smart-teaser{background:var(--bg-deep);color:#fff;padding:88px 24px 96px;margin-top:8px}
+.smart-teaser .st-in{max-width:760px;margin:0 auto}
+.smart-teaser .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--green);margin-bottom:16px;display:block}
+.smart-teaser h2{font-size:clamp(1.9rem,4vw,3rem);margin:0 0 18px;line-height:1.1;letter-spacing:-.03em}
+.smart-teaser>.st-in>p{color:rgba(255,255,255,.66);max-width:56ch;line-height:1.7}
+.st-feats{margin-top:32px;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);border-radius:var(--radius-lg);overflow:hidden}
+.st-feat{background:var(--bg-deep);padding:22px 24px}
+.st-feat h4{font-size:1.05rem;margin:0 0 8px;color:#fff}
+.st-feat p{font-size:13.5px;color:rgba(255,255,255,.6);margin:0}
+
+/* ===================================================================
+   Site header — ghd- prefixed. Light bar, the way the demo does it.
+   =================================================================== */
+.ghd-wrap{max-width:1280px;margin:0 auto;padding:0 28px}
+
+/* header bar — light #f8f8f8, 69px, exactly as the demo serves it */
+.ghd{
+  position:sticky;top:0;z-index:200;background:#f8f8f8;
+  border-bottom:1px solid var(--line);font-family:var(--font-body);
+}
+.ghd .ghd-nav{display:flex;align-items:center;gap:22px;height:69px}
+.ghd-brand{display:flex;align-items:center;gap:9px;flex:0 0 auto;margin-left:-4px}
+.ghd-brand img{width:36px;height:36px;flex-shrink:0;object-fit:contain}
+.ghd-brand .ghd-name{font-family:var(--font-display);font-weight:600;font-size:22px;letter-spacing:-.035em;white-space:nowrap;color:var(--ink)}
+.ghd-brand .ghd-name b{color:var(--green);font-weight:600}
+/* Poppins sets wider than the face this nav was built for and there are 11 items
+   against the demo's 9, so the type and padding below are tuned to fit. Do NOT
+   add overflow:hidden here — it clips the mega menu, which drops out of the
+   bottom of this box. The burger takes over at 1200px, above which the row fits. */
+.ghd-main{display:flex;align-items:center;gap:0;margin:0;flex:1 1 auto;flex-wrap:nowrap;min-width:0;justify-content:center;list-style:none;overflow:visible}
+.ghd-main>li{position:relative;flex:0 0 auto}
+.ghd-main>li>a,.ghd-main>li>button{
+  display:flex;align-items:center;gap:6px;padding:10px 7px;font-size:13px;font-weight:500;
+  border-radius:var(--radius-md);transition:background .2s,color .2s;white-space:nowrap;
+  color:var(--ink);background:none;border:0;cursor:pointer;font-family:inherit;letter-spacing:-.005em;
+}
+@media(max-width:1300px){.ghd-main>li>a,.ghd-main>li>button{padding:9px 5px;font-size:12.5px}.ghd .ghd-nav{gap:14px}}
+.ghd-main>li>a:hover,.ghd-main>li>button:hover{background:var(--hover-bg);color:var(--green-link)}
+.ghd-caret{width:9px;height:9px;border-right:1.8px solid currentColor;border-bottom:1.8px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .25s}
+.ghd-main>li:hover .ghd-caret{transform:rotate(-135deg) translateY(-1px)}
+.ghd-dot{position:relative}
+.ghd-dot::after{content:"";position:absolute;top:7px;right:5px;width:5px;height:5px;border-radius:50%;background:var(--green)}
+.ghd-tools{margin-left:auto;display:flex;align-items:center;gap:4px;flex:0 0 auto;margin-right:-6px}
+.ghd-ic{width:42px;height:42px;display:grid;place-items:center;border-radius:var(--radius-md);position:relative;transition:background .2s;color:var(--ink)}
+.ghd-ic:hover{background:var(--hover-bg)}
+.ghd-ic svg{width:21px;height:21px;stroke:var(--ink);stroke-width:1.6;fill:none}
+.ghd-ic:hover svg{stroke:var(--green-hover)}
+
+/* mega menu */
+.ghd-mega{
+  /* Anchored to the trigger's left edge, not centred on it: the nav sits centre
+     and this panel is 660px wide, so centring pushed it off the left of the
+     viewport below ~1400px. */
+  position:absolute;top:calc(100% + 1px);left:0;transform:translateY(8px);
+  background:var(--bg-plate);border:1px solid var(--line);border-radius:var(--radius-lg);
+  box-shadow:0 28px 60px rgba(20,21,15,.16);padding:28px;
+  width:max-content;min-width:min(660px,calc(100vw - 40px));max-width:calc(100vw - 40px);
+  opacity:0;visibility:hidden;transition:opacity .22s,transform .22s;z-index:50;
+}
+.ghd-main>li:hover .ghd-mega,.ghd-main>li:focus-within .ghd-mega,.ghd-mega:hover{opacity:1;visibility:visible;transform:translateY(0)}
+.ghd-mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px 28px}
+.ghd-mgrid a{font-size:14px;padding:8px 11px;border-radius:var(--radius-md);color:var(--ink-soft);transition:background .18s,color .18s;display:block}
+.ghd-mgrid a:hover{background:var(--hover-bg);color:var(--green-link)}
+.ghd-mfoot{margin-top:24px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink-muted)}
+.ghd-mfoot a{color:var(--green-link);font-weight:600}
+
+/* mobile */
+.ghd-burger{display:none}
+.ghd-mchk,.ghd-scrim{display:none}
+.ghd-mnav{position:fixed;inset:0 0 0 auto;width:min(92vw,380px);background:var(--bg-plate);z-index:400;transform:translateX(100%);transition:transform .35s var(--ease);overflow-y:auto;box-shadow:-20px 0 60px rgba(0,0,0,.2)}
+.ghd-mnav-head{display:flex;justify-content:space-between;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}
+.ghd-mnav-head .ghd-name{font-family:var(--font-display);font-weight:600;font-size:21px;letter-spacing:-.035em}
+.ghd-mnav-head .ghd-name b{color:var(--green)}
+.ghd-mnav a.ghd-mlink{display:block;padding:16px 22px;font-size:16px;font-weight:500;font-family:var(--font-body);border-bottom:1px solid var(--line);color:var(--ink)}
+.ghd-mnav a.ghd-mlink:hover{background:var(--hover-bg);color:var(--green-link)}
+.ghd-mclose{font-size:26px;line-height:1;color:var(--ink);cursor:pointer}
+@media(max-width:1200px){
+  .ghd-main,.ghd-tools .ghd-ic--search{display:none}
+  .ghd-burger{display:grid;width:42px;height:42px;place-items:center;cursor:pointer;color:var(--ink)}
+  .ghd-burger svg{width:24px;height:24px;stroke:var(--ink);stroke-width:1.8;fill:none}
+}
+.ghd-mchk:checked ~ .ghd-scrim{display:block;position:fixed;inset:0;background:rgba(20,21,15,.5);z-index:350}
+.ghd-mchk:checked ~ .ghd-mnav{transform:translateX(0)}
+
+.pdp-thumbs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.pdp-thumbs img{width:74px;height:74px;object-fit:cover;border:1px solid var(--line);border-radius:var(--radius-md);cursor:pointer;background:var(--bg-plate);transition:border-color .18s}
+.pdp-thumbs img:hover{border-color:var(--green)}
+
+/* ---------- product gallery ---------- */
+.pdp-gallery{display:flex;flex-direction:column;gap:12px}
+.pg-main{position:relative;background:var(--bg-plate);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;
+  aspect-ratio:1/1;display:grid;place-items:center;cursor:zoom-in}
+.pg-main img{width:100%;height:100%;object-fit:contain;display:block}
+.pg-count{position:absolute;right:10px;bottom:10px;background:rgba(20,21,15,.72);color:#fff;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;padding:5px 10px;border-radius:99px}
+.pg-thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
+.pg-thumb{padding:0;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--bg-plate);cursor:pointer;
+  aspect-ratio:1/1;overflow:hidden;display:grid;place-items:center}
+.pg-thumb img{width:100%;height:100%;object-fit:contain;display:block}
+.pg-thumb:hover{border-color:var(--green)}
+.pg-thumb[aria-current="true"]{border-color:var(--green);box-shadow:0 0 0 2px var(--hover-bg)}
+.pg-thumb:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.pg-lb{position:fixed;inset:0;z-index:900;background:rgba(10,10,9,.94);display:none;
+  place-items:center;padding:36px 20px}
+.pg-lb.open{display:grid}
+.pg-lb img{max-width:min(1100px,94vw);max-height:86vh;object-fit:contain;display:block}
+.pg-lb button{position:absolute;background:rgba(255,255,255,.12);color:#fff;border:0;border-radius:50%;
+  width:46px;height:46px;font-size:22px;line-height:1;cursor:pointer}
+.pg-lb button:hover{background:rgba(255,255,255,.24)}
+.pg-lb .pg-x{top:20px;right:20px}
+.pg-lb .pg-prev{left:20px;top:50%;transform:translateY(-50%)}
+.pg-lb .pg-next{right:20px;top:50%;transform:translateY(-50%)}
+.pg-lb .pg-cap{position:absolute;bottom:18px;left:0;right:0;text-align:center;color:rgba(255,255,255,.7);
+  font-family:var(--font-mono);font-size:12px}
+@media(max-width:640px){
+  .pg-thumbs{grid-template-columns:repeat(auto-fill,minmax(56px,1fr))}
+  .pg-lb button{width:40px;height:40px}
+}
+
+/* ---------- Light Lab ---------- */
+.ll-head{max-width:1280px;margin:0 auto;padding:56px 28px 8px}
+.ll-head h1{font-size:clamp(2.1rem,4vw,3.2rem);line-height:1.08;margin-bottom:12px;letter-spacing:-.03em}
+.ll-head .ll-sub{color:var(--ink-new-mute);max-width:62ch;line-height:1.7;font-size:1.02rem}
+.ll-filters{display:flex;gap:8px;flex-wrap:wrap;max-width:1280px;margin:28px auto 0;padding:0 28px}
+.ll-filters button{background:var(--bg-plate);border:1px solid var(--line);border-radius:99px;padding:9px 19px;
+  font:inherit;font-size:.9rem;font-weight:500;color:var(--ink-new-mute);cursor:pointer;transition:all .18s}
+.ll-filters button:hover{border-color:var(--green);color:var(--green-link)}
+.ll-filters button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#08210a;font-weight:600}
+.ll-grid{max-width:1280px;margin:0 auto;padding:28px 28px 76px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:26px}
+.ll-card{position:relative;background:var(--bg-plate);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;
+  display:flex;flex-direction:column}
+.ll-demo{position:absolute;z-index:4;top:12px;left:12px;background:#F4CE1F;color:var(--ink);
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 10px;border-radius:99px;font-weight:700}
+.ll-wipe{position:relative;aspect-ratio:4/3;overflow:hidden;background:var(--bg-hero);user-select:none}
+.ll-wipe img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ll-beforewrap{position:absolute;inset:0;width:50%;overflow:hidden;border-right:2px solid #fff}
+.ll-beforewrap img{width:auto;height:100%;min-width:100%;object-fit:cover}
+.ll-tag{position:absolute;bottom:12px;z-index:3;background:rgba(10,10,9,.76);color:#fff;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 11px;border-radius:99px;pointer-events:none}
+.ll-tag-b{left:12px}
+.ll-tag-a{right:12px}
+.ll-handle{position:absolute;top:0;bottom:0;width:2px;background:#fff;z-index:3;pointer-events:none;
+  transform:translateX(-1px)}
+.ll-handle::after{content:"";position:absolute;top:50%;left:50%;width:38px;height:38px;
+  transform:translate(-50%,-50%);border-radius:50%;background:#fff;
+  box-shadow:0 2px 10px rgba(0,0,0,.34)}
+.ll-handle::before{content:"\2039 \203A";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:1;font-size:15px;font-weight:700;color:var(--ink);letter-spacing:1px}
+.ll-range{position:absolute;inset:0;z-index:5;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize}
+.ll-range:focus-visible{opacity:1;outline:3px solid var(--green);outline-offset:-3px}
+.ll-body{padding:22px 24px 26px;display:flex;flex-direction:column;gap:12px}
+.ll-body h3{font-size:1.2rem;line-height:1.3;margin:0;letter-spacing:-.02em}
+.ll-body p{color:var(--ink-new-mute);line-height:1.65;font-size:.94rem;margin:0}
+.ll-nums{display:flex;gap:10px;flex-wrap:wrap}
+.ll-num{background:var(--bg-raised);border:1px solid var(--line);border-radius:var(--radius-md);padding:9px 14px;min-width:96px}
+.ll-num .k{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+.ll-num b{font-size:1.1rem;font-weight:600}
+.ll-fitted{display:flex;flex-wrap:wrap;gap:7px;align-items:center;padding-top:6px;
+  border-top:1px solid var(--line)}
+.ll-lab{width:100%;font-family:var(--font-mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint)}
+.ll-fitted a,.ll-fitted span:not(.ll-lab){font-size:.86rem;background:var(--bg-raised);border:1px solid var(--line);
+  border-radius:99px;padding:6px 13px;color:var(--green-link);text-decoration:none;font-weight:600}
+.ll-fitted a:hover{background:var(--green);color:#08210a;border-color:var(--green)}
+.ll-empty{grid-column:1/-1;text-align:center;color:var(--ink-faint);padding:50px 0}
+.ll-note{max-width:1280px;margin:0 auto;padding:0 28px 64px}
+.ll-note div{background:var(--bg-raised);border:1px solid var(--line);border-left:3px solid var(--green);
+  border-radius:var(--radius-md);padding:17px 21px;color:var(--ink-soft);line-height:1.7;font-size:.94rem}
+@media(max-width:520px){.ll-grid{grid-template-columns:1fr}.ll-head h1{font-size:1.9rem}}
+
+/* ---------- live stock badge ---------- */
+/* The hidden attribute must win over any author display rule. Without this,
+   .stock-live[hidden] still painted as an empty green pill whenever Magento
+   had not answered yet. */
+[hidden]{display:none!important}
+.stock-live{display:inline-block;margin-left:10px;font-family:var(--font-mono);font-size:10.5px;
+  letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:99px;
+  background:var(--hover-bg);color:var(--green-link);border:1px solid rgba(0,196,0,.35);vertical-align:middle}
+.stock-live[data-in-stock="false"]{background:#FDF3EC;color:#9A5412;border-color:#E8C9A4}
+
+/* ---------- live options & bulk pricing (from Magento) ---------- */
+.pdp-live{margin-top:20px;background:var(--bg-raised);border:1px solid var(--line);border-left:3px solid var(--green);
+  border-radius:var(--radius-md);padding:16px 19px}
+.pdp-live .lv-head{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--green-link);margin-bottom:11px;font-weight:700}
+.pdp-live .lv-row{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;padding:7px 0;
+  border-bottom:1px solid var(--line);font-size:.93rem}
+.pdp-live .lv-row:last-of-type{border-bottom:0}
+.pdp-live .lv-k{min-width:118px;color:var(--ink-new-mute);font-weight:600}
+.pdp-live .lv-x{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);text-transform:uppercase}
+.pdp-live .lv-vals{display:flex;flex-wrap:wrap;gap:6px}
+.pdp-live .lv-opt{background:var(--bg-plate);border:1px solid var(--line);border-radius:99px;padding:4px 12px;font-size:.86rem}
+.pdp-live .lv-opt em{font-style:normal;color:var(--green-link);font-weight:700}
+.pdp-live .lv-note{margin-top:11px;font-size:.82rem;color:var(--ink-faint);line-height:1.55}
+
+/* ---------- spec sheets ----------
+   Every product that has supplier spec sheets on the Magento site carries
+   them here, on the product itself, above the fold. Links go to /docs/<file>,
+   which _redirects proxies to the Magento media folder. */
+.specsheets{
+  margin-top:18px;border:1px solid var(--line);border-radius:var(--radius-md);
+  background:var(--bg-raised);padding:14px 16px 8px;
+}
+.ss-head{
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-faint);margin-bottom:8px;
+}
+.ss-item{
+  display:flex;align-items:center;gap:10px;padding:9px 0;font-size:13.5px;font-weight:500;
+  border-top:1px solid var(--line);color:var(--ink);transition:color .18s;
+}
+.ss-item:first-of-type{border-top:0}
+.ss-item svg{
+  width:17px;height:17px;flex:0 0 auto;stroke:var(--green-hover);stroke-width:1.7;
+  fill:none;stroke-linejoin:round;
+}
+.ss-item span{flex:1 1 auto;line-height:1.4}
+.ss-item em{
+  font-style:normal;font-family:var(--font-mono);font-size:9.5px;letter-spacing:.12em;
+  color:var(--ink-faint);border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:2px 7px;flex:0 0 auto;
+}
+.ss-item:hover{color:var(--green-link)}
+.ss-item:hover em{border-color:var(--green);color:var(--green-link)}
+
+/* ---------- installation index ---------- */
+.ins-cat{
+  background:var(--bg-plate);border:1px solid var(--line);border-radius:var(--radius-lg);
+  margin-bottom:12px;overflow:hidden;
+}
+.ins-cat>summary{
+  display:flex;align-items:center;gap:16px;padding:22px 26px;cursor:pointer;
+  font-family:var(--font-display);font-size:1.15rem;font-weight:600;letter-spacing:-.02em;
+  list-style:none;
+}
+.ins-cat>summary::-webkit-details-marker{display:none}
+.ins-cat>summary:hover{background:var(--hover-bg)}
+.ins-n{
+  margin-left:auto;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink-faint);white-space:nowrap;
+}
+.ins-body{padding:0 26px 20px;border-top:1px solid var(--line)}
+.ins-row{
+  display:flex;align-items:center;gap:16px;padding:13px 0;border-bottom:1px solid var(--line);
+  font-size:14px;
+}
+.ins-row:last-child{border-bottom:0}
+.ins-row .ins-p{flex:1 1 auto;font-weight:500;min-width:0}
+.ins-row .ins-links{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.ins-row a.ins-sheet{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--green-link);border:1px solid var(--line);border-radius:99px;padding:5px 12px;
+  white-space:nowrap;transition:all .18s;
+}
+.ins-row a.ins-sheet:hover{background:var(--green);border-color:var(--green);color:#08210a}
+.ins-browse{
+  display:inline-flex;align-items:center;gap:9px;margin-top:16px;
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+  border-bottom:1px solid var(--ink);padding-bottom:4px;
+}
+.ins-browse:hover{color:var(--green-link);border-color:var(--green)}
+.ins-guides{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 30px}
+.ins-guides a{
+  font-family:var(--font-mono);font-size:11.5px;letter-spacing:.06em;
+  border:1px solid var(--line);border-radius:var(--radius-md);padding:11px 15px;
+  background:var(--bg-plate);transition:all .18s;
+}
+.ins-guides a:hover{border-color:var(--green);color:var(--green-link)}
+.ins-warn{
+  background:#FBF3E4;border:1px solid #EBD9B4;border-radius:var(--radius-md);
+  padding:16px 20px;margin:22px 0 8px;font-size:14px;color:#6b5a34;line-height:1.6;max-width:70ch;
+}
+
+/* a size in the Options list that has its own supplier spec sheet */
+.opts li{position:relative}
+.opt-sheet{
+  display:inline-block;margin-top:8px;font-family:var(--font-mono);font-size:9.5px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--green-link);
+  border:1px solid var(--line);border-radius:99px;padding:4px 11px;transition:all .18s;
+}
+.opt-sheet:hover{background:var(--green);border-color:var(--green);color:#08210a}
+.ins-none{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+
+/* ---------- about page ---------- */
+.ab{max-width:1280px;margin:0 auto;padding:26px 28px 60px}
+.ab .bl-crumb{margin-bottom:22px}
+.ab .eyebrow{margin-bottom:10px}
+.ab h1{font-size:clamp(2rem,4vw,3rem);letter-spacing:-.03em;line-height:1.05;margin:6px 0 14px}
+.ab-lede{font-size:1.05rem;color:var(--ink-new-mute);max-width:62ch;margin-bottom:36px}
+.ab-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px}
+.ab-card{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:28px}
+.ab-card h2{font-size:1.25rem;letter-spacing:-.02em;margin-bottom:16px}
+.ab-card ul{margin:0 0 22px;padding-left:20px}
+.ab-card li{margin-bottom:9px;color:var(--ink-new-mute);font-size:15px}
+.ab-visit{margin-top:22px;background:var(--bg-tile);color:#fff;border-radius:var(--radius-lg);padding:34px 28px}
+.ab-visit h2{font-size:1.35rem;letter-spacing:-.02em;margin-bottom:12px}
+.ab-visit p{color:rgba(255,255,255,.76);max-width:62ch;margin-bottom:14px}
+.ab-visit .ab-addr{font-family:var(--font-mono);font-size:13px;line-height:1.9;color:rgba(255,255,255,.86)}
+.ab-visit .ab-addr a{color:var(--green)}
+.ab-visit .btn{background:transparent;border-color:rgba(255,255,255,.35);color:#fff}/* .btn sets background:var(--bg-plate) (white); without resetting it here the   label was white on white inside this dark panel. */
+.ab-visit .btn:hover{background:var(--green);border-color:var(--green);color:#08210a}

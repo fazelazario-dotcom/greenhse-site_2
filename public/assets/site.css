@@ -1,0 +1,146 @@
+:root{
+  --ink:#15170F;--paper:#F6F4EC;--paper-2:#ECE9DD;--line:#DAD6C7;
+  --glow:#46B06E;--eco:#5C8A66;--muted:#8C8C7E;--radius:2px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Space Grotesk",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.55;
+}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
+.mono{font-family:"Space Mono",ui-monospace,monospace}
+
+/* header */
+.hdr{
+  display:flex;align-items:center;gap:20px;padding:0 26px;height:60px;
+  background:var(--ink);color:var(--paper);position:sticky;top:0;z-index:20;
+}
+.brand{display:flex;align-items:baseline;gap:9px}
+.brand b{font-size:15px;letter-spacing:.14em}
+.brand span{font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--glow)}
+.nav{margin-left:auto;display:flex;gap:20px;font-size:13.5px}
+.nav a:hover{color:var(--glow)}
+
+/* breadcrumbs */
+.crumbs{
+  max-width:1180px;margin:0 auto;padding:18px 26px 0;
+  font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);
+}
+.crumbs a:hover{color:var(--ink)}
+.crumbs span{margin:0 6px}
+.crumbs .here{color:var(--ink);margin:0}
+
+/* home */
+.hero{max-width:1180px;margin:0 auto;padding:52px 26px 30px}
+.eyebrow{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--eco);margin-bottom:14px}
+.hero h1{font-size:clamp(1.9rem,3.4vw,2.9rem);letter-spacing:-.03em;line-height:1.08;margin-bottom:12px}
+.hero p{font-size:16px;color:#5d6151;max-width:60ch}
+.cgrid{
+  max-width:1180px;margin:0 auto 60px;padding:0 26px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;
+}
+.ccard{border:1px solid var(--line);background:#fff;overflow:hidden;transition:border-color .15s}
+.ccard:hover{border-color:var(--ink)}
+.ccard img{width:100%;aspect-ratio:1913/822;object-fit:cover}
+.cname{display:block;padding:12px 14px 2px;font-size:14.5px;font-weight:600}
+.ccount{display:block;padding:0 14px 13px;font-size:10px;letter-spacing:.08em;color:var(--muted)}
+
+/* category */
+/* full-bleed hero: the 2026 banner artwork runs edge to edge under the header */
+.cat-hero{margin:0;padding:0}
+.cat-hero .banner{width:100%;height:auto;aspect-ratio:1913/822;object-fit:cover;border:0;display:block}
+/* the 2026 banner artwork carries its own headline and buttons — the wrap
+   overlays real links on the printed buttons so they actually work */
+.hero-wrap{position:relative}
+.hero-wrap .hot{position:absolute;top:74%;height:12%;display:block;border-radius:4px}
+.hero-wrap .hot:focus-visible{outline:2px solid var(--glow)}
+.hero-wrap .hot.h1st{left:2%;width:14.8%}
+.hero-wrap .hot.h1st.wide{width:16%}
+.hero-wrap .hot.h2nd{left:17.8%;width:15.5%}
+.cat-copy{max-width:1180px;margin:0 auto;padding:22px 26px 0}
+.cat-copy p{max-width:70ch}
+/* finder band - sits under the hero on the downlight & strip pages */
+.finder-band{background:var(--ink);color:var(--paper)}
+.fb-in{max-width:1180px;margin:0 auto;padding:16px 26px;display:flex;align-items:center;justify-content:space-between;gap:10px 22px;flex-wrap:wrap}
+.fb-in p{font-size:14px;color:#c9c6ba;margin:0}
+.fb-in p b{color:#fff}
+.fb-btn{background:var(--glow);color:#0b1408;font-weight:700;font-size:13.5px;padding:12px 20px;border-radius:4px;white-space:nowrap;transition:filter .15s}
+.fb-btn:hover{filter:brightness(1.1)}
+.cat-copy h1{font-size:clamp(1.7rem,3vw,2.4rem);letter-spacing:-.025em;margin-bottom:10px}
+.cat-copy p{font-size:15.5px;color:#5d6151}
+.count{margin-top:10px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pgrid{
+  max-width:1180px;margin:0 auto 60px;padding:0 26px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;
+}
+.pcard{border:1px solid var(--line);background:#fff;padding:14px;display:flex;flex-direction:column;transition:border-color .15s}
+.pcard:hover{border-color:var(--ink)}
+.pcard img{aspect-ratio:1;object-fit:contain;margin-bottom:12px}
+.noimg{display:block;aspect-ratio:1;background:var(--paper-2);margin-bottom:12px}
+.noimg.lg{display:grid;place-items:center;font-family:"Space Mono",monospace;font-size:11px;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pname{font-size:13.5px;font-weight:600;line-height:1.35;flex:1}
+.pcode{font-family:"Space Mono",monospace;font-size:9.5px;color:var(--muted);margin-top:6px;letter-spacing:.05em}
+.pprice{font-size:15px;font-weight:700;margin-top:8px}
+.pprice small,.rprice small{font-family:"Space Mono",monospace;font-size:9px;font-weight:400;color:var(--muted);letter-spacing:.06em}
+
+/* product */
+.pdp{
+  max-width:1180px;margin:0 auto;padding:20px 26px 10px;
+  display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start;
+}
+.pdp-media{border:1px solid var(--line);background:#fff;padding:26px}
+.pdp-media img{width:100%;aspect-ratio:1;object-fit:contain}
+.pdp-info h1{font-size:clamp(1.5rem,2.6vw,2.1rem);letter-spacing:-.025em;line-height:1.15;margin-bottom:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.chip{font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.06em;border:1px solid var(--line);padding:4px 8px;color:#5d6151}
+.price{font-size:1.8rem;font-weight:700;letter-spacing:-.02em;margin-bottom:16px}
+.price small{display:block;font-size:11px;font-weight:400;color:var(--muted);font-family:"Space Mono",monospace;letter-spacing:.06em;margin-top:5px}
+.desc{font-size:14.5px;color:#5d6151;margin-bottom:20px}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.btn{border:1px solid var(--ink);padding:13px 20px;font-size:13.5px;font-weight:600;transition:all .15s}
+.btn:hover{background:var(--paper-2)}
+.btn.dark{background:var(--ink);color:var(--paper)}
+.btn.dark:hover{background:#000}
+.pickup{font-size:12px;color:var(--muted)}
+
+.block{max-width:1180px;margin:0 auto;padding:34px 26px 0}
+.block h2{font-size:1.15rem;letter-spacing:-.015em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.spec{width:100%;border-collapse:collapse;font-size:13.5px}
+.spec th{
+  text-align:left;font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);font-weight:400;padding:9px 16px 9px 0;
+  border-bottom:1px solid var(--line);width:230px;vertical-align:top;
+}
+.spec td{padding:9px 0;border-bottom:1px solid var(--line);font-weight:500}
+.bul{list-style:none;font-size:14px;columns:2;column-gap:34px}
+.bul li{padding:6px 0 6px 18px;position:relative;break-inside:avoid}
+.bul li::before{content:"";position:absolute;left:0;top:14px;width:7px;height:7px;background:var(--glow)}
+.opts{list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.opts li{border:1px solid var(--line);background:#fff;padding:13px}
+.opts b{display:block;font-size:13.5px;margin-bottom:5px}
+.opts span{font-family:"Space Mono",monospace;font-size:11px;color:var(--muted)}
+
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.rcard{border:1px solid var(--line);background:#fff;padding:13px;display:flex;flex-direction:column}
+.rcard:hover{border-color:var(--ink)}
+.rcard img{aspect-ratio:1;object-fit:contain;margin-bottom:10px}
+.rname{font-size:12.8px;font-weight:600;line-height:1.35;flex:1}
+.rprice{font-size:14px;font-weight:700;margin-top:7px}
+
+/* footer */
+.ftr{border-top:1px solid var(--line);margin-top:60px;background:var(--paper-2)}
+.ftr-in{max-width:1180px;margin:0 auto;padding:34px 26px;display:grid;grid-template-columns:280px 1fr;gap:40px;font-size:13px;color:#5d6151}
+.ftr-in b{color:var(--ink)}
+.ftr-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:7px 20px}
+.ftr-cats a:hover{color:var(--ink);text-decoration:underline}
+.ftr-legal{max-width:1180px;margin:0 auto;padding:0 26px 34px;font-size:11px;color:var(--muted);line-height:1.5}
+
+@media (max-width:860px){
+  .pdp{grid-template-columns:1fr;gap:24px}
+  .ftr-in{grid-template-columns:1fr;gap:24px}
+  .bul{columns:1}
+  .spec th{width:140px}
+}

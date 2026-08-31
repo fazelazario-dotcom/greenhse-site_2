@@ -1,10 +1,10 @@
-# The Greenhse website is a plain static build - nothing to compile.
+# Next.js static export. `next build` writes the finished site to out/ and
+# Netlify serves it from the CDN - no server runtime, same operational model
+# as the static build. public/_redirects carries the Magento proxies and the
+# 301s from every old .html address.
 [build]
-  publish = "."
-  # Explicitly empty. Netlify's UI still holds an "npm run build" command from
-  # the Next.js attempt; an empty command here overrides it. Without this line
-  # the deploy fails trying to run a build that does not exist.
-  command = ""
+  command = "npm run build"
+  publish = "out"
 
 [[headers]]
   for = "/img/*"
@@ -12,12 +12,6 @@
     Cache-Control = "public, max-age=31536000, immutable"
 
 [[headers]]
-  for = "/assets/*"
+  for = "/_next/static/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
