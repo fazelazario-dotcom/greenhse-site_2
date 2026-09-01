@@ -17,10 +17,10 @@ function lookup(slugParts){
     clean+'index.html',                 // /products/x/ -> /products/x/index.html
   ];
   for(const k of candidates){
-    if(SITE.products[k])   return {kind:'product', data:SITE.products[k]};
-    if(SITE.categories[k]) return {kind:'category', data:SITE.categories[k]};
-    if(SITE.blogs[k])      return {kind:'blog', data:SITE.blogs[k]};
-    if(SITE.simple[k])     return {kind:'simple', data:SITE.simple[k]};
+    if(SITE.products[k])   return {kind:'product', data:SITE.products[k], key:k};
+    if(SITE.categories[k]) return {kind:'category', data:SITE.categories[k], key:k};
+    if(SITE.blogs[k])      return {kind:'blog', data:SITE.blogs[k], key:k};
+    if(SITE.simple[k])     return {kind:'simple', data:SITE.simple[k], key:k};
   }
   return null;
 }
@@ -55,7 +55,7 @@ export default function Page({params}){
   const hit=lookup(params.slug);
   if(!hit) notFound();
   if(hit.kind==='product') return <Pdp p={hit.data}/>;
-  if(hit.kind==='category') return <Cat c={hit.data}/>;
+  if(hit.kind==='category') return <Cat c={hit.data} path={hit.key}/>;
   if(hit.kind==='blog') return <main className="bl-article"><BlogPost b={hit.data}/></main>;
   // Content page: markup carried as data, page-scoped css alongside, and the
   // page's own client behaviour (account, checkout, light lab) loaded as the

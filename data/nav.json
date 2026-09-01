@@ -75,67 +75,7 @@
  ],
  "main": [
   {
-   "href": "/index.html#dl-finder",
-   "label": "Downlights",
-   "dot": true
-  },
-  {
-   "href": "/index.html#strip-finder",
-   "label": "Strip Lights",
-   "dot": true
-  },
-  {
-   "href": "/automation/smart-lights-perth/",
-   "label": "Smart Life",
-   "dot": false
-  },
-  {
-   "href": "/index.html#energy",
-   "label": "Energy & Battery",
-   "dot": false
-  },
-  {
-   "href": "/light-lab.html",
-   "label": "Light Lab",
-   "dot": false
-  },
-  {
-   "href": "/blog/",
-   "label": "Blog",
-   "dot": false
-  },
-  {
-   "href": "/index.html#resources",
-   "label": "Resources",
-   "dot": false
-  },
-  {
-   "href": "/installation.html",
-   "label": "Installation",
-   "dot": false
-  },
-  {
-   "href": "/index.html#faq",
-   "label": "FAQ",
-   "dot": false
-  },
-  {
-   "href": "/index.html#contact",
-   "label": "Contact",
-   "dot": false
-  }
- ],
- "mobile": [
-  {
-   "href": "/categories/",
-   "label": "All Products"
-  },
-  {
-   "href": "/index.html#dl-finder",
-   "label": "Downlights"
-  },
-  {
-   "href": "/index.html#strip-finder",
+   "href": "/products/lighting-perth/led-strip-lights/",
    "label": "Strip Lights"
   },
   {
@@ -143,16 +83,12 @@
    "label": "Smart Life"
   },
   {
-   "href": "/index.html#energy",
+   "href": "/index.html#green-charge",
    "label": "Energy & Battery"
   },
   {
-   "href": "/light-lab.html",
-   "label": "Light Lab"
-  },
-  {
-   "href": "/blog/",
-   "label": "Blog"
+   "href": "/index.html#applications",
+   "label": "Applications"
   },
   {
    "href": "/index.html#resources",
@@ -169,15 +105,89 @@
   {
    "href": "/index.html#contact",
    "label": "Contact"
-  },
-  {
-   "href": "/account.html",
-   "label": "My account"
-  },
-  {
-   "href": "/layout.html",
-   "label": "Layout App ↗"
   }
  ],
- "megaFoot": "18 categories · 1000s of certified fittings"
+ "megaFoot": "18 categories \u00b7 1000s of certified fittings",
+ "footer": [
+  {
+   "title": "Products",
+   "links": [
+    {
+     "href": "/products/lighting-perth/australian-certified-12v-24v-transformers-greenhouse-technologies/",
+     "label": "12V/24V Transformers"
+    },
+    {
+     "href": "/products/lighting-perth/air-flow/",
+     "label": "Air Flow"
+    },
+    {
+     "href": "/lighting-perth/led-batten-lights-perth/",
+     "label": "Batten Fittings"
+    },
+    {
+     "href": "/lighting-perth/led-ceiling-lights-perth/",
+     "label": "Ceiling"
+    },
+    {
+     "href": "/products/lighting-perth/led-downlights-perth/",
+     "label": "Downlights"
+    },
+    {
+     "href": "/products/lighting-perth/emergency-lights/",
+     "label": "Emergency Lights"
+    },
+    {
+     "href": "/products/lighting-perth/led-flood-lights-perth/",
+     "label": "Flood"
+    },
+    {
+     "href": "/products/lighting-perth/high-bay-lights/",
+     "label": "High Bay Lights"
+    }
+   ]
+  },
+  {
+   "title": "Explore",
+   "links": [
+    {
+     "href": "/automation/smart-lights-perth/",
+     "label": "Smart Life"
+    },
+    {
+     "href": "/index.html#green-charge",
+     "label": "Energy & Battery"
+    },
+    {
+     "href": "/light-lab.html",
+     "label": "Light Lab"
+    },
+    {
+     "href": "/categories/",
+     "label": "All Products"
+    }
+   ]
+  },
+  {
+   "title": "Company",
+   "links": [
+    {
+     "href": "/layout.html",
+     "label": "Layout App",
+     "ext": true
+    },
+    {
+     "href": "/blog/",
+     "label": "Blog"
+    },
+    {
+     "href": "/about.html",
+     "label": "About us"
+    },
+    {
+     "href": "/index.html#contact",
+     "label": "Contact"
+    }
+   ]
+  }
+ ]
 }

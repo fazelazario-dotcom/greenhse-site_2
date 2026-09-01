@@ -3405,8 +3405,12 @@ const TESTS=[
      :("noChop="+noChopping+" cont="+continuous+" cond="+conditional+" honest="+honest+" short="+onShort+" v240="+off240+" bars="+bars)];
  }],
  ["Finder CTA rows are actually styled",()=>{
-   // .sw-cta and .pk-restart previously had NO css rule at all - bare buttons
-   const css=[...document.querySelectorAll("style")].map(s=>s.textContent).join("");
+   // .sw-cta and .pk-restart previously had NO css rule at all - bare buttons.
+   // The rules moved from an inline <style> into the linked home.css when the
+   // page became a Next.js route, so scan linked sheets as well as style tags.
+   let css=[...document.querySelectorAll("style")].map(s=>s.textContent).join("");
+   for(const sh of document.styleSheets){try{css+=[...sh.cssRules].map(r=>r.cssText).join("");}catch(e){}}
+   css=css.replace(/\s+/g,"");
    const cta=/\.sw-cta\{[^}]*display:flex[^}]*gap:/.test(css);
    const rest=/\.pk-restart\{[^}]*border:[^}]*\}/.test(css);
    const hover=/\.pk-restart:hover\{/.test(css);

@@ -1,5 +1,6 @@
 import { SITE, cleanPath } from '../../../lib/site';
 import nav from '../../../data/nav.json';
+import extras from '../../../data/cat-extras.json';
 
 export const metadata={
   title:'LED Lighting Perth — All Categories | Greenhse Technologies',
@@ -13,7 +14,8 @@ export default function Categories(){
   const cats=nav.mega.map(x=>{
     const key=x.href.endsWith('/')?x.href+'index.html':x.href;
     const c=SITE.categories[key]||{};
-    return {href:cleanPath(x.href),label:x.label,banner:c.banner,count:(c.count||'').split('·')[0].trim()};
+    const hero=(extras[key]||{}).hero;
+    return {href:cleanPath(x.href),label:x.label,banner:c.banner||hero,count:(c.count||'').split('·')[0].trim()};
   });
   return (
     <main className="catdir">
@@ -21,7 +23,7 @@ export default function Categories(){
         <h1>Every category</h1>
         <p>The whole range, grouped the way the catalogue is. Prices are live from our Magento store once each page loads.</p>
       </div></div>
-      <section className="psec"><div className="cgrid2">
+      <section><div className="cgrid2">
         {cats.map(c=>(
           <a key={c.href} className="ccard" href={c.href}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
