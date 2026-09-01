@@ -25,14 +25,24 @@ const JSONLD={
 };
 
 /* The homepage is the one page on the site that is an application rather than
-   a document: 27 KB of skeleton markup that a 730 KB module (public/assets/
-   home-app.js) renders the shop grid, cart, both finder wizards, the
-   applications carousel and the QA suite into. It ships its own header and
-   footer because the cart, search and menu buttons live in them and the module
-   wires those by id. Componentising it section by section is the natural next
-   refactor; everything else on the site is already components + data. */
+   a document. Its markup lives ONE FILE PER SECTION in data/sections/ —
+   00-header, 01-hero, 02-categories, 03-shop … 22-toasts — assembled here in
+   manifest order (files 01–14 sit inside <main id="top">). The behaviour is
+   the same deal: one file per feature in public/assets/home/, built into
+   home-app.js (see scripts/build-home-app.js). The module renders the shop
+   grid, cart, both finder wizards, the applications carousel and the QA suite
+   into this skeleton, wiring everything by element id. */
+function assembleSkeleton(){
+  const dir=path.join(process.cwd(),'data','sections');
+  const order=JSON.parse(fs.readFileSync(path.join(dir,'manifest.json'),'utf8')).order;
+  const part=f=>fs.readFileSync(path.join(dir,f),'utf8');
+  const inMain=order.slice(1,15).map(part).join('');
+  const after=order.slice(15).map(part).join('');
+  return part(order[0])+'<main id="top">'+inMain+'</main>'+after;
+}
+
 export default function Home(){
-  const skeleton=fs.readFileSync(path.join(process.cwd(),'data','home-body.html'),'utf8');
+  const skeleton=assembleSkeleton();
   return (<>
     <link rel="stylesheet" href="/assets/home.css"/>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(JSONLD)}}/>

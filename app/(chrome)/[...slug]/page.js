@@ -2,13 +2,15 @@ import { notFound } from 'next/navigation';
 import Script from 'next/script';
 import { SITE, cleanPath } from '../../../lib/site';
 import Pdp from '../../../components/Pdp';
-import Cat from '../../../components/Cat';
 import BlogPost from '../../../components/BlogPost';
 
-/* One catch-all route drives every templated page on the site - all products,
-   category landings, blog posts and the content pages - from data/site.json.
-   The static build carried 334 hand-maintained HTML files; this carries four
-   components and one data file. */
+/* This catch-all route drives the PRODUCT pages, BLOG POSTS and content
+   pages (account, checkout, policies, light-lab) from data/site.json.
+
+   It does NOT render the category pages any more: every category landing
+   has its own page file under app/(chrome)/ — e.g.
+   app/(chrome)/products/lighting-perth/led-downlights-perth/page.js —
+   one file per page, each documenting its own URL and product groups. */
 
 function lookup(slugParts){
   const clean='/'+slugParts.join('/')+'/';
@@ -18,7 +20,6 @@ function lookup(slugParts){
   ];
   for(const k of candidates){
     if(SITE.products[k])   return {kind:'product', data:SITE.products[k], key:k};
-    if(SITE.categories[k]) return {kind:'category', data:SITE.categories[k], key:k};
     if(SITE.blogs[k])      return {kind:'blog', data:SITE.blogs[k], key:k};
     if(SITE.simple[k])     return {kind:'simple', data:SITE.simple[k], key:k};
   }
@@ -33,7 +34,7 @@ export function generateStaticParams(){
     paths.push({slug:c.split('/').filter(Boolean)});
   };
   Object.keys(SITE.products).forEach(add);
-  Object.keys(SITE.categories).forEach(add);
+  // categories are NOT added here — each has its own page.js (see above)
   Object.keys(SITE.blogs).forEach(add);
   Object.keys(SITE.simple).forEach(add);
   return paths;
@@ -55,7 +56,6 @@ export default function Page({params}){
   const hit=lookup(params.slug);
   if(!hit) notFound();
   if(hit.kind==='product') return <Pdp p={hit.data}/>;
-  if(hit.kind==='category') return <Cat c={hit.data} path={hit.key}/>;
   if(hit.kind==='blog') return <main className="bl-article"><BlogPost b={hit.data}/></main>;
   // Content page: markup carried as data, page-scoped css alongside, and the
   // page's own client behaviour (account, checkout, light lab) loaded as the

@@ -1,0 +1,28 @@
+{
+ "order": [
+  "00-header-and-mobile-nav.html",
+  "01-hero.html",
+  "02-categories.html",
+  "03-shop-browse-and-build.html",
+  "04-downlight-finder-section.html",
+  "05-strip-light-finder-section.html",
+  "06-smart-life.html",
+  "07-energy-green-charge.html",
+  "08-applications-carousel.html",
+  "09-resources-plan-it.html",
+  "10-blog-teasers.html",
+  "11-videos.html",
+  "12-faq.html",
+  "13-about.html",
+  "14-contact-signup.html",
+  "15-footer.html",
+  "16-cart-drawer.html",
+  "17-quick-view-modal.html",
+  "18-strip-finder-wizard.html",
+  "19-downlight-finder-wizard.html",
+  "20-cookie-consent.html",
+  "21-legal-pages.html",
+  "22-toasts-and-qa-panel.html"
+ ],
+ "note": "Assembled in this order by app/page.js \u2014 the pieces between 01 and 14 sit inside <main id=\"top\">."
+}

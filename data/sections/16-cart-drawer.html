@@ -1,0 +1,20 @@
+<!-- ===================== CART DRAWER ===================== -->
+<div class="scrim" id="cartScrim"></div>
+<aside class="cart" id="cart" aria-label="Shopping cart">
+  <div class="cart-head">
+    <h3>Your cart</h3>
+    <button class="icon-btn" id="cartClose" aria-label="Close cart">
+      <svg viewBox="0 0 24 24" style="stroke:var(--ink);stroke-width:2;fill:none;width:22px;height:22px"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-foot">
+    <div class="tot"><span class="lbl">Subtotal (ex-GST)</span><span class="amt" id="cartTotal">$0.00</span></div>
+    <div class="tot tot-gst"><span class="lbl">Total incl. GST</span><span class="amt2" id="cartTotalGst">$0.00</span></div>
+    <p class="note">Freight calculated at checkout</p>
+    <p class="ck-review-note">Custom-cut strip and made-to-size runs are confirmed by our team before dispatch. If your order includes them, use “Request a quote” and we will price it properly.</p>
+    <button class="btn btn-primary" id="checkoutBtn">Checkout</button>
+    <button class="btn" id="quoteBtn" style="width:100%;justify-content:center;margin-top:8px">Request a quote instead</button>
+  </div>
+</aside>
+
