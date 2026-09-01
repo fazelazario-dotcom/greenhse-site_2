@@ -209,8 +209,12 @@ select.sel:disabled{border-color:var(--line-soft);color:var(--muted);cursor:not-
 .tools{
   flex:0 0 auto;
   display:flex;align-items:center;gap:5px;padding:8px 12px;background:var(--ink-2);
-  border-bottom:1px solid #000;z-index:20;flex-wrap:wrap;
+  border-bottom:1px solid #000;z-index:20;
+  /* Never wrap: buttons appearing on selection must not grow the bar and
+     shove the plan down mid-click. Worst case the bar scrolls sideways. */
+  flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;
 }
+.tools::-webkit-scrollbar{display:none}
 .tool{
   display:inline-flex;align-items:center;gap:6px;padding:7px 10px;font-size:11.5px;color:#b9bcae;
   border:1px solid transparent;border-radius:var(--radius);transition:all .15s;white-space:nowrap;
@@ -225,7 +229,7 @@ select.sel:disabled{border-color:var(--line-soft);color:var(--muted);cursor:not-
 .zoomv{font-family:"JetBrains Mono",monospace;font-size:11px;color:#b9bcae;min-width:46px;text-align:center}
 .readout{
   margin-left:auto;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.06em;color:#8e9184;
-  display:flex;gap:14px;white-space:nowrap;
+  display:flex;gap:14px;white-space:nowrap;min-width:0;overflow:hidden;
 }
 .readout b{color:var(--glow);font-weight:400}
 
@@ -246,6 +250,7 @@ select.sel:disabled{border-color:var(--line-soft);color:var(--muted);cursor:not-
 .fx-dot{fill:var(--ink)}
 .fx-line{stroke:var(--ink);stroke-width:2}
 .fx-hit{cursor:move}
+.grp-string{pointer-events:none}
 /* Fill and opacity now come from the fitting's own colour, set inline in
    renderFixtures, so no fill here or it would override them. */
 .fx-pool{pointer-events:none}
@@ -1124,6 +1129,8 @@ img{image-rendering:-webkit-optimize-contrast}
         <span class="tsep"></span>
         <button type="button" class="tool" id="t-undo" title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M3 10h11a5 5 0 0 1 0 10H8"/><path d="M3 10l5-5M3 10l5 5"/></svg>Undo</button>
         <button type="button" class="tool" id="t-del" title="Delete selected (Del)"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Delete</button>
+        <button type="button" class="tool" id="t-group" title="Group the selected fittings so they move as one — made for star-light runs between walls"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.4"/><circle cx="12" cy="12" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 12h12" stroke-dasharray="2 2"/></svg>Group</button>
+        <button type="button" class="tool" id="t-ungroup" title="Ungroup — each fitting moves on its own again"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.4"/><circle cx="12" cy="7" r="2.4"/><circle cx="19" cy="14" r="2.4"/></svg>Ungroup</button>
         <button type="button" class="tool" id="t-clear" title="Remove every fitting">Clear all</button>
       </span>
       <span class="tool" id="toolhint" style="cursor:default;color:#8e9184">Load a floor plan in step 01 to start marking up</span>
@@ -2296,6 +2303,9 @@ function renderFixtures(){
        is not a symbol any more. Draw it to scale until scale stops being
        readable, then hold a legible floor. */
     var rPix=Math.max(7.5/S.zoom, m2px(cut/1000)/2);
+    /* Star lights are pinpricks by design - a run of them drawn at downlight
+       size read as a row of downlights. 40% smaller, with a lower floor. */
+    if(isStarLight(p)) rPix=Math.max(4.5/S.zoom, rPix*0.6);
     /* A batten is a 1.2 m tube, not a 90 mm cut-out. Drawing it from the
        cut-out made it a stub on the plan and gave no sense of how much of the
        garage it actually covers. The bar symbol is 4.4r long, so work back
@@ -2363,6 +2373,19 @@ function renderFixtures(){
     '</g>';
   });
 
+  /* Each group draws a faint string through its members, in placement order -
+     that is the wire of the feature run, and it is what tells you these dots
+     belong together before you ever click one. */
+  var strings={}, stringSvg='';
+  S.fixtures.forEach(function(f){ if(f.grp){(strings[f.grp]=strings[f.grp]||[]).push(f);} });
+  Object.keys(strings).forEach(function(g){
+    var run=strings[g]; if(run.length<2) return;
+    var pts=run.map(function(f){return f.x+','+f.y;}).join(' ');
+    stringSvg+='<polyline class="grp-string" pointer-events="none" points="'+pts+'" fill="none" stroke="#B8860B" stroke-opacity="0.45" '+
+      'stroke-width="'+(1.2/S.zoom).toFixed(2)+'" stroke-dasharray="'+(3/S.zoom).toFixed(1)+' '+(4/S.zoom).toFixed(1)+'"/>';
+  });
+  marks=stringSvg+marks;
+
   var grads='';
   Object.keys(FX_COLOURS).forEach(function(k){
     var c=FX_COLOURS[k];
@@ -2415,8 +2438,11 @@ function renderReadout(){
 function toolState(){
   var hasPlan=!!(S.plan.loaded||S.fixtures.length||S.rooms.length);
   var hasFx=S.fixtures.length>0;
+  var selFx=S.fixtures.filter(function(f){return S.sel.indexOf(f.id)>-1;});
   return {view:hasPlan,show:hasFx,
           undo:S.undo.length>0, del:S.sel.length>0, clear:hasFx,
+          group:selFx.length>1,
+          ungroup:selFx.some(function(f){return f.grp;}),
           edit:(S.undo.length>0||S.sel.length>0||hasFx),
           hint:!hasPlan};
 }
@@ -2425,7 +2451,8 @@ function renderTools(){
   var nh=document.getElementById('navhint');
   if(nh) nh.hidden=!(S.plan.loaded&&!S.hintSeen);
   [['grp-view','view'],['grp-show','show'],['grp-edit','edit'],
-   ['t-undo','undo'],['t-del','del'],['t-clear','clear'],['toolhint','hint']].forEach(function(pair){
+   ['t-undo','undo'],['t-del','del'],['t-clear','clear'],
+   ['t-group','group'],['t-ungroup','ungroup'],['toolhint','hint']].forEach(function(pair){
     var el=document.getElementById(pair[0]);
     if(el) el.hidden=!t[pair[1]];
   });
@@ -3536,8 +3563,13 @@ function addFixtures(pts){
   if(refused && !ok.length){ toast(refused); return; }
   snapshot();
   var ids=[];
+  /* Dropping several star lights in one action is placing a feature string,
+     so it arrives as a group and moves as one. Ungroup is on the toolbar the
+     moment it is selected. */
+  var starRun = isStarLight(prod) && ok.length>1 ? 'g'+(S.seq++) : null;
   ok.forEach(function(p){
     var f={id:'f'+(S.seq++),pid:S.pick.pid,x:Math.round(p.x),y:Math.round(p.y)};
+    if(starRun) f.grp=starRun;
     /* A wall light carries the direction it throws. Everything else is a
        ceiling fitting and has no orientation to keep. */
     if(isWallLight(prod)) f.rot=wallFacing(f.x,f.y);
@@ -4083,7 +4115,12 @@ function onDown(e){
   if(hit){
     var id=hit.dataset.id;
     if(e.shiftKey){ var k=S.sel.indexOf(id); if(k>-1) S.sel.splice(k,1); else S.sel.push(id); }
-    else if(S.sel.indexOf(id)===-1) S.sel=[id];
+    else if(S.sel.indexOf(id)===-1){
+      /* A grouped fitting brings its whole run: that is what the group is for.
+         Shift-click still reaches an individual member. */
+      var gf=S.fixtures.filter(function(f){return f.id===id;})[0];
+      S.sel=(gf&&gf.grp)?S.fixtures.filter(function(f){return f.grp===gf.grp;}).map(function(f){return f.id;}):[id];
+    }
     snapshot();
     drag={mode:'move',a:pt,moved:false,orig:S.fixtures.filter(function(f){return S.sel.indexOf(f.id)>-1;}).map(function(f){return {id:f.id,x:f.x,y:f.y};})};
     renderFixtures();renderReadout();
@@ -4900,6 +4937,8 @@ function wire(){
   $('#t-labels').onclick=function(){S.showLabels=!S.showLabels;this.classList.toggle('on',S.showLabels);renderFixtures();};
   $('#t-grid').onclick=function(){S.showGrid=!S.showGrid;this.classList.toggle('on',S.showGrid);renderGrid();};
   $('#t-undo').onclick=undo;
+  $('#t-group').onclick=function(){groupSelected();};
+  $('#t-ungroup').onclick=function(){ungroupSelected();};
   $('#t-del').onclick=delSel;
   $('#t-clear').onclick=function(){
     if(!S.fixtures.length) return;
@@ -4946,7 +4985,13 @@ function wire(){
   document.addEventListener('keydown',function(e){
     if(/input|textarea|select/i.test(e.target.tagName)) return;
     if(e.code==='Space'){spaceDown=true;e.preventDefault();}
-    if(e.key==='Escape'){setTool('select');guideClear();}
+    if(e.key==='Escape'){
+      /* First Esc puts the armed tool down; a second one lets go of whatever
+         is selected — the two things people mean by "stop". */
+      if(S.tool!=='select'){setTool('select');}
+      else if(S.sel.length){S.sel=[];renderAll();}
+      guideClear();
+    }
     if(e.key==='Delete'||e.key==='Backspace'){delSel();e.preventDefault();}
     if(/^Arrow/.test(e.key)&&S.sel.length){
       var step=S.mpp?m2px(e.shiftKey?0.1:0.01):(e.shiftKey?10:1);
@@ -5057,6 +5102,28 @@ function delSel(){
   S.sel=[];renderAll();toast(n+' removed');
 }
 
+/* ---------- grouping ----------
+   A run of star lights strung between two walls is one feature, not eight
+   separate fittings. Grouped fittings select and move as one - click any
+   member and the whole run comes with it; shift-click still picks members
+   individually. Ungroup hands each dot back. */
+function groupSelected(){
+  var sel=S.fixtures.filter(function(f){return S.sel.indexOf(f.id)>-1;});
+  if(sel.length<2){toast('Select two or more fittings to group');return;}
+  snapshot();
+  var g='g'+(S.seq++);
+  sel.forEach(function(f){f.grp=g;});
+  renderFixtures();renderReadout();
+  toast(sel.length+' fittings grouped \u2014 they move as one now');
+}
+function ungroupSelected(){
+  var sel=S.fixtures.filter(function(f){return S.sel.indexOf(f.id)>-1&&f.grp;});
+  if(!sel.length){toast('Nothing grouped is selected');return;}
+  snapshot();
+  sel.forEach(function(f){delete f.grp;});
+  renderFixtures();renderReadout();
+  toast('Ungrouped \u2014 each fitting moves on its own');
+}
 /* ---------- boot ---------- */
 function init(){
   wire();buildSelects();setTool('select');renderAll();fitView();
@@ -5077,7 +5144,7 @@ window.__GH={
   fillPoints:fillPoints,gridInRoom:gridInRoom,pointInRect:pointInRect,incGST:incGST,money:money,
   bomLines:bomLines,bomTotals:bomTotals,ROOMS:ROOMS,CATS:CATS,PRODUCTS:PRODUCTS,S:S,
   roomName:roomName,renderDoneRooms:renderDoneRooms,
-  isStarLight:isStarLight,isWallLight:isWallLight,STAR_SPACING_M:STAR_SPACING_M,
+  isStarLight:isStarLight,isWallLight:isWallLight,STAR_SPACING_M:STAR_SPACING_M,groupSelected:groupSelected,ungroupSelected:ungroupSelected,
   isBigRoom:isBigRoom,roomComfort:roomComfort,applyComfort:applyComfort,COMFORT:COMFORT,
   wallFacing:wallFacing,rotateSelected:rotateSelected,
   smartLights:smartLights,pickerGroupProducts:pickerGroupProducts,
@@ -6674,6 +6741,22 @@ window.__GHQA=function(){
 
     /* ---- star lights are set 500 mm apart, not at downlight spacing ---- */
     eq('a star light is recognised as one',G.isStarLight(G.byId('DL03-ALL-1')),true);
+    (function(){
+      var keepFx=G.S.fixtures, keepSel=G.S.sel, keepPick={cat:G.S.pick.cat,pid:G.S.pick.pid};
+      G.S.fixtures=[]; G.S.sel=[];
+      G.setPick({cat:'star',pid:'DL03-ALL-1'});
+      G.addFixtures([{x:100,y:100},{x:140,y:100},{x:180,y:100}]);
+      var grps=G.S.fixtures.map(function(f){return f.grp;});
+      ok('a placed star run arrives as one group',
+         grps.every(function(g){return g&&g===grps[0];}),'grps: '+grps.join(','));
+      G.S.sel=G.S.fixtures.map(function(f){return f.id;});
+      G.ungroupSelected();
+      ok('ungroup hands each star back',G.S.fixtures.every(function(f){return !f.grp;}),'grp survived');
+      G.groupSelected();
+      ok('and group ties them together again',
+         G.S.fixtures.every(function(f){return f.grp===G.S.fixtures[0].grp;}),'not grouped');
+      G.S.fixtures=keepFx; G.S.sel=keepSel; G.setPick(keepPick);
+    })();
     eq('a downlight is not',G.isStarLight(G.byId('DL10ES')),false);
     G.setPick({cat:'star',qty:4,arr:'row'}); S.pick.pid='DL03-ALL-1';
     var sp=G.groupPointsAt(500,500);
