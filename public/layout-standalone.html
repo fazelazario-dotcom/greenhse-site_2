@@ -2246,11 +2246,18 @@ var FX_COLOURS={
   strip    : {ink:'#8B3A62', fill:'#E8B6CF', name:'Strip / track'},
   fan      : {ink:'#5A5A4A', fill:'#D2D2C4', name:'Ceiling fan'},
   sensor   : {ink:'#8B4513', fill:'#E8C4A0', name:'Sensor'},
+  wall     : {ink:'#A8701E', fill:'#F4C26B', name:'Outdoor wall light'},
+  pendant  : {ink:'#8C6D1F', fill:'#F2D98C', name:'Pendant'},
   other    : {ink:'#4A4A42', fill:'#D8D8CE', name:'Other fitting'}
 };
 function fxKind(p){
   if(!p) return 'other';
   var c=p.cat, n=(p.name||'').toLowerCase();
+  /* Wall lights and pendants glow warm like every other light — they were
+     falling through to the grey 'other' bucket, which is why they never
+     looked like they were shining. */
+  if(isWallLight(p)) return 'wall';
+  if(/^OWN-PENDANT/.test(p.id||'')) return 'pendant';
   if(c==='batten') return 'batten';
   if(c==='strip'||c==='track') return 'strip';
   if(c==='fans') return 'fan';
@@ -2294,6 +2301,12 @@ function renderFixtures(){
   S.fixtures.forEach(function(f){
     var p=byId(f.pid); if(!p) return;
     var beam=parseBeam(p.beam);
+    /* Wall lights and customer pendants often carry no usable beam figure in
+       the catalogue, which left them glowless on the plan. Fall back to the
+       defaults our team quotes: 120° for a wall light, 110° for a pendant —
+       so they shine like everything else. */
+    if(!beam && isWallLight(p)) beam=120;
+    if(!beam && /^OWN-PENDANT/.test(p.id||'')) beam=110;
     var cut=parseCutout(p)||90;
     var rPix=Math.max(7.5/S.zoom, m2px(cut/1000)/2);
     /* Star lights are pinpricks by design - a run of them drawn at downlight
@@ -4233,7 +4246,17 @@ function onUp(e){
     }
     return;
   }
-  if(d.mode==='move'){guideClear();if(d.moved)renderAll();}
+  if(d.mode==='move'){
+    guideClear();
+    if(d.moved){
+      /* A dragged wall light re-reads which wall it is now closest to, so it
+         keeps throwing into the space — never back into the wall. */
+      S.fixtures.forEach(function(f){
+        if(S.sel.indexOf(f.id)>-1 && isWallLight(byId(f.pid))) f.rot=wallFacing(f.x,f.y);
+      });
+      renderAll();
+    }
+  }
 }
 
 var spaceDown=false;
