@@ -1306,6 +1306,26 @@ const ART={"planStd":"data:image/webp;base64,UklGRpKmAABXRUJQVlA4IIamAAAQOQOdASp
 (function(){
 "use strict";
 
+/* Product photos are linked as /img/… relative to the deployed site. Opened
+   anywhere else — the demo deploy, a local copy, a saved file — those paths
+   404 and every card shows a broken-image icon. Retry each failed photo once
+   against the live site; if that also fails, hide the broken glyph so the
+   plain tile shows instead. (This build inlines its photos as data URIs, so
+   the handler is a safety net that normally never fires.) */
+document.addEventListener('error',function(e){
+  var t=e.target;
+  if(!t||!t.tagName||t.tagName!=='IMG') return;
+  if(t.dataset.ghDone) return;
+  var src=t.getAttribute('src')||'';
+  if(!t.dataset.ghRetried && /^\/(img|blog|images)\//.test(src)){
+    t.dataset.ghRetried='1';
+    t.src='https://greenhse.netlify.app'+src;
+    return;
+  }
+  t.dataset.ghDone='1';
+  t.style.visibility='hidden';
+},true);
+
 /* ---------- catalogue-derived helpers (never invent data) ---------- */
 
 // "560/650/600 lumens (3000/4000/5000k)" -> 603.  Cuts at the word "lumen"
@@ -1853,6 +1873,11 @@ var DL_DEFAULT='DL9ES-FLAT-HL';
 function catProducts(c){
   return PRODUCTS.filter(function(p){
     if(p.cat!==c) return false;
+    /* This picker chooses LIGHTS. Drivers, transformers, remotes, controllers
+       and channel profiles stay in the catalogue data (the schedule and saved
+       plans still resolve them) but are no longer offered as things to place —
+       they were most of the noise in the strip and star lists. */
+    if(!isALight(p)) return false;
     if(c==='downlights') return DL_ALLOW.indexOf(p.id)>-1;
     if(c==='ceiling')    return EXTRA_ALLOW.indexOf(p.id)>-1 || /25W|24W/i.test(p.name||'');
     /* One batten, and it is the T40 Pro. The 60 cm T20 and the IP65 version
@@ -4583,15 +4608,16 @@ function refreshProducts(){
     w.innerHTML='<div class="empty">Nothing matches that.<br>Try a code like DL10ES, or clear the search.</div>';
     return;
   }
+  /* One line per light: photo, name, price. The spec line and the fold-out
+     description/spec panel were more reading than anyone wanted here — the
+     product page (a click away on the site) carries all of that. */
   w.innerHTML=list.map(function(p){
     var on=p.id===S.pick.pid;
     return '<button type="button" class="pcard'+(on?' on':'')+'" data-pid="'+p.id+'">'+
       thumb(p)+
       '<span>'+(p.id===rec?'<span class="pc-badge">Recommended</span>':'')+
-        '<span class="pc-name">'+esc(p.name)+'</span>'+
-        '<span class="pc-spec">'+esc(p.id)+' · '+esc(productSpecLine(p))+'</span></span>'+
-      '<span class="pc-price">'+money(p.price||0)+'<small>EX GST</small></span></button>'+
-      (on?detailBlock(p):'');
+        '<span class="pc-name">'+esc(p.name)+'</span></span>'+
+      '<span class="pc-price">'+money(p.price||0)+'<small>EX GST</small></span></button>';
   }).join('');
   w.querySelectorAll('[data-pid]').forEach(function(b){
     b.onclick=function(){
@@ -4606,23 +4632,8 @@ function refreshProducts(){
   var sel=w.querySelector('.pcard.on');
   if(sel&&sel.scrollIntoView) sel.scrollIntoView({block:'nearest'});
 }
-function detailBlock(p){
-  var rows=[];
-  var lm=parseLumens(p.lumens), bm=parseBeam(p.beam);
-  rows.push(['Output',lm?lm+' lm (average of the catalogue figures)':'<span style="color:var(--danger)">not in the catalogue</span>']);
-  rows.push(['Beam',bm?bm+'°':'<span style="color:var(--danger)">not in the catalogue</span>']);
-  if(p.cct) rows.push(['Colour',esc(p.cct)]);
-  if(p.ip) rows.push(['Rating',esc(p.ip)]);
-  if(p.dims) rows.push(['Size',esc(p.dims)]);
-  rows.push(['Inc GST',money(incGST(p.price||0))+' each']);
-  return '<div class="pc-more">'+
-    (p.desc?'<p>'+esc(p.desc.length>190?p.desc.slice(0,190).replace(/\s+\S*$/,'')+'…':p.desc)+'</p>':'')+
-    '<ul class="plist">'+rows.map(function(r){
-      return '<li><span class="k">'+r[0]+'</span><span class="v">'+r[1]+'</span></li>';
-    }).join('')+'</ul>'+
-    (p.url?'<div class="hint"><a href="'+p.url+'" target="_blank" rel="noopener" style="color:var(--eco-bright)">View this product →</a></div>':'')+
-    '</div>';
-}
+/* detailBlock (the fold-out description + spec table under the selected card)
+   was removed 1 Sep 2026 — the cards now show photo, name and price only. */
 
 
 /* Low glare vs standard. Same measured drawings the downlight finder uses,

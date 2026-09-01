@@ -87,10 +87,10 @@ h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;letter-spacing:-.02e
 .hdr .nav{margin-left:auto;display:flex;gap:20px;font-size:14.5px;font-weight:500}
 .hdr .nav a:hover{color:var(--green-link)}
 /* breadcrumbs */
-/* home */
-.hero{max-width:1280px;margin:0 auto;padding:56px 28px 32px}
-.hero h1{font-size:clamp(2.1rem,4.4vw,4.25rem);letter-spacing:-.03em;line-height:1.06;margin-bottom:16px}
-.hero p{font-size:16px;color:var(--ink-new-mute);max-width:60ch}
+/* The old boxed homepage hero (.hero{max-width:1280px...}) was removed
+   1 Sep 2026: the homepage styles its own full-bleed hero in home.css, the
+   category pages use .tpl .hero from port.css, and this global rule was
+   what pinched both into a 1280px box with gutters on wide screens. */
 .cgrid{
   max-width:1280px;margin:0 auto 64px;padding:0 28px;
   display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:18px;
@@ -153,13 +153,10 @@ h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;letter-spacing:-.02e
 .pickup{font-size:12.5px;color:var(--ink-muted)}
 .block{max-width:1280px;margin:0 auto;padding:38px 28px 0}
 .block h2{font-size:1.35rem;letter-spacing:-.025em;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--line)}
-.spec{width:100%;border-collapse:collapse;font-size:14px}
-.spec th{
-  text-align:left;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--ink-faint);font-weight:400;padding:11px 16px 11px 0;
-  border-bottom:1px solid var(--line);width:230px;vertical-align:top;
-}
-.spec td{padding:11px 0;border-bottom:1px solid var(--line);font-weight:500}
+/* The old PDP spec-table rules (.spec{width:100%…}) were removed 1 Sep 2026:
+   the product page now uses .tpl .specs, and the global .spec width was
+   leaking onto the homepage's <span class="spec"> chips, stretching each one
+   into a full-width stacked box. */
 .bul{list-style:none;font-size:14.5px;columns:2;column-gap:36px}
 .bul li{padding:7px 0 7px 20px;position:relative;break-inside:avoid}
 .bul li::before{content:"";position:absolute;left:0;top:15px;width:7px;height:7px;background:var(--green);border-radius:50%}
@@ -170,8 +167,7 @@ h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;letter-spacing:-.02e
 .rname{font-size:13.5px;font-weight:600;line-height:1.35;flex:1;padding:0 15px}
 .rprice{font-size:18px;font-weight:600;margin-top:8px;letter-spacing:-.02em;padding:0 15px 16px}
 /* ---- footer: near-black, the way the demo closes every page ---- */
-@media (max-width:860px){.bul{columns:1}
-.spec th{width:140px}}
+@media (max-width:860px){.bul{columns:1}}
 /* ---- secondary nav (legacy, kept) ---- */
 .nav2{position:sticky;top:0;z-index:40;background:rgba(248,248,248,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .nav2-in{max-width:1280px;margin:0 auto;padding:0 28px;height:69px;display:flex;align-items:center;gap:26px}

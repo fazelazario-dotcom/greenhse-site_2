@@ -37,10 +37,10 @@ function Card({c}){
       </div>
     </div>
     <div className="card__body">
+      {/* the card is the light, its name and its price — spec chips live on
+          the product page itself, not here */}
       {(c.eyebrow||c.meta) ? <span className="eyebrow">{c.eyebrow||c.meta}</span> : null}
       <span className="card__title">{c.name}</span>
-      {!!(c.chips||[]).length &&
-        <div className="card__chips">{c.chips.map(ch=><span key={ch} className="chip-spec">{ch}</span>)}</div>}
       <div className="card__foot">
         <div className="card__price" {...(c.sku?{'data-sku':c.sku}:{})}>
           <span className="card__amount" {...(c.sku?{'data-price-target':true}:{})}>{c.price}</span>
@@ -109,6 +109,22 @@ export default function Cat({ c, path }){
           </div>
           {finderHref && <a className="link-mono range__finder" href={finderHref}>Open the finder <span aria-hidden="true">→</span></a>}
         </div>
+        {(sections.length>1 || (c.jumpExtra||[]).length>0) && (
+          <nav className="shelfnav" aria-label="Product groups">
+            {sections.map(s=>(
+              <a key={s.id} className="shelfnav__box" href={'#'+s.id}>
+                <span className="shelfnav__label">{s.h2}</span>
+                <span className="shelfnav__count">{s.cards.length} product{s.cards.length===1?'':'s'} ↓</span>
+              </a>
+            ))}
+            {(c.jumpExtra||[]).map(j=>(
+              <a key={j.id} className="shelfnav__box" href={'#'+j.id}>
+                <span className="shelfnav__label">{j.label}</span>
+                <span className="shelfnav__count">{j.count} ↓</span>
+              </a>
+            ))}
+          </nav>
+        )}
         {x?.banner && (
           <div className="sl-banner">
             {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -642,3 +642,14 @@ main.home+.site-footer{margin-top:0}
 @media (max-width:560px){.tpl .block--cross .cross{grid-template-columns:1fr}}
 .tpl .card__tile--text{display:grid;place-items:center;background:#0d1210;color:var(--green-bright)}
 .tpl .card__tile--text span{font-family:var(--font-mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase}
+
+/* ============ Part 7 — product-group boxes on category pages ============
+   The row of boxes under the range head that splits a category's products
+   into named groups (Standard / Low glare / Smart …) and jumps to each —
+   the wayfinding the old pages had, restyled to match the demo. */
+.tpl .shelfnav{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:0 0 34px}
+.tpl .shelfnav__box{display:flex;flex-direction:column;gap:6px;background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px 16px;color:inherit;text-decoration:none;transition:border-color .15s,background .15s}
+.tpl .shelfnav__box:hover{border-color:var(--green);background:var(--bg-raised)}
+.tpl .shelfnav__label{font-weight:600;font-size:14.5px;letter-spacing:-.01em}
+.tpl .shelfnav__count{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted)}
+.tpl .range__section{scroll-margin-top:92px}

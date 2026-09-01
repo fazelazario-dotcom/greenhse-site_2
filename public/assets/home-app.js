@@ -225,7 +225,9 @@ function filtered(){
 }
 function cardHTML(p){
   const catName=shortName((CATEGORIES.find(c=>c.id===p.cat)||{}).name||"");
-  const specs=Object.entries(p.specs).slice(0,3).map(([k,v])=>`<span class="spec">${v}</span>`).join("");
+  /* Spec chips were removed from the cards 1 Sep 2026 — the card is the
+     light, its name and its price; specs live in the product modal and on
+     the product's own page. */
   return `<article class="card" data-id="${p.id}">
       <div class="thumb" data-view="${p.id}">
         ${p.tag?`<span class="tag">${p.tag}</span>`:""}
@@ -237,7 +239,6 @@ function cardHTML(p){
       <div class="body">
         <span class="cat-label">${catName}</span>
         <h3 data-view="${p.id}" style="cursor:pointer">${p.name}</h3>
-        <div class="specs">${specs}</div>
         <div class="foot">
           <span class="price">${p.options&&p.options.length?'<span class="from">from</span>':''}$${p.price.toFixed(2)}<span class="ex">ex-GST</span></span>
           <button class="add" data-add="${p.id}">${p.options&&p.options.length?'Options':'Add +'}</button>
@@ -1386,7 +1387,14 @@ function renderStripTuts(){
 }
 function renderStrips(){
   const host=$("#stripGrid"); if(!host) return;
-  host.innerHTML=PRODUCTS.filter(p=>p.cat==="strip"&&!/suspension|modular|channel/i.test(p.name)).map(cardHTML).join("");
+  /* The homepage teaser shows a handful; the full range lives on the strip
+     lights page. Capped 1 Sep 2026 — the page was getting too long. */
+  const all=PRODUCTS.filter(p=>p.cat==="strip"&&!/suspension|modular|channel/i.test(p.name));
+  const shown=all.slice(0,8);
+  host.innerHTML=shown.map(cardHTML).join("")
+    +(all.length>shown.length
+      ? '<div class="grid-more"><a class="btn-more" href="/products/lighting-perth/led-strip-lights/">See the full strip range — '+all.length+' products →</a></div>'
+      : '');
   renderStripTuts();
 }
 
@@ -2364,8 +2372,14 @@ function renderDownlights(){
   renderDlGuide();
   const host=$("#dlGrid");
   const list=dlFiltered();
+  /* Show about eight; the full range lives on the downlights page.
+     Capped 1 Sep 2026 \u2014 the page was getting too long. */
+  const shown=list.slice(0,8);
   if(host) host.innerHTML=list.length
-    ? list.map(cardHTML).join("")
+    ? shown.map(cardHTML).join("")
+      +(list.length>shown.length
+        ? '<div class="grid-more"><a class="btn-more" href="/products/lighting-perth/led-downlights-perth/">See all '+list.length+' downlights \u2192</a></div>'
+        : '')
     : '<p class="dl-empty">Nothing online in that combination \u2014 call our Perth team on (08) 9297 2969 and we\u2019ll check the warehouse.</p>';
   const help=$("#dlHelp");
   if(help){

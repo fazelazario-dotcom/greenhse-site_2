@@ -1250,3 +1250,7 @@ button.sl-chan:hover{border-color:#9aa08d;transform:translateY(-2px)}
 
 /* The QA panel is a team tool, not a customer feature. Hidden unless the URL carries ?qa=1 */
 body:not(.qa-on) .qa-fab,body:not(.qa-on) .qa{display:none!important}
+/* "See all" row under the capped homepage grids (added 1 Sep 2026) */
+.grid-more{grid-column:1/-1;display:flex;justify-content:center;padding:6px 0 2px}
+.btn-more{display:inline-flex;align-items:center;gap:8px;background:var(--glow);color:#08210a;font-weight:600;font-size:14px;padding:12px 22px;border-radius:4px;transition:background .15s}
+.btn-more:hover{background:#00a800}
