@@ -899,6 +899,7 @@ img{image-rendering:-webkit-optimize-contrast}
     <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span class="lbl">Save</span>
   </button>
   <button type="button" class="hbtn" id="btn-open" title="Reopen a saved layout">Open</button>
+  <button type="button" class="hbtn" id="btn-faq" title="Why the planner does what it does — fans, low glare, beam angles, which fitting goes where">FAQ</button>
   <button type="button" class="hbtn" id="btn-png" title="Download the marked-up plan as a PNG">Export PNG</button>
   <button type="button" class="hbtn pri" id="btn-print" title="Print or save a PDF of the plan plus the light schedule">
     <svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg><span class="lbl">Plan + schedule</span>
@@ -1016,20 +1017,9 @@ img{image-rendering:-webkit-optimize-contrast}
         lights go in by themselves — the right number, in the right places. Do that for
         every room and you are finished.</p>
         <div class="scalewarn" data-scalewarn hidden></div>
-        <div class="q">
-          <label class="qlabel" for="fanplan">Are you putting fans in?</label>
-          <div class="selwrap"><select class="sel" id="fanplan">
-            <option value="ask">Not decided yet — I'll say room by room</option>
-            <option value="none">No fans anywhere</option>
-            <option value="light">Yes — fans with a light in them</option>
-            <option value="nolight">Yes — fans without a light</option>
-          </select></div>
-          <div class="hint" id="fanplan-line"></div>
-          <details class="moreinfo" id="fanplan-more">
-            <summary>Why it matters</summary>
-            <div class="moreinfo-body"><div class="teach" id="teach-fanplan"></div></div>
-          </details>
-        </div>
+        <p class="hint" style="margin-top:-6px">Each room asks its own questions as you go —
+        fan or no fan, more light or comfortable light. The reasoning behind all of it lives
+        under <b>FAQ</b> at the top.</p>
         <div class="q">
           <label class="qlabel" for="rtype">What is this room?</label>
           <div class="selwrap"><select class="sel" id="rtype"></select></div>
@@ -3958,36 +3948,9 @@ function setTool(t){
     } else ph.hidden=true;
   }
 }
-function renderFanPlanTeach(){
-  /* One plain line stays on screen; the reasoning folds away underneath it.
-     Step 03 is the step people actually work in, so it has to stay short. */
-  var line=document.getElementById('fanplan-line');
-  if(line) line.textContent={
-    ask:'You can decide room by room instead.',
-    none:'Every room gets the normal number of lights for its size.',
-    light:'A fan room gets the fan and nothing else \u2014 its light does the room.',
-    nolight:'A fan room gets the fan plus '+FAN_DL_COUNT+' low glare downlights.'
-  }[S.fanPlan]||'';
-  var el=document.getElementById('teach-fanplan');
-  if(!el) return;
-  var txt={
-    ask:'<h5>Decide now if you can</h5>A fan changes what goes in the room, so it '+
-        'is worth answering before you lay anything out. You can still set it room by room.',
-    none:'<h5>No fans</h5>Every room gets the normal count for its size, and the '+
-         'fitting you pick is the fitting that goes in.',
-    light:'<h5>Fans with a light</h5>The light in the fan does the room, so no '+
-          'downlights go in underneath it. Rooms without a fan are unaffected.',
-    nolight:'<h5>Fans without a light</h5>Each fan room gets '+FAN_DL_COUNT+
-            ' \u00d7 60\u00b0 low glare downlights around the fan.'
-  }[S.fanPlan]||'';
-  el.innerHTML=txt+
-    '<p style="margin-top:8px"><b>Ceiling fans go in bedrooms and on the alfresco.</b> '+
-    'Exhaust fans go in bathrooms and laundries. The app will not let you drop '+
-    'either one anywhere else.</p>'+
-    '<p style="margin-top:8px">Whichever you choose, <b>any room with a fan in it is '+
-    'laid out in 60\u00b0 low glare</b>. A wide beam crossing the blades is what gives '+
-    'you shadow flicker, and it is the most common complaint about a new install.</p>';
-}
+/* The fan pre-question used to live in step 03. Rooms ask it themselves now,
+   one at a time, which is how people actually decide - so the reasoning that
+   sat under the question moved to the FAQ, with everything else worth knowing. */
 function armedMessage(t){
   var p=byId(S.pick.pid);
   if(t==='measure') return 'Drag across anything on the plan to measure it.';
@@ -4861,37 +4824,6 @@ function wire(){
   var hx=$('#howto-x');
   if(hx) hx.onclick=function(){ hideHowTo(); specPick=null; renderSpecial(); setTool('select'); };
 
-  var fp=$('#fanplan');
-  if(fp){
-    fp.value=S.fanPlan;
-    fp.onchange=function(){
-      S.fanPlan=this.value;
-      renderFanPlanTeach();
-      /* Answering it after rooms are already marked applies it to the ones
-         that can take a fan and have not been decided on individually. */
-      var n=0, kept=0;
-      S.rooms.forEach(function(r){
-        var b=ROOMS[r.type]||ROOMS.other;
-        if(!b.fan) return;
-        if(S.fanPlan==='ask'){ return; }
-        /* This answer is the default for rooms you have not decided on
-           yourself. A room you set by hand keeps what you chose - changing
-           the whole-house answer used to wipe every one of them. */
-        if(S.roomFanManual[r.id]){ kept++; return; }
-        var want=S.fanPlan==='none'?'none':S.fanPlan;
-        if(S.roomFan[r.id]===want) return;
-        S.roomFan[r.id]=want;
-        if(S.mpp) doFill(r);
-        n++;
-      });
-      renderAll();
-      if(n||kept){
-        toast((n?n+' room'+(n>1?'s':'')+' updated':'No rooms changed')+
-              (kept?' \u00b7 '+kept+' you set yourself left alone':''));
-      }
-    };
-    renderFanPlanTeach();
-  }
   var nb=$('#nextup');
   if(nb) nb.onclick=function(){
     var n=+(this.dataset.step||1);
@@ -4932,6 +4864,7 @@ function wire(){
   $('#t-zoomout').onclick=function(){zoomStepBtn(-1);};
   $('#zoomv').onclick=function(){zoomTo(1);};
   $('#t-help').onclick=showHelp;
+  $('#btn-faq').onclick=showFaq;
   $('#t-fit').onclick=function(){fitView();toast('Whole plan back on screen');};
   $('#t-beams').onclick=function(){S.showPools=!S.showPools;this.classList.toggle('on',S.showPools);renderFixtures();};
   $('#t-labels').onclick=function(){S.showLabels=!S.showLabels;this.classList.toggle('on',S.showLabels);renderFixtures();};
@@ -5076,6 +5009,90 @@ function showHelp(){
 function showModal(title,html){
   $('#mtitle').textContent=title;$('#mbody').innerHTML=html;$('#modal').classList.add('open');
 }
+
+/* ---------- FAQ ----------
+   Every piece of reasoning the planner acts on, in one place. The panels the
+   sidebar used to carry ("why it matters", the fan pre-question) folded into
+   here, so the steps stay short and the answers stay findable. */
+function faqItem(q,a){
+  return '<details class="moreinfo"><summary>'+q+'</summary>'+
+         '<div class="moreinfo-body"><div class="teach" style="margin-top:10px">'+a+'</div></div></details>';
+}
+function showFaq(){
+  showModal('How the planner thinks',
+    '<p>Short answers to the questions the planner is quietly answering for you. '+
+    'Open the one you are wondering about.</p>'+
+
+    faqItem('How does it know how many lights a room needs?',
+      'Room size and room type. Standard rules of thumb give a count for the '+
+      'floor area, and the room type adjusts it — a hallway wants one fitting '+
+      'every 2–2.5 m down the centre line, a small room takes one or two at '+
+      'most, and a bathroom is capped at two. On bigger rooms the room card also '+
+      'asks whether you want it <b>more comfortable</b> (fewer, softer) or '+
+      '<b>brighter</b> (the full count) — both are correct, they are just '+
+      'different houses.')+
+
+    faqItem('What about fans?',
+      'Each room that can take a ceiling fan — bedrooms and the alfresco — '+
+      'asks you when you draw it. <b>A fan with a light in it does the room on its '+
+      'own</b>, so no downlights go in underneath. A fan without a light gets '+
+      FAN_DL_COUNT+' × 60° low glare downlights around it. Exhaust fans '+
+      'belong in bathrooms and laundries, and the planner will not let either kind '+
+      'be dropped anywhere else.<p style="margin-top:8px">Any room with a fan is '+
+      'laid out in <b>60° low glare</b>: a wide beam crossing the blades gives '+
+      'you shadow flicker, and that is the most common complaint about a new '+
+      'install.</p>')+
+
+    faqItem('Low glare or standard — which downlight where?',
+      '<b>Low glare (60°)</b> fittings sit deeper in the ceiling so you do not '+
+      'look into the LED. They go where people sit and look up at night: living, '+
+      'dining, bedrooms, the study — and every fan room. <b>Standard (90–'+
+      '100°)</b> fittings spread wider, so fewer do more — right for '+
+      'kitchens, hallways and work spaces where output matters more than comfort.')+
+
+    faqItem('What do the dashed circles around each light mean?',
+      'That is the pool of useful light the fitting throws at your ceiling height '+
+      '— worked out from its beam angle, not guessed. Pools should overlap a '+
+      'little; gaps between pools are the dark patches you would live with. '+
+      'Downlights also want to sit about <b>650–750 mm off the wall</b> — '+
+      'closer scallops the wall, further leaves the edge of the room dim. The '+
+      'planner colours the gap as you drag.')+
+
+    faqItem('Why are some rooms warm white and others not?',
+      'Rooms you relax in — living, dining, bedrooms, alfresco — get '+
+      '<b>3000K warm white</b>. Rooms you work in — kitchen, bathroom, '+
+      'laundry, study — get <b>4000K natural white</b>. The garage gets '+
+      '<b>5000K bright white</b>. Mixing them mid-room is what makes a house feel '+
+      'off, so the planner keeps each room to one temperature.')+
+
+    faqItem('Why does the bathroom not just get downlights?',
+      'One or two downlights at most — and the better answer is a sealed '+
+      '25 W 3-CCT ceiling light: bright enough on its own, no cut-outs over '+
+      'the shower, and rated for the moisture. Every bathroom and laundry also '+
+      'needs an exhaust fan — take the version with the light in it and the '+
+      'room is done. Wet areas (bathroom, laundry, alfresco) need fittings with '+
+      'the right IP rating, which is why the planner tracks them separately.')+
+
+    faqItem('What are star lights, and why do they move as a group?',
+      'Small 3 W points of light — alfresco ceilings, feature nooks, '+
+      'stair risers — set about 500 mm apart. A run of them is one feature, '+
+      'not eight separate fittings, so the planner places them as a group that '+
+      'moves as one, with a faint string showing the run. <b>Ungroup</b> on the '+
+      'toolbar frees each dot when you are threading them between walls.')+
+
+    faqItem('Strip lights and battens — where do they fit?',
+      'Strip is sold per metre and lives in coves, under kitchen benches and along '+
+      'stairs — drop one marker per run and note the length. Battens are the '+
+      'garage and shed answer: a 1.2 m batten throws far more light per dollar '+
+      'than downlights and needs no ceiling cut-outs.')+
+
+    faqItem('Can I trust the plan enough to build from it?',
+      'It is a real plan in real metres — counts, spacings and prices your '+
+      'electrician can work from. But quantities come from rules of thumb applied '+
+      'to what you drew, so <b>every layout must be verified on site by your '+
+      'licensed electrician</b> before ordering: measurements, joist positions, '+
+      'ceiling access, IP ratings and circuit loads.'));
+}
 /* Turn the selected wall lights. The auto-facing gets a rectangular room
    right nearly every time, but a plan with a diagonal wall, a return, or a
    light on a post needs a hand. 45 deg steps - finer than that is false
@@ -5144,7 +5161,7 @@ window.__GH={
   fillPoints:fillPoints,gridInRoom:gridInRoom,pointInRect:pointInRect,incGST:incGST,money:money,
   bomLines:bomLines,bomTotals:bomTotals,ROOMS:ROOMS,CATS:CATS,PRODUCTS:PRODUCTS,S:S,
   roomName:roomName,renderDoneRooms:renderDoneRooms,
-  isStarLight:isStarLight,isWallLight:isWallLight,STAR_SPACING_M:STAR_SPACING_M,groupSelected:groupSelected,ungroupSelected:ungroupSelected,
+  isStarLight:isStarLight,isWallLight:isWallLight,STAR_SPACING_M:STAR_SPACING_M,groupSelected:groupSelected,ungroupSelected:ungroupSelected,showFaq:showFaq,
   isBigRoom:isBigRoom,roomComfort:roomComfort,applyComfort:applyComfort,COMFORT:COMFORT,
   wallFacing:wallFacing,rotateSelected:rotateSelected,
   smartLights:smartLights,pickerGroupProducts:pickerGroupProducts,
@@ -6291,17 +6308,26 @@ window.__GHQA=function(){
     G.setPick({cat:'downlights',pid:'DL10ES'});
   })();
 
-  /* ---- the answer given before any room is marked ---- */
-  eq('the fan question starts undecided',
+  /* ---- the fan question is asked room by room, not up front ---- */
+  eq('with no answer given, fans start undecided',
      (function(){var v=G.S.fanPlan;G.S.fanPlan='ask';return v!==undefined?'ask':'missing';})(),'ask');
-  ok('the question is asked before the Add lights step',
-     (function(){
-       var q=d.getElementById('fanplan');
-       if(!q) return false;
-       var step=q.closest('.step');
-       return step && step.dataset.step==='3';
-     })(),'fan question missing or in the wrong step');
-  eq('and it offers all four answers',d.querySelectorAll('#fanplan option').length,4);
+  ok('the fan pre-question is gone from step 03 — rooms ask it themselves',
+     !d.getElementById('fanplan'),'pre-question still in the sidebar');
+
+  /* ---- the reasoning moved to the FAQ ---- */
+  ok('an FAQ button sits in the header',!!d.getElementById('btn-faq'),'no #btn-faq');
+  (function(){
+    G.showFaq();
+    var body=d.getElementById('mbody');
+    var txt=body?body.textContent:'';
+    ok('the FAQ opens with the fan reasoning in it',
+       /shadow flicker/.test(txt),'fan reasoning missing');
+    ok('and covers low glare, star lights and wet areas',
+       /low glare/i.test(txt)&&/[Ss]tar light/.test(txt)&&/IP rating/.test(txt),'a topic is missing');
+    ok('as fold-out questions, not a wall of text',
+       body&&body.querySelectorAll('details.moreinfo').length>=8,'fewer than 8 items');
+    d.getElementById('modal').classList.remove('open');
+  })();
 
   /* ---- plan symbols ---- */
   eq('downlights draw as a circle',G.symbolFor('downlights'),'round');
