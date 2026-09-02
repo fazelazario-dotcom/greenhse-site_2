@@ -7,7 +7,8 @@
     "prebuild": "node scripts/build-home-app.js",
     "build": "next build",
     "start": "next start",
-    "build:home": "node scripts/build-home-app.js"
+    "build:home": "node scripts/build-home-app.js",
+    "preview": "node scripts/serve.js"
   },
   "dependencies": {
     "next": "14.2.15",

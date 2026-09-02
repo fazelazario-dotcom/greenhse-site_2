@@ -1,6 +1,19 @@
 import Script from 'next/script';
-import { mapHref } from '../lib/site';
+import { SITE, mapHref } from '../lib/site';
 import extras from '../data/cat-extras.json';
+
+/* Category card data historically carried empty price/sku fields, which left
+   the card amounts blank and gave magento.js nothing to hook its live prices
+   onto. Resolve each card against the product it links to at build time, so
+   every card shows the catalogue price AND carries the data-sku hook that
+   the Magento API paints the live figure over at page load. */
+function withProduct(c){
+  if(c.price && c.sku) return c;
+  const href=c.href||'';
+  const p=SITE.products[href] || SITE.products[href.replace(/\/$/,'')+'.html'] || null;
+  if(!p) return c;
+  return {...c, price:c.price||p.price, sku:c.sku||p.sku};
+}
 
 /* Category landing page, in the demo build's template: full-bleed photo
    hero with scrim, "Find your perfect …" range head, the product card
@@ -27,7 +40,8 @@ function Title({t}){
   });
 }
 
-function Card({c}){
+function Card({c: raw}){
+  const c=withProduct(raw);
   const Tag=c.href?'a':'div';
   const body=(<>
     <div className="card__tile">

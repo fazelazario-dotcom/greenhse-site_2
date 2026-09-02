@@ -22,7 +22,15 @@
      disk, or a host without the rewrite. */
   var ENDPOINT = '/mag/graphql';
   var DIRECT   = 'https://greenhse.com/graphql';
-  if (location.protocol === 'file:' || !/netlify\.app$|greenhse\.com$/.test(location.hostname)) {
+  /* Always try the same-origin proxy first — Netlify provides it in
+     production (_redirects), `npm run dev` provides it via next.config.js
+     rewrites, and `npm run preview` via scripts/serve.js. The old hostname
+     allow-list here forced DIRECT on localhost, where the browser's CORS
+     policy blocks it — which is why local runs looked "not API connected".
+     Only a file:// open (no server at all) goes DIRECT immediately;
+     anywhere else the DIRECT fallback still kicks in automatically if the
+     proxy is missing. */
+  if (location.protocol === 'file:') {
     ENDPOINT = DIRECT;
   }
 
@@ -43,11 +51,15 @@
     });
   }
 
-  var MAP = window.GREENHSE_SKU_MAP || {};
+  /* Read the SKU map lazily: with next/script the load order of sku-map.js
+     and this file is not guaranteed, and capturing the map once at startup
+     meant that when this file won the race, every lookup returned null and
+     no Magento call was ever made — pages looked static. */
+  function MAPNOW() { return window.GREENHSE_SKU_MAP || {}; }
   var cache = {};
 
   function skuFor(pid) {
-    var e = MAP[pid];
+    var e = MAPNOW()[pid];
     return e ? e.sku : null;
   }
 
@@ -250,6 +262,12 @@
 
   function start() {
     paint();
+    /* Belt and braces for script-order races: repaint once the sku map has
+       definitely arrived, and again shortly after, so live Magento prices
+       land no matter which script executed first. */
+    setTimeout(paint, 400);
+    setTimeout(paint, 1500);
+    window.addEventListener('load', function () { paint(); });
     // Modal contents render after open, so repaint when the DOM changes.
     var modal = document.getElementById('modal');
     if (modal) {

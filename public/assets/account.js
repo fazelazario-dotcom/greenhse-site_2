@@ -15,7 +15,10 @@
 
   var ENDPOINT = '/mag/graphql';
   var DIRECT = 'https://greenhse.com/graphql';
-  if (location.protocol === 'file:' || !/netlify\.app$|greenhse\.com$/.test(location.hostname)) {
+  /* Same-origin proxy first everywhere a server is present — production
+     (_redirects), npm run dev (next.config.js rewrites) and npm run preview
+     (scripts/serve.js) all provide it. Only a file:// open goes direct. */
+  if (location.protocol === 'file:') {
     ENDPOINT = DIRECT;
   }
 
