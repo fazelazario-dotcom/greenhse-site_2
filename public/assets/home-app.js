@@ -31,6 +31,24 @@
 const $=(s,c=document)=>c.querySelector(s);
 const $$=(s,c=document)=>[...c.querySelectorAll(s)];
 
+/* Turn any product/blog URL from the catalogue data into the path this
+   static export actually serves. The data still carries the old Magento
+   shapes (absolute https://greenhse.com/... and trailing .html); the export
+   writes every page as a folder, so those must become /path/ or they 404.
+   The layout planner files are the one real pair of .html files. */
+function cleanUrl(u){
+  if(!u) return u;
+  u=String(u).replace(/^https?:\/\/(www\.)?greenhse\.com/,"");
+  if(!u.startsWith("/")) return u;
+  if(/^\/layout(-standalone)?\.html/.test(u)) return u;
+  const h=u.indexOf("#"); const hash=h>=0?u.slice(h):""; if(h>=0) u=u.slice(0,h);
+  const q=u.indexOf("?"); const query=q>=0?u.slice(q):""; if(q>=0) u=u.slice(0,q);
+  if(u.endsWith("/index.html")) u=u.slice(0,-"index.html".length);
+  else if(u.endsWith(".html")) u=u.slice(0,-5)+"/";
+  else if(!/\.[a-z0-9]+$/i.test(u.split("/").pop()) && !u.endsWith("/")) u+="/";
+  return u+query+hash;
+}
+
 /* ---------- DATA: categories (migrated from greenhse.com) ---------- */
 const CATIMG={"cats":{"batten":{"img":"/img/inline/3beca41f07d4.webp","alt":"Batten lights running down a car park ceiling"},"fans":{"img":"/img/inline/a2a5c307d6bc.webp","alt":"A black ceiling fan in a lit bedroom"},"ceiling":{"img":"/img/inline/489c2d891ebc.webp","alt":"Round oyster ceiling lights on a white ceiling"},"downlights":{"img":"/img/inline/55beb994e4c7.webp","alt":"Downlights through a living space overlooking a city sunset"},"emergency":{"img":"/img/inline/d5f3d9ce0893.webp","alt":"An illuminated green emergency exit sign"},"flood":{"img":"/img/inline/02e494bec76b.webp","alt":"Flood lights over a padel court at night"},"landscape":{"img":"/img/inline/7546f6ea1798.webp","alt":"Garden and step lights around a modern home at dusk"},"highbay":{"img":"/img/inline/288461ab5db3.webp","alt":"High bay lights across a warehouse roof structure"},"industrial":{"img":"/img/inline/45b4e6d7d38e.webp","alt":"Industrial wall lights above loading dock roller doors"},"outdoor":{"img":"/img/inline/2e672a025d64.webp","alt":"Wall lights washing the facade of a home at dusk"},"commercial":{"img":"/img/inline/4fe8dd785f6f.webp","alt":"Recessed panel lighting across an open-plan office"},"sensors":{"img":"/img/inline/d732692aaed2.webp","alt":"A white outdoor security sensor light on a wall"},"smart":{"img":"/img/inline/a61e6c46752e.webp","alt":"Smart home lighting controlled from a phone"},"star":{"img":"/img/inline/3cf39c604c4b.webp","alt":"A fibre-optic star light ceiling above a staircase"},"strip":{"img":"/img/inline/6cde843a7098.webp","alt":"A reel of LED strip light glowing teal"},"switches":{"img":"/img/inline/f0b704deba30.webp","alt":"A hand pressing a black wall switch plate"},"track":{"img":"/img/inline/b44074527d0d.webp","alt":"Track and linear lights over a retail clothing floor"},"transformers":{"img":"/img/inline/cd5b2515c9bb.webp","alt":"A row of low-voltage transformer enclosures"}},"titleInArtwork":true,"ratio":"2067/827","noPhoto":[],"source":"Catalogue_images.pdf (Lazar, 4 Aug)"};
 const COBIMG={"products":["ST24V-LONGRUN-IP68"],"img":{"reel":"/img/inline/44da87cec139.webp","macro":"/img/inline/3741051237e6.webp","lit":"/img/inline/be2d3be98225.webp","dims":"/img/inline/113c940ae43f.webp","wiring":"/img/inline/a0d09fd6b772.webp"},"specs":[["Model","SELS-COBX480-24-YCC"],["LED density","480 LEDs per metre \u2014 dot-free COB"],["Power","7.5W per metre"],["Voltage","24V DC"],["Colour", "Fixed colour, chosen at order \u2014 3000K or 4000K on IP20, 3000K only on IP67"],["Brightness","675\u2013712 lm per metre depending on the colour setting (\u00b110%)"],["Colour accuracy","CRI >90"],["Beam angle","180\u00b0"],["Board","8mm wide white PCB \u00b7 3oz double layer, constant current"],["Max run","20m fed from one end \u00b7 40m fed from both ends \u2014 no voltage drop"],["Cutting","Every 50mm, between the soldering pads only"],["Minimum bend","50mm diameter \u2014 never tighter than 40mm"],["Leads","150mm of 20AWG red/black wire on both ends"],["Working temperature","-40\u00b0C to +45\u00b0C"],["Life span","50,000 hours"],["Warranty","3 years"],["Supplied as","20m roll (other lengths can be cut to order)"]],"ipGrades":[["IP20","8 mm","Bare strip on 3M adhesive backing. Indoor, dry areas only."],["IP67","10 \u00d7 4 mm","Silicon injected. Sealed against rain and splashing \u2014 not for submersion."]],"sold":["IP20","IP67"],"flags":["REVERSED (Lazar, this session): now listed as IP20 and IP67 silicon injected, selectable. This overturns the 30 Jul decision that it was sold as IP68 only with the IP20 entry deleted. Worth double-checking against what is actually on the shelf before this goes live.","REVERSED (Lazar, this session): now listed as fixed colours chosen at order (3000K or 4000K), not tri-colour. This overturns the 30 Jul decision that it IS a tri-colour strip switched from the remote. These two cannot both be right.","OPEN - the supplier datasheet prints the third colour as 6000K; Lazar says the strip we sell is 3000K / 4000K / 5500K. The site follows Lazar. Worth confirming with the supplier so the datasheet and the website agree.","WATERMARKS: all five photos Lazar sent on 30 Jul carry an 'SE.Lighting' watermark, same reason cob_lit.png was originally held back. They are now bundled because Lazar asked for them - but they advertise the supplier on a Greenhse page. Clean versions would be better.","MISMATCH: the photos show the BARE strip on 3M adhesive backing - that is the unsealed build. We sell this strip as IP20 bare on 3M adhesive, or IP67 silicon injected (10 x 4mm). Captions say so rather than pretending otherwise.","MISMATCH: the board markings in the reel photos read 'FOB-2P8S 320D 8mm', i.e. 320 LEDs/m, while the datasheet spec we publish says 480 LEDs/m. One of the two is wrong - needs checking with SE.Lighting before the 480 figure is trusted.","Price ($16.00/m ex GST) is ours - it is not on the supplier datasheet."]};
@@ -185,7 +203,7 @@ function catPageLinks(cid){
   const seen=new Set();
   return PRODUCTS.filter(p=>p.cat===cid)
     .map(p=>({name:p.name,slug:pageSlug(p),
-      href:p.url?String(p.url).replace(/^https?:\/\/[^\/]+/,""):("product/"+pageSlug(p)+"/index.html")}))
+      href:p.url?cleanUrl(p.url):("#shop")}))
     .filter(x=>x.slug&&!seen.has(x.slug)&&seen.add(x.slug));
 }
 /* Mock-up (Home_page_mock_up.pdf) calls for dark full-bleed photo tiles with the
@@ -228,7 +246,7 @@ function renderCats(){
     }
     const links=catPageLinks(c.id);
     const dir=links.length?`<details class="cat-links"><summary>Browse ${links.length} product page${links.length===1?"":"s"}</summary><ul>
-      <li><a href="${CATPAGE[c.id]||("category/"+c.id+"/index.html")}" class="cl-all">All ${c.name} \u2192</a></li>
+      <li><a href="${CATPAGE[c.id]||"#shop"}" class="cl-all">All ${c.name} \u2192</a></li>
       ${links.map(x=>`<li><a href="${x.href}">${x.name}</a></li>`).join("")}
     </ul></details>`:"";
     const baked=!!(mood&&mood.baked);
@@ -361,7 +379,7 @@ function updateCart(){
       <div class="det">
         <h4>${p.name}</h4>
         <div class="c">${shortName((CATEGORIES.find(c=>c.id===p.cat)||{}).name)}${l.opt?" · "+l.opt:""}</div>
-        ${p.url?`<a class="ci-buy" href="${p.url}" target="_blank" rel="noopener">Buy on greenhse.com &#8599;</a>`:""}
+        ${p.url?`<a class="ci-buy" href="${cleanUrl(p.url)}">View product page &#8594;</a>`:""}
         <div class="qty">
           <button data-q="${l.key}" data-d="-1" aria-label="Decrease">−</button>
           <span>${l.qty}</span>
@@ -540,7 +558,7 @@ function openModal(id){
       <h4>Installation guide</h4>
       ${guideHTML(p)}
     </div>
-    <a class="view-live" href="${p.url}" target="_blank" rel="noopener">View this product on greenhse.com \u2197</a>
+    <a class="view-live" href="${cleanUrl(p.url)}">View the full product page \u2192</a>
     ${relatedHTML(p)}`;
   demoWire($("#modalBody"));
   renderOptDetail();
@@ -626,7 +644,7 @@ function applyTemp(k){
 
 function renderBlog(){
   $("#blogGrid").innerHTML=BLOGS.map(b=>`
-    <a class="post" href="${b.url}" target="_blank" rel="noopener">
+    <a class="post" href="${cleanUrl(b.url)}">
       <div class="top"></div>
       <div class="pbody">
         <p class="eyebrow">Greenhse Journal</p>
@@ -3050,7 +3068,7 @@ function init(){
     if(!cart.length){toast("Your cart is empty");return;}
     var A=window.GreenhseAccount, C=window.GreenhseCheckout, M=window.GreenhseMagento;
     if(!A||!C||!M){ toast("Checkout is still loading — one moment"); return; }
-    if(!A.signedIn()){ location.href="/account.html?next=%2Fcheckout.html"; return; }
+    if(!A.signedIn()){ location.href="/account/?next=%2Fcheckout%2F"; return; }
     var btn=this; btn.disabled=true; var was=btn.textContent; btn.textContent="Preparing checkout…";
     var lines=[], unknown=[];
     cart.forEach(function(l){
@@ -3066,11 +3084,11 @@ function init(){
     C.syncCart(lines).then(function(r){
       var held=unknown.concat(r.rejected||[]);
       if(held.length) try{ sessionStorage.setItem("greenhse_cart_held", JSON.stringify(held)); }catch(e){}
-      location.href="/checkout.html";
+      location.href="/checkout/";
     }).catch(function(err){
       btn.disabled=false; btn.textContent=was;
       toast(err&&err.message==="SESSION_EXPIRED" ? "Please sign in again" : "Could not start checkout — please try again");
-      if(err&&err.message==="SESSION_EXPIRED") location.href="/account.html?next=%2Fcheckout.html";
+      if(err&&err.message==="SESSION_EXPIRED") location.href="/account/?next=%2Fcheckout%2F";
     });
   });
 
@@ -3972,7 +3990,8 @@ const TESTS=[
    CATEGORIES.forEach(c=>{expected+=catPageLinks(c.id).length;});
    $("#catGrid").querySelectorAll(".cat-links li a:not(.cl-all)").forEach(a=>{
      rendered++;
-     if(!/^\/(products|lighting-perth|automation)\/.+\.html$/i.test(a.getAttribute("href")))badHref++;
+     /* static-export URLs: every product page is a folder — /products/…/name/ */
+     if(!/^\/(products|lighting-perth|automation)\/.+\/$/i.test(a.getAttribute("href")))badHref++;
    });
    const allLinks=$("#catGrid").querySelectorAll(".cat-links .cl-all").length;
    return [cells.length===CATEGORIES.length&&rendered===expected&&badHref===0&&allLinks>0,
@@ -4126,10 +4145,10 @@ const TESTS=[
    return [missing===0, (PRODUCTS.length-missing)+"/"+PRODUCTS.length+" products have a step-by-step guide"];
  }],
  ["Installation help moved to its own page, and the nav points at it",()=>{
-   /* The index used to live on the homepage. It is now /installation.html, so
+   /* The index used to live on the homepage. It is now /installation/, so
       the homepage must NOT carry it and must link out to it instead. */
    const gone=document.getElementById("installIndex")===null;
-   const linked=$$('a[href="/installation.html"]').length>0;
+   const linked=$$('a[href="/installation/"],a[href="/installation.html"]').length>0;
    return [gone&&linked, gone?(linked?"moved and linked":"moved but nothing links to it")
                              :"install index still on the homepage"];
  }],

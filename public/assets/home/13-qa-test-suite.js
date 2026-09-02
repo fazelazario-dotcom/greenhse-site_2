@@ -622,7 +622,8 @@ const TESTS=[
    CATEGORIES.forEach(c=>{expected+=catPageLinks(c.id).length;});
    $("#catGrid").querySelectorAll(".cat-links li a:not(.cl-all)").forEach(a=>{
      rendered++;
-     if(!/^\/(products|lighting-perth|automation)\/.+\.html$/i.test(a.getAttribute("href")))badHref++;
+     /* static-export URLs: every product page is a folder — /products/…/name/ */
+     if(!/^\/(products|lighting-perth|automation)\/.+\/$/i.test(a.getAttribute("href")))badHref++;
    });
    const allLinks=$("#catGrid").querySelectorAll(".cat-links .cl-all").length;
    return [cells.length===CATEGORIES.length&&rendered===expected&&badHref===0&&allLinks>0,
@@ -776,10 +777,10 @@ const TESTS=[
    return [missing===0, (PRODUCTS.length-missing)+"/"+PRODUCTS.length+" products have a step-by-step guide"];
  }],
  ["Installation help moved to its own page, and the nav points at it",()=>{
-   /* The index used to live on the homepage. It is now /installation.html, so
+   /* The index used to live on the homepage. It is now /installation/, so
       the homepage must NOT carry it and must link out to it instead. */
    const gone=document.getElementById("installIndex")===null;
-   const linked=$$('a[href="/installation.html"]').length>0;
+   const linked=$$('a[href="/installation/"],a[href="/installation.html"]').length>0;
    return [gone&&linked, gone?(linked?"moved and linked":"moved but nothing links to it")
                              :"install index still on the homepage"];
  }],

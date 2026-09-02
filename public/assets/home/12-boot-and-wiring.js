@@ -273,7 +273,7 @@ function init(){
     if(!cart.length){toast("Your cart is empty");return;}
     var A=window.GreenhseAccount, C=window.GreenhseCheckout, M=window.GreenhseMagento;
     if(!A||!C||!M){ toast("Checkout is still loading — one moment"); return; }
-    if(!A.signedIn()){ location.href="/account.html?next=%2Fcheckout.html"; return; }
+    if(!A.signedIn()){ location.href="/account/?next=%2Fcheckout%2F"; return; }
     var btn=this; btn.disabled=true; var was=btn.textContent; btn.textContent="Preparing checkout…";
     var lines=[], unknown=[];
     cart.forEach(function(l){
@@ -289,11 +289,11 @@ function init(){
     C.syncCart(lines).then(function(r){
       var held=unknown.concat(r.rejected||[]);
       if(held.length) try{ sessionStorage.setItem("greenhse_cart_held", JSON.stringify(held)); }catch(e){}
-      location.href="/checkout.html";
+      location.href="/checkout/";
     }).catch(function(err){
       btn.disabled=false; btn.textContent=was;
       toast(err&&err.message==="SESSION_EXPIRED" ? "Please sign in again" : "Could not start checkout — please try again");
-      if(err&&err.message==="SESSION_EXPIRED") location.href="/account.html?next=%2Fcheckout.html";
+      if(err&&err.message==="SESSION_EXPIRED") location.href="/account/?next=%2Fcheckout%2F";
     });
   });
 

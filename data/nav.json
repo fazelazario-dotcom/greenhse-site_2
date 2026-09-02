@@ -95,7 +95,7 @@
    "label": "Resources"
   },
   {
-   "href": "/installation.html",
+   "href": "/installation/",
    "label": "Installation"
   },
   {
@@ -107,7 +107,7 @@
    "label": "Contact"
   }
  ],
- "megaFoot": "18 categories \u00b7 1000s of certified fittings",
+ "megaFoot": "18 categories · 1000s of certified fittings",
  "footer": [
   {
    "title": "Products",
@@ -158,7 +158,7 @@
      "label": "Energy & Battery"
     },
     {
-     "href": "/light-lab.html",
+     "href": "/light-lab/",
      "label": "Light Lab"
     },
     {
@@ -180,7 +180,7 @@
      "label": "Blog"
     },
     {
-     "href": "/about.html",
+     "href": "/about/",
      "label": "About us"
     },
     {

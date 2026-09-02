@@ -30,8 +30,8 @@ var LIGHTLAB_PROJECTS = [
     after: '/img/gallery/24vstrip-channels-new-2.webp',
     summary: 'Continuous strip in an aluminium channel follows the curve of the joinery, so the desk reads as one clean line of light instead of a row of spots.',
     fitted: [
-      { name: '24V Strip Channel Options', qty: 1, url: '/lighting-perth/led-strip-lights/24vstrip-channels-new.html' },
-      { name: '24V COB Strip, 9W/15W CCT', qty: 1, url: '/products/lighting-perth/led-strip-lights/st24v-9w-15w-cct-cob-1.html' }
+      { name: '24V Strip Channel Options', qty: 1, url: '/lighting-perth/led-strip-lights/24vstrip-channels-new/' },
+      { name: '24V COB Strip, 9W/15W CCT', qty: 1, url: '/products/lighting-perth/led-strip-lights/st24v-9w-15w-cct-cob-1/' }
     ],
     demo: true
   },
@@ -41,7 +41,7 @@ var LIGHTLAB_PROJECTS = [
     after: '/img/gallery/black-linear-modular-light-12.webp',
     summary: 'Suspended linear runs above the desk line give even light across the floor with no glare in the screens.',
     fitted: [
-      { name: 'Black Linear Modular Lighting System', qty: 8, url: '/lighting-perth/led-strip-lights/black-linear-modular-light.html' }
+      { name: 'Black Linear Modular Lighting System', qty: 8, url: '/lighting-perth/led-strip-lights/black-linear-modular-light/' }
     ],
     demo: true
   },
@@ -51,8 +51,8 @@ var LIGHTLAB_PROJECTS = [
     after: '/img/gallery/24vstrip-channels-new-7.webp',
     summary: 'Strip under the overheads puts light on the bench instead of on the cook’s shoulders — the fix for working in your own shadow.',
     fitted: [
-      { name: '24V SMD Strip', qty: 1, url: '/products/lighting-perth/led-strip-lights/st24v-smd-all.html' },
-      { name: '24V Transformer', qty: 1, url: '/products/lighting-perth/led-strip-lights/tr24v-all.html' }
+      { name: '24V SMD Strip', qty: 1, url: '/products/lighting-perth/led-strip-lights/st24v-smd-all/' },
+      { name: '24V Transformer', qty: 1, url: '/products/lighting-perth/led-strip-lights/tr24v-all/' }
     ],
     demo: true
   },
@@ -62,7 +62,7 @@ var LIGHTLAB_PROJECTS = [
     after: '/img/gallery/st24v-smd-all-3.webp',
     summary: 'Strip set into the stringer lights the tread, not the eye — safe to walk at night without lighting the whole void.',
     fitted: [
-      { name: '24V SMD Strip', qty: 1, url: '/products/lighting-perth/led-strip-lights/st24v-smd-all.html' }
+      { name: '24V SMD Strip', qty: 1, url: '/products/lighting-perth/led-strip-lights/st24v-smd-all/' }
     ],
     demo: true
   },
@@ -72,7 +72,7 @@ var LIGHTLAB_PROJECTS = [
     after: '/img/gallery/black-linear-modular-light-1.webp',
     summary: 'Continuous rows down the aisles keep product lit evenly to the bottom shelf.',
     fitted: [
-      { name: 'Black Linear Modular Lighting System', qty: 24, url: '/lighting-perth/led-strip-lights/black-linear-modular-light.html' }
+      { name: 'Black Linear Modular Lighting System', qty: 24, url: '/lighting-perth/led-strip-lights/black-linear-modular-light/' }
     ],
     demo: true
   },
@@ -82,8 +82,8 @@ var LIGHTLAB_PROJECTS = [
     after: '/img/gallery/st240v-rgb-2.webp',
     summary: 'RGB strip in the ceiling coffers — warm white for trade, colour for events, from the same fitting.',
     fitted: [
-      { name: '240V RGB LED Strip Light', qty: 1, url: '/products/lighting-perth/led-strip-lights/st240v-rgb.html' },
-      { name: 'RGB Controller', qty: 1, url: '/products/lighting-perth/led-strip-lights/rgb-ctrlr-037.html' }
+      { name: '240V RGB LED Strip Light', qty: 1, url: '/products/lighting-perth/led-strip-lights/st240v-rgb/' },
+      { name: 'RGB Controller', qty: 1, url: '/products/lighting-perth/led-strip-lights/rgb-ctrlr-037/' }
     ],
     demo: true
   }

@@ -36,7 +36,7 @@ function catPageLinks(cid){
   const seen=new Set();
   return PRODUCTS.filter(p=>p.cat===cid)
     .map(p=>({name:p.name,slug:pageSlug(p),
-      href:p.url?String(p.url).replace(/^https?:\/\/[^\/]+/,""):("product/"+pageSlug(p)+"/index.html")}))
+      href:p.url?cleanUrl(p.url):("#shop")}))
     .filter(x=>x.slug&&!seen.has(x.slug)&&seen.add(x.slug));
 }
 /* Mock-up (Home_page_mock_up.pdf) calls for dark full-bleed photo tiles with the
@@ -79,7 +79,7 @@ function renderCats(){
     }
     const links=catPageLinks(c.id);
     const dir=links.length?`<details class="cat-links"><summary>Browse ${links.length} product page${links.length===1?"":"s"}</summary><ul>
-      <li><a href="${CATPAGE[c.id]||("category/"+c.id+"/index.html")}" class="cl-all">All ${c.name} \u2192</a></li>
+      <li><a href="${CATPAGE[c.id]||"#shop"}" class="cl-all">All ${c.name} \u2192</a></li>
       ${links.map(x=>`<li><a href="${x.href}">${x.name}</a></li>`).join("")}
     </ul></details>`:"";
     const baked=!!(mood&&mood.baked);

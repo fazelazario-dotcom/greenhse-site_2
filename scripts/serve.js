@@ -53,6 +53,11 @@ http.createServer((req, res) => {
   if (p.endsWith('/')) p += 'index.html';
   let file = path.join(ROOT, p);
   if (!file.startsWith(ROOT)) { res.writeHead(403); return res.end(); }
+  // a folder URL without its trailing slash redirects to it, as Netlify does
+  if (!p.endsWith('/') && fs.existsSync(file) && fs.statSync(file).isDirectory()) {
+    res.writeHead(301, { location: p + '/' });
+    return res.end();
+  }
   if (!fs.existsSync(file) && fs.existsSync(file + '/index.html')) file += '/index.html';
   if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) {
     const nf = path.join(ROOT, '404.html');

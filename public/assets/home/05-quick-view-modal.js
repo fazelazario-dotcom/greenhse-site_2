@@ -151,7 +151,7 @@ function openModal(id){
       <h4>Installation guide</h4>
       ${guideHTML(p)}
     </div>
-    <a class="view-live" href="${p.url}" target="_blank" rel="noopener">View this product on greenhse.com \u2197</a>
+    <a class="view-live" href="${cleanUrl(p.url)}">View the full product page \u2192</a>
     ${relatedHTML(p)}`;
   demoWire($("#modalBody"));
   renderOptDetail();

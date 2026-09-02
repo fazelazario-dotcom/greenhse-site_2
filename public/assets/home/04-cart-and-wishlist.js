@@ -39,7 +39,7 @@ function updateCart(){
       <div class="det">
         <h4>${p.name}</h4>
         <div class="c">${shortName((CATEGORIES.find(c=>c.id===p.cat)||{}).name)}${l.opt?" · "+l.opt:""}</div>
-        ${p.url?`<a class="ci-buy" href="${p.url}" target="_blank" rel="noopener">Buy on greenhse.com &#8599;</a>`:""}
+        ${p.url?`<a class="ci-buy" href="${cleanUrl(p.url)}">View product page &#8594;</a>`:""}
         <div class="qty">
           <button data-q="${l.key}" data-d="-1" aria-label="Decrease">−</button>
           <span>${l.qty}</span>

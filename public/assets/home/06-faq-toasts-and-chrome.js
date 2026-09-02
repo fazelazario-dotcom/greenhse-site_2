@@ -15,7 +15,7 @@ function applyTemp(k){
 
 function renderBlog(){
   $("#blogGrid").innerHTML=BLOGS.map(b=>`
-    <a class="post" href="${b.url}" target="_blank" rel="noopener">
+    <a class="post" href="${cleanUrl(b.url)}">
       <div class="top"></div>
       <div class="pbody">
         <p class="eyebrow">Greenhse Journal</p>
