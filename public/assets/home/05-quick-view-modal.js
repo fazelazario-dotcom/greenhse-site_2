@@ -113,7 +113,9 @@ function openModal(id){
     <span class="cat-label">${catName}</span>
     <h2>${p.name}</h2>
     <div class="mprice">
-      <span class="price big">$<span id="modalPrice">${unit.toFixed(2)}</span></span>
+      ${p.options&&p.options.length
+        ? `<span class="price big">$<span id="modalPrice">${unit.toFixed(2)}</span></span>`
+        : `<span class="price big" data-sku="${p.id}"><span id="modalPrice" data-price-target>$${unit.toFixed(2)}</span></span>`}
       <span class="gstline">ex-GST &nbsp;·&nbsp; $<span id="modalGst">${gst(unit)}</span> inc GST</span>
     </div>
     <p class="desc">${p.desc||""}</p>

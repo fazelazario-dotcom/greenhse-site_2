@@ -20,7 +20,13 @@ const nextConfig = {
   // (price, stock, cart) is fetched client-side from Magento, exactly as the
   // static build did. So the whole site exports as static HTML and Netlify
   // serves it from the CDN - no server functions needed.
-  output: 'export',
+  //
+  // The export flag is set for BUILDS only. With it set in dev, Next 14's dev
+  // server refuses every page of the [...slug] catch-all (products, blog,
+  // account, checkout, policies) with a bogus "missing generateStaticParams"
+  // 500 — which is exactly the "only the homepage opens" symptom. Dev doesn't
+  // export anything, so it doesn't need the flag; the build still gets it.
+  ...(isDev ? {} : { output: 'export' }),
   trailingSlash: true,
   images: { unoptimized: true },
   // rewrites are a dev-server feature; the exported build gets the same

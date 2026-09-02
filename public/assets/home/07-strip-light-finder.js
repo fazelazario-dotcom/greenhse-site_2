@@ -769,5 +769,6 @@ function renderStrips(){
       ? '<div class="grid-more"><a class="btn-more" href="/products/lighting-perth/led-strip-lights/">See the full strip range — '+all.length+' products →</a></div>'
       : '');
   renderStripTuts();
+  repaintLive();
 }
 

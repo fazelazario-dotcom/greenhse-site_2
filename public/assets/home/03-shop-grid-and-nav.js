@@ -127,7 +127,7 @@ function cardHTML(p){
         <span class="cat-label">${catName}</span>
         <h3 data-view="${p.id}" style="cursor:pointer">${p.name}</h3>
         <div class="foot">
-          <span class="price">${p.options&&p.options.length?'<span class="from">from</span>':''}$${p.price.toFixed(2)}<span class="ex">ex-GST</span></span>
+          <span class="price" data-sku="${p.id}"><span data-price-target>${p.options&&p.options.length?'<span class="from">from</span>':''}$${p.price.toFixed(2)}</span><span class="ex">ex-GST</span></span>
           <button class="add" data-add="${p.id}">${p.options&&p.options.length?'Options':'Add +'}</button>
         </div>
       </div>
@@ -139,12 +139,12 @@ function renderShop(){
   const q=query.trim().toLowerCase();
   if(q){
     const list=filtered();
-    if(list.length){ host.innerHTML=`<div class="prod-grid">${list.map(cardHTML).join("")}</div>`; return; }
+    if(list.length){ host.innerHTML=`<div class="prod-grid">${list.map(cardHTML).join("")}</div>`; repaintLive(); return; }
     const sugg=["downlights","strip","highbay","sensors"].map(cid=>PRODUCTS.find(p=>p.cat===cid&&p.img)).filter(Boolean);
     host.innerHTML=`<div class="no-results">No fittings match "${query}". Try a product type (e.g. "downlight"), a spec (e.g. "IP65", "10W") or a colour ("tri-colour").</div>
       <div class="shop-hint" style="margin-top:18px">Popular right now:</div>
       <div class="prod-grid">${sugg.map(cardHTML).join("")}</div>`;
-    return;
+    repaintLive(); return;
   }
   if(activeCat==="all"){
     // compact default: a few popular picks; categories above are the navigator
@@ -152,7 +152,7 @@ function renderShop(){
     const feat=[]; heroCats.forEach(cid=>{const p=PRODUCTS.find(x=>x.cat===cid&&x.img); if(p)feat.push(p);});
     host.innerHTML='<div class="shop-hint">Popular picks shown below — tap a category above (with photos), use the filters, or search to see the full range.</div>'
       +'<div class="prod-grid">'+feat.map(cardHTML).join("")+'</div>';
-    return;
+    repaintLive(); return;
   }
   const c=CATEGORIES.find(x=>x.id===activeCat)||{name:"Products"};
   const items=PRODUCTS.filter(p=>p.cat===activeCat);
@@ -168,5 +168,6 @@ function renderShop(){
       <div class="prod-grid">${items.map(cardHTML).join("")}</div>
       ${moreBtn}
     </section>`;
+  repaintLive();
 }
 

@@ -85,6 +85,10 @@ const PdfSvg=(
 
 export default function Cat({ c, path }){
   const x=(path && extras[path]) || null;
+  /* Magento url_key for this category — the last real segment of its path.
+     catalog.js reads it off the section and fetches the LIVE product list
+     for the category from Magento GraphQL at page load. */
+  const urlKey=path ? path.replace(/\/index\.html$/,'').split('/').filter(Boolean).pop() : null;
   const sections=(c.sections||[]).filter(Boolean);
   const flatCards=!sections.length ? (c.cards||[]) : null;
   const hero=x?.hero || c.banner;
@@ -113,7 +117,7 @@ export default function Cat({ c, path }){
       <div className="page-intro"><div><h1>{c.h1}</h1>{c.intro && <p>{c.intro}</p>}</div></div>
     )}
 
-    <section className="range" id={c.rangeId||undefined}>
+    <section className="range" id={c.rangeId||undefined} data-live-category={urlKey||undefined}>
       <div className="container">
         <div className="range__head">
           <div className="range__copy">
@@ -210,5 +214,7 @@ export default function Cat({ c, path }){
 
     <Script src="/assets/sku-map.js" strategy="afterInteractive"/>
     <Script src="/assets/magento.js" strategy="afterInteractive"/>
+    <Script src="/assets/catalog-map.js" strategy="afterInteractive"/>
+    <Script src="/assets/catalog.js" strategy="afterInteractive"/>
   </div>);
 }

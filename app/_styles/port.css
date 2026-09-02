@@ -629,6 +629,9 @@ main.home+.site-footer{margin-top:0}
 .tpl .range__head--sub{margin:44px 0 20px}
 .tpl .range__title--sub{margin:2px 0 8px;font-size:max(22px,min(2.4vw,28px))}
 .tpl .range__note{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)}
+/* the live-catalogue proof line + live-rendered extras (catalog.js) */
+.tpl .range__live{margin:10px 0 0;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#1e7a3c}
+.tpl .range__section--live{margin-top:34px}
 .tpl a.card{color:inherit;text-decoration:none}
 .tpl .card:hover .card__title{color:var(--green)}
 .tpl .card .visual{position:absolute;inset:0}

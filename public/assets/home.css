@@ -1254,3 +1254,5 @@ body:not(.qa-on) .qa-fab,body:not(.qa-on) .qa{display:none!important}
 .grid-more{grid-column:1/-1;display:flex;justify-content:center;padding:6px 0 2px}
 .btn-more{display:inline-flex;align-items:center;gap:8px;background:var(--glow);color:#08210a;font-weight:600;font-size:14px;padding:12px 22px;border-radius:4px;transition:background .15s}
 .btn-more:hover{background:#00a800}
+/* the shop's live-pricing proof line — shown only after Magento answers */
+.live-badge{margin-top:8px;font-family:var(--mono,monospace);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#33d17a}

@@ -987,6 +987,7 @@ function renderDownlights(){
         ? '<div class="grid-more"><a class="btn-more" href="/products/lighting-perth/led-downlights-perth/">See all '+list.length+' downlights \u2192</a></div>'
         : '')
     : '<p class="dl-empty">Nothing online in that combination \u2014 call our Perth team on (08) 9297 2969 and we\u2019ll check the warehouse.</p>';
+  repaintLive();
   const help=$("#dlHelp");
   if(help){
     help.innerHTML=

@@ -8,7 +8,11 @@
 const findP=id=>PRODUCTS.find(p=>p.id===id);
 function addToCart(id,opt,price,qty){
   const p=findP(id);if(!p)return;
-  const unit=(price!=null)?price:p.price;
+  /* prefer the LIVE Magento price when the layer has already fetched it —
+     so the cart total agrees with what the card was repainted to show */
+  const g=window.GreenhseMagento;
+  const live=(price==null&&!opt&&g&&g.skuFor)?(g.cache||{})[g.skuFor(id)]:null;
+  const unit=(price!=null)?price:((live&&!live.grouped)?live.price:p.price);
   const key=lineKey(id,opt||null);
   const n=(qty&&qty>0)?qty:1;
   const line=cart.find(l=>l.key===key);

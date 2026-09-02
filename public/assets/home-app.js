@@ -49,6 +49,18 @@ function cleanUrl(u){
   return u+query+hash;
 }
 
+/* Ask the Magento layer (assets/magento.js) to repaint live prices over any
+   freshly-rendered cards. Called after every grid render; harmless when the
+   layer hasn't loaded yet — its own start() pass covers that case. */
+function repaintLive(){
+  if(window.GreenhseMagento){ try{ window.GreenhseMagento.paint(); }catch(e){} }
+}
+/* The shop's "Live pricing" line shows only once Magento has actually
+   answered — it is proof of a live backend, never decoration. */
+document.addEventListener("greenhse:prices",function(){
+  var b=document.getElementById("shopLive"); if(b) b.hidden=false;
+});
+
 /* ---------- DATA: categories (migrated from greenhse.com) ---------- */
 const CATIMG={"cats":{"batten":{"img":"/img/inline/3beca41f07d4.webp","alt":"Batten lights running down a car park ceiling"},"fans":{"img":"/img/inline/a2a5c307d6bc.webp","alt":"A black ceiling fan in a lit bedroom"},"ceiling":{"img":"/img/inline/489c2d891ebc.webp","alt":"Round oyster ceiling lights on a white ceiling"},"downlights":{"img":"/img/inline/55beb994e4c7.webp","alt":"Downlights through a living space overlooking a city sunset"},"emergency":{"img":"/img/inline/d5f3d9ce0893.webp","alt":"An illuminated green emergency exit sign"},"flood":{"img":"/img/inline/02e494bec76b.webp","alt":"Flood lights over a padel court at night"},"landscape":{"img":"/img/inline/7546f6ea1798.webp","alt":"Garden and step lights around a modern home at dusk"},"highbay":{"img":"/img/inline/288461ab5db3.webp","alt":"High bay lights across a warehouse roof structure"},"industrial":{"img":"/img/inline/45b4e6d7d38e.webp","alt":"Industrial wall lights above loading dock roller doors"},"outdoor":{"img":"/img/inline/2e672a025d64.webp","alt":"Wall lights washing the facade of a home at dusk"},"commercial":{"img":"/img/inline/4fe8dd785f6f.webp","alt":"Recessed panel lighting across an open-plan office"},"sensors":{"img":"/img/inline/d732692aaed2.webp","alt":"A white outdoor security sensor light on a wall"},"smart":{"img":"/img/inline/a61e6c46752e.webp","alt":"Smart home lighting controlled from a phone"},"star":{"img":"/img/inline/3cf39c604c4b.webp","alt":"A fibre-optic star light ceiling above a staircase"},"strip":{"img":"/img/inline/6cde843a7098.webp","alt":"A reel of LED strip light glowing teal"},"switches":{"img":"/img/inline/f0b704deba30.webp","alt":"A hand pressing a black wall switch plate"},"track":{"img":"/img/inline/b44074527d0d.webp","alt":"Track and linear lights over a retail clothing floor"},"transformers":{"img":"/img/inline/cd5b2515c9bb.webp","alt":"A row of low-voltage transformer enclosures"}},"titleInArtwork":true,"ratio":"2067/827","noPhoto":[],"source":"Catalogue_images.pdf (Lazar, 4 Aug)"};
 const COBIMG={"products":["ST24V-LONGRUN-IP68"],"img":{"reel":"/img/inline/44da87cec139.webp","macro":"/img/inline/3741051237e6.webp","lit":"/img/inline/be2d3be98225.webp","dims":"/img/inline/113c940ae43f.webp","wiring":"/img/inline/a0d09fd6b772.webp"},"specs":[["Model","SELS-COBX480-24-YCC"],["LED density","480 LEDs per metre \u2014 dot-free COB"],["Power","7.5W per metre"],["Voltage","24V DC"],["Colour", "Fixed colour, chosen at order \u2014 3000K or 4000K on IP20, 3000K only on IP67"],["Brightness","675\u2013712 lm per metre depending on the colour setting (\u00b110%)"],["Colour accuracy","CRI >90"],["Beam angle","180\u00b0"],["Board","8mm wide white PCB \u00b7 3oz double layer, constant current"],["Max run","20m fed from one end \u00b7 40m fed from both ends \u2014 no voltage drop"],["Cutting","Every 50mm, between the soldering pads only"],["Minimum bend","50mm diameter \u2014 never tighter than 40mm"],["Leads","150mm of 20AWG red/black wire on both ends"],["Working temperature","-40\u00b0C to +45\u00b0C"],["Life span","50,000 hours"],["Warranty","3 years"],["Supplied as","20m roll (other lengths can be cut to order)"]],"ipGrades":[["IP20","8 mm","Bare strip on 3M adhesive backing. Indoor, dry areas only."],["IP67","10 \u00d7 4 mm","Silicon injected. Sealed against rain and splashing \u2014 not for submersion."]],"sold":["IP20","IP67"],"flags":["REVERSED (Lazar, this session): now listed as IP20 and IP67 silicon injected, selectable. This overturns the 30 Jul decision that it was sold as IP68 only with the IP20 entry deleted. Worth double-checking against what is actually on the shelf before this goes live.","REVERSED (Lazar, this session): now listed as fixed colours chosen at order (3000K or 4000K), not tri-colour. This overturns the 30 Jul decision that it IS a tri-colour strip switched from the remote. These two cannot both be right.","OPEN - the supplier datasheet prints the third colour as 6000K; Lazar says the strip we sell is 3000K / 4000K / 5500K. The site follows Lazar. Worth confirming with the supplier so the datasheet and the website agree.","WATERMARKS: all five photos Lazar sent on 30 Jul carry an 'SE.Lighting' watermark, same reason cob_lit.png was originally held back. They are now bundled because Lazar asked for them - but they advertise the supplier on a Greenhse page. Clean versions would be better.","MISMATCH: the photos show the BARE strip on 3M adhesive backing - that is the unsealed build. We sell this strip as IP20 bare on 3M adhesive, or IP67 silicon injected (10 x 4mm). Captions say so rather than pretending otherwise.","MISMATCH: the board markings in the reel photos read 'FOB-2P8S 320D 8mm', i.e. 320 LEDs/m, while the datasheet spec we publish says 480 LEDs/m. One of the two is wrong - needs checking with SE.Lighting before the 480 figure is trusted.","Price ($16.00/m ex GST) is ours - it is not on the supplier datasheet."]};
@@ -294,7 +306,7 @@ function cardHTML(p){
         <span class="cat-label">${catName}</span>
         <h3 data-view="${p.id}" style="cursor:pointer">${p.name}</h3>
         <div class="foot">
-          <span class="price">${p.options&&p.options.length?'<span class="from">from</span>':''}$${p.price.toFixed(2)}<span class="ex">ex-GST</span></span>
+          <span class="price" data-sku="${p.id}"><span data-price-target>${p.options&&p.options.length?'<span class="from">from</span>':''}$${p.price.toFixed(2)}</span><span class="ex">ex-GST</span></span>
           <button class="add" data-add="${p.id}">${p.options&&p.options.length?'Options':'Add +'}</button>
         </div>
       </div>
@@ -306,12 +318,12 @@ function renderShop(){
   const q=query.trim().toLowerCase();
   if(q){
     const list=filtered();
-    if(list.length){ host.innerHTML=`<div class="prod-grid">${list.map(cardHTML).join("")}</div>`; return; }
+    if(list.length){ host.innerHTML=`<div class="prod-grid">${list.map(cardHTML).join("")}</div>`; repaintLive(); return; }
     const sugg=["downlights","strip","highbay","sensors"].map(cid=>PRODUCTS.find(p=>p.cat===cid&&p.img)).filter(Boolean);
     host.innerHTML=`<div class="no-results">No fittings match "${query}". Try a product type (e.g. "downlight"), a spec (e.g. "IP65", "10W") or a colour ("tri-colour").</div>
       <div class="shop-hint" style="margin-top:18px">Popular right now:</div>
       <div class="prod-grid">${sugg.map(cardHTML).join("")}</div>`;
-    return;
+    repaintLive(); return;
   }
   if(activeCat==="all"){
     // compact default: a few popular picks; categories above are the navigator
@@ -319,7 +331,7 @@ function renderShop(){
     const feat=[]; heroCats.forEach(cid=>{const p=PRODUCTS.find(x=>x.cat===cid&&x.img); if(p)feat.push(p);});
     host.innerHTML='<div class="shop-hint">Popular picks shown below — tap a category above (with photos), use the filters, or search to see the full range.</div>'
       +'<div class="prod-grid">'+feat.map(cardHTML).join("")+'</div>';
-    return;
+    repaintLive(); return;
   }
   const c=CATEGORIES.find(x=>x.id===activeCat)||{name:"Products"};
   const items=PRODUCTS.filter(p=>p.cat===activeCat);
@@ -335,6 +347,7 @@ function renderShop(){
       <div class="prod-grid">${items.map(cardHTML).join("")}</div>
       ${moreBtn}
     </section>`;
+  repaintLive();
 }
 
 
@@ -348,7 +361,11 @@ function renderShop(){
 const findP=id=>PRODUCTS.find(p=>p.id===id);
 function addToCart(id,opt,price,qty){
   const p=findP(id);if(!p)return;
-  const unit=(price!=null)?price:p.price;
+  /* prefer the LIVE Magento price when the layer has already fetched it —
+     so the cart total agrees with what the card was repainted to show */
+  const g=window.GreenhseMagento;
+  const live=(price==null&&!opt&&g&&g.skuFor)?(g.cache||{})[g.skuFor(id)]:null;
+  const unit=(price!=null)?price:((live&&!live.grouped)?live.price:p.price);
   const key=lineKey(id,opt||null);
   const n=(qty&&qty>0)?qty:1;
   const line=cart.find(l=>l.key===key);
@@ -520,7 +537,9 @@ function openModal(id){
     <span class="cat-label">${catName}</span>
     <h2>${p.name}</h2>
     <div class="mprice">
-      <span class="price big">$<span id="modalPrice">${unit.toFixed(2)}</span></span>
+      ${p.options&&p.options.length
+        ? `<span class="price big">$<span id="modalPrice">${unit.toFixed(2)}</span></span>`
+        : `<span class="price big" data-sku="${p.id}"><span id="modalPrice" data-price-target>$${unit.toFixed(2)}</span></span>`}
       <span class="gstline">ex-GST &nbsp;·&nbsp; $<span id="modalGst">${gst(unit)}</span> inc GST</span>
     </div>
     <p class="desc">${p.desc||""}</p>
@@ -1478,6 +1497,7 @@ function renderStrips(){
       ? '<div class="grid-more"><a class="btn-more" href="/products/lighting-perth/led-strip-lights/">See the full strip range — '+all.length+' products →</a></div>'
       : '');
   renderStripTuts();
+  repaintLive();
 }
 
 
@@ -2470,6 +2490,7 @@ function renderDownlights(){
         ? '<div class="grid-more"><a class="btn-more" href="/products/lighting-perth/led-downlights-perth/">See all '+list.length+' downlights \u2192</a></div>'
         : '')
     : '<p class="dl-empty">Nothing online in that combination \u2014 call our Perth team on (08) 9297 2969 and we\u2019ll check the warehouse.</p>';
+  repaintLive();
   const help=$("#dlHelp");
   if(help){
     help.innerHTML=

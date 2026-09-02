@@ -52,3 +52,8 @@ one file per feature, all listed.
 
 - Homepage: open `/?qa=1` → QA tab → Run tests (baseline **110/116**).
 - Layout planner: open `/layout.html?qa=1` (baseline **363/379**).
+
+## Seeing the backend on a category page
+
+Open any category page (e.g. `/products/lighting-perth/led-downlights-perth/`) with DevTools → Network open: you'll see the `/mag/graphql` POST calls to Magento. On the page itself, a green "✓ Live catalogue — N products synced from our stock system" line renders ONLY from a successful live API response, and products that exist in Magento but not in the pre-built page appear under "More in this category — live from Magento", rendered entirely from the API. Prices on the cards are also repainted live (e.g. a card baked at $6.00 shows the live $5.50). The homepage works the same way: the Browse & Build shop grid, the downlight and strip grids and the quick-view popup all repaint their prices from the API, and a green "✓ Live pricing" line appears under the shop heading only once Magento has answered.
+
