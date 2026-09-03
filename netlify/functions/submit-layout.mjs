@@ -62,6 +62,32 @@ export default async (req) => {
   await store.setJSON('plans/' + id, payload);
   await store.setJSON('meta/' + id, meta);
 
+  /* Email notification, via Netlify Forms: post a "plan-submission" form entry
+     on our own site. Netlify's form notification (configured once in the UI:
+     Forms → plan-submission → Notifications → add email) then emails the team
+     with the customer's details and direct links to the plan. Non-fatal — a
+     failed notification never loses the stored plan. */
+  try {
+    const origin = new URL(req.url).origin;
+    const body = new URLSearchParams({
+      'form-name': 'plan-submission',
+      name: meta.name,
+      email: meta.email,
+      phone: meta.phone,
+      suburb: meta.suburb,
+      project: meta.project,
+      fittings: String(meta.fittings),
+      total_inc_gst: '$' + (+meta.totalIncGst || 0).toFixed(2),
+      view_in_admin: origin + '/layout-admin/?open=' + id,
+      open_in_planner: origin + '/layout-app/?load=' + id,
+    });
+    await fetch(origin + '/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    });
+  } catch { /* notification is best-effort */ }
+
   return json({ ok: true, id });
 };
 

@@ -91,3 +91,31 @@ expected. To exercise the real flow locally use `npx netlify dev`
 The customer never needs an account: name + email or phone is all the Send
 form asks for. Oversized plans are handled — the app shrinks the plan photo
 and image before sending so submissions stay under the function's ~6 MB limit.
+
+## Layout app usage stats + email when a plan arrives
+
+**Usage stats (automatic):** the layout app sends an anonymous usage beacon —
+sessions, how many lights/rooms people place, PDF/PNG/print clicks, sends.
+No names and no plan content are collected; staff loads (`?load=`) and QA
+runs (`?qa=1`) are excluded. The dashboard sits at the top of
+`/layout-admin/`: visitors, sessions, plans sent and PDFs for the last
+7 days, plus a daily breakdown and a "what they did" list of recent
+sessions. Data is stored in Netlify Blobs (store `usage`), function
+`netlify/functions/track.mjs`.
+
+**Email notification (one-time setup on Netlify):** when a customer sends a
+plan, the submit function also files a Netlify Forms entry
+("plan-submission") with the customer's details and two direct links —
+"view in admin" (opens that plan's details) and "open in planner" (loads it
+for editing). To get that as an email:
+
+1. Netlify → your project → **Forms** → turn ON **Enable form detection**.
+2. Trigger a deploy (or push) so Netlify detects the `plan-submission` form.
+3. Netlify → Forms → **plan-submission** → **Notifications** (Settings & 
+   usage) → **Add notification → Email notification** → enter the email 
+   address that should receive new-plan alerts.
+
+From then on every customer send = one email with the links. The free tier
+covers 100 form submissions a month — plenty for plan sends. If the email
+ever fails, nothing is lost: the plan is already stored and visible in
+/layout-admin/.
