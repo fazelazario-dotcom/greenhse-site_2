@@ -1,3 +1,9 @@
+# ---- The three former .html pages now live at folder routes ----
+/layout.html             /layout-app/         301!
+/layout/                 /layout-app/         301
+/layout-standalone.html  /layout-standalone/  301!
+/layout-admin.html       /layout-admin/       301!
+
 # ---- Magento proxies (status 200 = server-side proxy, avoids CORS) ----
 /mag/*  https://greenhse.com/:splat  200
 /docs/*  https://greenhse.com/media/sparsh/product_attachment/:splat  200

@@ -4263,7 +4263,7 @@ const TESTS=[
    return [o&&c,"Drawer + scrim toggle"];
  }],
  ["Key external links wired",()=>{
-   const layout=$$('a[href*="/layout.html"]').length>0;
+   const layout=$$('a[href*="/layout-app/"]').length>0;
    const charge=$$('a[href*="greencharge.com.au"]').length>0;
    return [layout&&charge,"Layout App + Green Charge links present"];
  }],

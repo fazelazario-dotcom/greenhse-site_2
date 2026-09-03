@@ -8,11 +8,13 @@
     "build": "next build",
     "start": "next start",
     "build:home": "node scripts/build-home-app.js",
-    "preview": "node scripts/serve.js"
+    "preview": "node scripts/serve.js",
+    "postbuild": "node scripts/make-folder-routes.js"
   },
   "dependencies": {
     "next": "14.2.15",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "@netlify/blobs": "^11.0.3"
   }
 }

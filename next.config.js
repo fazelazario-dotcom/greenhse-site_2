@@ -11,6 +11,15 @@ const MAGENTO_PROXIES = [
   { source: '/mag/:path*',   destination: 'https://greenhse.com/:path*' },
   { source: '/docs/:path*',  destination: 'https://greenhse.com/media/sparsh/product_attachment/:path*' },
   { source: '/brand/:path*', destination: 'https://greenhse.com/media/wysiwyg/:path*' },
+  // Folder routes for the three real .html pages. The build gets these from
+  // scripts/make-folder-routes.js (postbuild); dev serves the same content
+  // through rewrites so /layout/ works identically in every run mode.
+  { source: '/layout-app',        destination: '/layout.html' },
+  { source: '/layout-app/',       destination: '/layout.html' },
+  { source: '/layout-standalone', destination: '/layout-standalone.html' },
+  { source: '/layout-standalone/',destination: '/layout-standalone.html' },
+  { source: '/layout-admin',      destination: '/layout-admin.html' },
+  { source: '/layout-admin/',     destination: '/layout-admin.html' },
 ];
 
 const isDev = process.env.NODE_ENV !== 'production';

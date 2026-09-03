@@ -59,7 +59,7 @@ export function Header(){
               </div>
               <div className="mega__foot">
                 <span className="mega__note">{nav.megaFoot}</span>
-                <a className="mega__cta" href="/layout.html">Plan your layout ↗</a>
+                <a className="mega__cta" href="/layout-app/">Plan your layout ↗</a>
                 <a className="mega__cta" href="/categories/">Browse the full range →</a>
               </div>
             </div>
@@ -84,7 +84,7 @@ export function Header(){
         {nav.mega.map(x=><a key={x.href} className="drawer__sublink" href={mapHref(x.href)}>{x.label}</a>)}
         <span className="drawer__heading">Explore</span>
         {nav.main.map(x=><a key={x.href+x.label} className="drawer__link" href={mapHref(x.href)}>{x.label}</a>)}
-        <a className="drawer__link" href="/layout.html">Layout planner</a>
+        <a className="drawer__link" href="/layout-app/">Layout planner</a>
         <a className="drawer__link" href="/account/">Account</a>
       </nav>
     </div>

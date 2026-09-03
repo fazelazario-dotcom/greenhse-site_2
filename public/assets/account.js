@@ -267,3 +267,29 @@
     setCartId: setCartId
   };
 })();
+
+/* ------------------------------------------------------------
+   Live-backend proof line. Renders ONLY from a successful live
+   Magento response, so a static copy of this page can never show
+   it - the same pattern as the green "Live catalogue" line on
+   category pages and "Live pricing" on the homepage.
+   ------------------------------------------------------------ */
+(function(){
+  function boot(){
+    var h=document.querySelector('main h1')||document.querySelector('h1');
+    if(!h||document.querySelector('[data-live-proof]')) return;
+    fetch('/mag/graphql',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query:'{storeConfig{store_code}}'})})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){
+        if(!j||!j.data||!j.data.storeConfig) return;
+        var d=document.createElement('div');
+        d.setAttribute('data-live-proof','1');
+        d.style.cssText='color:#1E7A46;font-size:13px;font-weight:600;margin:6px 0 14px';
+        d.textContent='\u2713 Connected live to the Greenhse store API';
+        h.parentNode.insertBefore(d,h.nextSibling);
+      }).catch(function(){});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+})();

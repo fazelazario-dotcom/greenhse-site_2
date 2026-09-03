@@ -108,7 +108,7 @@ export default function Cat({ c, path }){
           {(x?.lead||c.intro) && <p className="hero__lead">{x?.lead||c.intro}</p>}
           <div className="hero__actions">
             {finderHref && <a href={finderHref} className="hero__btn hero__btn--primary">{c.finder.cta||'Open the finder'} <span aria-hidden="true">→</span></a>}
-            <a href="/layout.html" className="hero__btn hero__btn--ghost">Lighting Layout App <span aria-hidden="true">→</span></a>
+            <a href="/layout-app/" className="hero__btn hero__btn--ghost">Lighting Layout App <span aria-hidden="true">→</span></a>
           </div>
         </div>
       </section>

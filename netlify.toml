@@ -6,6 +6,14 @@
   command = "npm run build"
   publish = "out"
 
+# Layout-app submissions: two serverless functions store customer plans in
+# Netlify Blobs (POST /api/submit-layout) and serve them back to staff
+# (GET/DELETE /api/layouts, guarded by the ADMIN_KEY environment variable —
+# set it in Site configuration → Environment variables). The staff view is
+# /layout-admin.html on the deployed site.
+[functions]
+  directory = "netlify/functions"
+
 [[headers]]
   for = "/img/*"
   [headers.values]

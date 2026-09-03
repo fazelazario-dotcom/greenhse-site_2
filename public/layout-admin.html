@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Layout submissions — Greenhse (staff)</title>
+<style>
+  :root{
+    --bg:#F6F7F5; --card:#fff; --ink:#15201A; --mut:#5C6B62;
+    --line:#E2E7E2; --green:#1E7A46; --green-d:#155C34; --warn:#B4552D;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:14px/1.5 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  header{background:#fff;border-bottom:1px solid var(--line);
+         padding:14px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header h1{font-size:17px;margin:0;font-weight:700}
+  header .sub{color:var(--mut);font-size:12.5px}
+  header .grow{flex:1}
+  .btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;
+       padding:7px 13px;font:600 13px/1 inherit;cursor:pointer}
+  .btn:hover{border-color:#c9d2c9}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:var(--green-d)}
+  .btn.danger{color:var(--warn)}
+  main{max-width:1060px;margin:0 auto;padding:22px}
+  /* key gate */
+  #gate{max-width:420px;margin:70px auto;background:var(--card);border:1px solid var(--line);
+        border-radius:14px;padding:28px}
+  #gate h2{margin:0 0 6px;font-size:18px}
+  #gate p{color:var(--mut);margin:0 0 16px}
+  #gate input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+              font:inherit;margin-bottom:12px}
+  #gate .err{color:var(--warn);font-size:13px;margin-top:10px;min-height:18px}
+  /* list */
+  #list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+        display:flex;flex-direction:column}
+  .card .shot{height:150px;background:#EDEFEA;display:flex;align-items:center;justify-content:center;
+              border-bottom:1px solid var(--line)}
+  .card .shot img{max-width:100%;max-height:100%;display:block}
+  .card .shot span{color:var(--mut);font-size:12px}
+  .card .body{padding:12px 14px;flex:1}
+  .card h3{margin:0 0 2px;font-size:15px}
+  .card .proj{color:var(--green-d);font-weight:600;font-size:13px}
+  .card .meta{color:var(--mut);font-size:12.5px;margin-top:6px}
+  .card .nums{margin-top:8px;font-size:13px}
+  .card .nums b{font-size:14px}
+  .card .acts{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .card .acts .btn{padding:6px 10px;font-size:12.5px}
+  #empty,#loading{color:var(--mut);text-align:center;padding:60px 0}
+  /* detail modal */
+  #modal{position:fixed;inset:0;background:rgba(10,16,12,.55);display:none;
+         align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto;z-index:20}
+  #modal.open{display:flex}
+  #modal .box{background:#fff;border-radius:14px;max-width:860px;width:100%;padding:22px}
+  #modal .box h2{margin:0 0 4px;font-size:18px}
+  #modal .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;margin:14px 0;font-size:13.5px}
+  #modal .grid b{color:var(--mut);font-weight:600;display:block;font-size:11.5px;
+                 text-transform:uppercase;letter-spacing:.04em}
+  #modal img.plan{width:100%;border:1px solid var(--line);border-radius:8px;margin:10px 0}
+  #modal table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+  #modal th,#modal td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+  #modal td.num,#modal th.num{text-align:right}
+  #modal .acts{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .note{background:#EDF5EF;border:1px solid #CFE4D5;border-radius:8px;padding:10px 12px;
+        color:#204A32;font-size:12.5px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Layout submissions</h1>
+  <span class="sub">Customer plans sent from the layout app</span>
+  <span class="grow"></span>
+  <button class="btn" id="refresh" hidden>Refresh</button>
+  <button class="btn" id="signout" hidden>Sign out</button>
+</header>
+<main>
+  <div id="gate">
+    <h2>Staff access</h2>
+    <p>Enter the admin key to view submitted layouts.</p>
+    <input id="key" type="password" placeholder="Admin key" autocomplete="off">
+    <button class="btn pri" id="enter" style="width:100%">View submissions</button>
+    <div class="err" id="gate-err"></div>
+  </div>
+  <div id="app" hidden>
+    <div class="note">Each card is a plan a customer sent in. <b>Open in planner</b> loads it
+      into the layout app so you can check and edit it before install. <b>.ghlayout</b> downloads
+      the same plan as a file the planner's Open button reads.</div>
+    <div id="loading">Loading…</div>
+    <div id="empty" hidden>No submissions yet. They appear here the moment a customer hits Send in the planner.</div>
+    <div id="list"></div>
+  </div>
+</main>
+
+<div id="modal"><div class="box" id="modal-box"></div></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s);};
+var KEY_LS='greenhse_admin_key';
+var key=null, plansCache={};
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function money(n){return '$'+(+n||0).toFixed(2);}
+function when(iso){
+  try{return new Date(iso).toLocaleString('en-AU',
+    {timeZone:'Australia/Perth',day:'numeric',month:'short',year:'numeric',
+     hour:'numeric',minute:'2-digit'});}catch(e){return iso||'';}
+}
+function api(path,opts){
+  opts=opts||{};opts.headers=opts.headers||{};
+  opts.headers['x-admin-key']=key;
+  return fetch(path,opts).then(function(r){
+    if(r.status===401) throw {auth:true};
+    if(!r.ok) throw new Error(r.status);
+    return r.json();
+  });
+}
+
+/* ---------- key gate ---------- */
+function tryEnter(k){
+  key=k;
+  api('/api/layouts').then(function(res){
+    try{localStorage.setItem(KEY_LS,key);}catch(e){}
+    $('#gate').hidden=true;$('#app').hidden=false;
+    $('#refresh').hidden=false;$('#signout').hidden=false;
+    render(res.plans||[]);
+  }).catch(function(e){
+    key=null;
+    $('#gate-err').textContent=e&&e.auth?
+      'That key was not accepted.':
+      'Could not reach the submissions store. This page works on the Netlify deploy, not on a local copy.';
+  });
+}
+$('#enter').onclick=function(){var k=$('#key').value.trim();if(k)tryEnter(k);};
+$('#key').addEventListener('keydown',function(e){if(e.key==='Enter')$('#enter').click();});
+$('#signout').onclick=function(){
+  try{localStorage.removeItem(KEY_LS);}catch(e){}
+  location.reload();
+};
+$('#refresh').onclick=function(){load();};
+
+function load(){
+  $('#loading').hidden=false;$('#empty').hidden=true;$('#list').innerHTML='';
+  api('/api/layouts').then(function(res){render(res.plans||[]);})
+    .catch(function(){$('#loading').textContent='Could not load submissions.';});
+}
+
+/* ---------- list ---------- */
+function render(plans){
+  $('#loading').hidden=true;
+  var list=$('#list');list.innerHTML='';
+  if(!plans.length){$('#empty').hidden=false;return;}
+  plans.forEach(function(p){
+    var card=document.createElement('div');card.className='card';
+    card.innerHTML=
+      '<div class="shot">'+(p.thumb?'<img src="'+p.thumb+'" alt="Plan preview">':'<span>No preview</span>')+'</div>'+
+      '<div class="body">'+
+        '<h3>'+esc(p.name)+'</h3>'+
+        '<div class="proj">'+esc(p.project||'Untitled plan')+'</div>'+
+        '<div class="meta">'+esc(when(p.submittedAt))+
+          (p.suburb?' · '+esc(p.suburb):'')+(p.jobType?' · '+esc(p.jobType):'')+'</div>'+
+        '<div class="meta">'+esc(p.email||'')+(p.email&&p.phone?' · ':'')+esc(p.phone||'')+'</div>'+
+        '<div class="nums">'+(p.fittings||0)+' fittings · <b>'+money(p.totalIncGst)+'</b> inc GST</div>'+
+      '</div>'+
+      '<div class="acts">'+
+        '<button class="btn pri" data-act="open">Open in planner</button>'+
+        '<button class="btn" data-act="view">Details</button>'+
+        '<button class="btn" data-act="gh">.ghlayout</button>'+
+        '<button class="btn danger" data-act="del">Delete</button>'+
+      '</div>';
+    card.querySelector('[data-act=open]').onclick=function(){
+      window.open('/layout-app/?load='+encodeURIComponent(p.id),'_blank');
+    };
+    card.querySelector('[data-act=view]').onclick=function(){openDetail(p);};
+    card.querySelector('[data-act=gh]').onclick=function(){downloadGh(p);};
+    card.querySelector('[data-act=del]').onclick=function(){
+      if(!window.confirm('Delete the submission from '+p.name+'? This cannot be undone.'))return;
+      api('/api/layouts?id='+encodeURIComponent(p.id),{method:'DELETE'})
+        .then(load)
+        .catch(function(){window.alert('Delete failed.');});
+    };
+    list.appendChild(card);
+  });
+}
+
+function fullPlan(p){
+  if(plansCache[p.id]) return Promise.resolve(plansCache[p.id]);
+  return api('/api/layouts?id='+encodeURIComponent(p.id)).then(function(full){
+    plansCache[p.id]=full;return full;
+  });
+}
+
+function downloadGh(p){
+  fullPlan(p).then(function(full){
+    if(!full.planData){window.alert('This submission has no editable plan attached.');return;}
+    var name=(full.planData.name||p.project||'plan').replace(/[^\w\- ]+/g,'')||'plan';
+    var blob=new Blob([JSON.stringify(full.planData)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download=name+'.ghlayout';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},4000);
+  }).catch(function(){window.alert('Could not fetch that plan.');});
+}
+
+/* ---------- detail modal ---------- */
+function openDetail(p){
+  var box=$('#modal-box');
+  box.innerHTML='<h2>'+esc(p.name)+' — '+esc(p.project||'Untitled plan')+'</h2>'+
+    '<div class="meta" style="color:var(--mut)">Loading the full submission…</div>';
+  $('#modal').classList.add('open');
+  fullPlan(p).then(function(full){
+    var c=full.customer||{}, s=full.schedule||{lines:[]};
+    var rows=(s.lines||[]).map(function(l){
+      return '<tr><td>'+esc(l.code)+'</td><td>'+esc(l.name)+'</td>'+
+             '<td class="num">'+l.qty+'</td><td class="num">'+money(l.unitExGst)+'</td>'+
+             '<td class="num">'+money(l.lineExGst)+'</td></tr>';
+    }).join('');
+    box.innerHTML=
+      '<h2>'+esc(c.name)+' — '+esc((full.project&&full.project.name)||'Untitled plan')+'</h2>'+
+      '<div style="color:var(--mut);font-size:12.5px">'+esc(when(full.submittedAt))+'</div>'+
+      '<div class="grid">'+
+        '<div><b>Email</b>'+esc(c.email||'—')+'</div>'+
+        '<div><b>Phone</b>'+esc(c.phone||'—')+'</div>'+
+        '<div><b>Suburb</b>'+esc(c.suburb||'—')+'</div>'+
+        '<div><b>Job type</b>'+esc(c.jobType||'—')+'</div>'+
+        (c.notes?'<div style="grid-column:1/-1"><b>Notes</b>'+esc(c.notes)+'</div>':'')+
+      '</div>'+
+      (full.planPng?'<img class="plan" src="'+full.planPng+'" alt="Marked-up plan">':'')+
+      '<table><tr><th>Code</th><th>Product</th><th class="num">Qty</th>'+
+        '<th class="num">Unit ex</th><th class="num">Line ex</th></tr>'+rows+
+        '<tr><td colspan="4" class="num"><b>Total inc GST</b></td>'+
+        '<td class="num"><b>'+money(s.totalIncGst)+'</b></td></tr></table>'+
+      '<div class="acts">'+
+        '<button class="btn pri" id="m-open">Open in planner</button>'+
+        '<button class="btn" id="m-gh">Download .ghlayout</button>'+
+        '<button class="btn" id="m-close">Close</button>'+
+      '</div>';
+    $('#m-open').onclick=function(){window.open('/layout-app/?load='+encodeURIComponent(p.id),'_blank');};
+    $('#m-gh').onclick=function(){downloadGh(p);};
+    $('#m-close').onclick=closeModal;
+  }).catch(function(){
+    box.innerHTML='<h2>Could not load</h2><p>That submission would not load. Try Refresh.</p>'+
+      '<div class="acts"><button class="btn" id="m-close">Close</button></div>';
+    $('#m-close').onclick=closeModal;
+  });
+}
+function closeModal(){$('#modal').classList.remove('open');}
+$('#modal').onclick=function(e){if(e.target===this)closeModal();};
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+
+/* ---------- boot ---------- */
+var saved=null;
+try{saved=localStorage.getItem(KEY_LS);}catch(e){}
+if(saved) tryEnter(saved);
+})();
+</script>
+</body>
+</html>

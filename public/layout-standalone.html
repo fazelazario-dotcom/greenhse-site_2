@@ -883,7 +883,7 @@ img{image-rendering:-webkit-optimize-contrast}
   </a>
   <input class="proj" id="projname" value="Untitled plan" aria-label="Project name" maxlength="60">
   <span class="spacer"></span>
-  <button type="button" class="hbtn" id="btn-save" title="Download a .ghlayout file you can reopen later">
+  <button type="button" class="hbtn" id="btn-save" title="Download the plan and light summary as a PDF">
     <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><span class="lbl">Save</span>
   </button>
   <button type="button" class="hbtn" id="btn-open" title="Reopen a saved layout">Open</button>
@@ -4444,6 +4444,12 @@ function composePNG(cb){
       '.fx-ring{fill:none;stroke:#00c400;stroke-width:2}'+
       '</style>';
     clone.insertAdjacentHTML('afterbegin',css);
+    /* Exports are a marking-up plan: the plan and the lights, nothing else.
+       Room boxes and their label chips are working aids for the screen (the
+       chip backgrounds also carry no inline style here, so they would render
+       as solid black rectangles) - both are stripped from the exported copy. */
+    Array.prototype.slice.call(clone.querySelectorAll('.room-rect,.room-chip,.room-lab,.guide'))
+      .forEach(function(n){if(n.parentNode)n.parentNode.removeChild(n);});
     var svg=new XMLSerializer().serializeToString(clone);
     var im=new Image();
     im.onload=function(){ctx.drawImage(im,0,0,c.width,c.height);cb(c.toDataURL('image/png'));};
@@ -4456,6 +4462,117 @@ function composePNG(cb){
     p.onerror=drawOverlay;
     p.src=activePlanSrc();
   }else drawOverlay();
+}
+/* ------------------------------------------------------------
+   Export artefact: the clean plan (lights only) plus a footer -
+   every light used, then room-by-room detail. Used by Export PNG
+   and by Save (PDF). cb receives a CANVAS, or null on failure.
+   ------------------------------------------------------------ */
+function composeExport(cb){
+  composePNG(function(base){
+    var img=new Image();
+    img.onload=function(){
+      var W=img.width;
+      var lines=bomLines(), t=bomTotals(lines);
+      var name=$('#projname').value||'Untitled plan';
+      var fs=Math.max(20,Math.round(W/72));
+      var lh=Math.round(fs*1.55), pad=Math.round(fs*1.8);
+      var body=[];
+      body.push({t:'LIGHTS USED',h:1});
+      if(lines.length) lines.forEach(function(l){
+        body.push({t:l.qty+' \u00d7  '+l.name+'   ['+l.sku+']'});
+      });
+      else body.push({t:'No fittings placed yet'});
+      body.push({t:'Total fittings: '+t.units+'   \u00b7   Total inc GST: '+money(t.inc)});
+      if(S.rooms.length){
+        body.push({sp:1});
+        body.push({t:'BY ROOM',h:1});
+        S.rooms.forEach(function(r){
+          var inR=S.fixtures.filter(function(f){return pointInRect(f.x,f.y,r);});
+          var byP={};
+          inR.forEach(function(f){
+            var p=byId(f.pid);
+            var k=p?p.name+'   ['+(p.sku||p.id)+']':String(f.pid);
+            byP[k]=(byP[k]||0)+1;
+          });
+          var a=roomAreaM2(r);
+          body.push({t:roomName(r).toUpperCase()+
+            (a?'  \u00b7  '+a.toFixed(1)+' m\u00b2':'')+
+            '  \u00b7  '+inR.length+' light'+(inR.length===1?'':'s'),h:2});
+          Object.keys(byP).forEach(function(k){
+            body.push({t:'      '+byP[k]+' \u00d7  '+k});
+          });
+        });
+      }
+      var footH=pad*2 + fs + lh*2 +
+        body.reduce(function(a,b){return a+(b.sp?Math.round(lh*0.5):lh);},0);
+      var c=document.createElement('canvas');
+      c.width=W; c.height=img.height+footH;
+      var ctx=c.getContext('2d');
+      ctx.fillStyle='#ffffff';ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(img,0,0);
+      function fit(s){
+        s=String(s);
+        while(s.length>6&&ctx.measureText(s).width>W-pad*2) s=s.slice(0,-2);
+        return s;
+      }
+      ctx.strokeStyle='#d8dcd2';ctx.lineWidth=2;
+      ctx.beginPath();
+      ctx.moveTo(pad,img.height+Math.round(pad*0.45));
+      ctx.lineTo(W-pad,img.height+Math.round(pad*0.45));
+      ctx.stroke();
+      var y=img.height+pad;
+      ctx.fillStyle='#14150f';
+      ctx.font='bold '+Math.round(fs*1.15)+'px monospace';
+      ctx.fillText(fit(name.toUpperCase()),pad,y+fs);
+      ctx.font=fs+'px monospace';
+      ctx.fillStyle='#5c6b62';
+      ctx.fillText(fit('Greenhse lighting plan  \u00b7  '+
+        new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'})+
+        '  \u00b7  ceiling '+S.ceiling.toFixed(2)+' m'),pad,y+fs+lh);
+      y+=fs+lh*2;
+      body.forEach(function(b){
+        if(b.sp){y+=Math.round(lh*0.5);return;}
+        if(b.h===1){ctx.font='bold '+fs+'px monospace';ctx.fillStyle='#14512C';}
+        else if(b.h===2){ctx.font='bold '+fs+'px monospace';ctx.fillStyle='#14150f';}
+        else{ctx.font=fs+'px monospace';ctx.fillStyle='#14150f';}
+        ctx.fillText(fit(b.t),pad,y+fs);
+        y+=lh;
+      });
+      cb(c);
+    };
+    img.onerror=function(){cb(null);};
+    img.src=base;
+  });
+}
+/* Wrap a JPEG of the canvas in a minimal single-page PDF. Hand-built so the
+   standalone file stays self-contained - no library needed for one image page. */
+function canvasToPdfBlob(c){
+  var jpeg=atob(c.toDataURL('image/jpeg',0.92).split(',')[1]);
+  var W=(c.width/2).toFixed(2), H=(c.height/2).toFixed(2);   /* 2x canvas -> pt */
+  var enc=function(s){var b=new Uint8Array(s.length);for(var i=0;i<s.length;i++)b[i]=s.charCodeAt(i)&255;return b;};
+  var content='q '+W+' 0 0 '+H+' 0 0 cm /Im0 Do Q';
+  var head='%PDF-1.4\n';
+  var parts=[head], pos=head.length, off=[0];
+  function push(s){parts.push(s);pos+=s.length;}
+  function obj(n,s){off[n]=pos;push(n+' 0 obj '+s+' endobj\n');}
+  obj(1,'<</Type/Catalog/Pages 2 0 R>>');
+  obj(2,'<</Type/Pages/Kids[3 0 R]/Count 1>>');
+  obj(3,'<</Type/Page/Parent 2 0 R/MediaBox[0 0 '+W+' '+H+']'+
+        '/Resources<</XObject<</Im0 4 0 R>>/ProcSet[/PDF/ImageC]>>/Contents 5 0 R>>');
+  off[4]=pos;
+  push('4 0 obj <</Type/XObject/Subtype/Image/Width '+c.width+'/Height '+c.height+
+       '/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+jpeg.length+'>> stream\n');
+  push(jpeg);
+  push('\nendstream endobj\n');
+  off[5]=pos;
+  push('5 0 obj <</Length '+content.length+'>> stream\n'+content+'\nendstream endobj\n');
+  var xref=pos;
+  var x='xref\n0 6\n0000000000 65535 f \n';
+  for(var j=1;j<=5;j++) x+=('0000000000'+off[j]).slice(-10)+' 00000 n \n';
+  x+='trailer <</Size 6/Root 1 0 R>>\nstartxref\n'+xref+'\n%%EOF';
+  push(x);
+  return new Blob(parts.map(enc),{type:'application/pdf'});
 }
 function download(name,url){
   var a=document.createElement('a');a.href=url;a.download=name;
@@ -4927,16 +5044,22 @@ function wire(){
 
   // export
   $('#btn-png').onclick=function(){
-    composePNG(function(url){download((($('#projname').value||'plan').replace(/[^\w\- ]+/g,'')||'plan')+'.png',url);toast('PNG downloaded');});
+    composeExport(function(c){
+      if(!c)return toast('Export failed \u2014 try again');
+      download((($('#projname').value||'plan').replace(/[^\w\- ]+/g,'')||'plan')+'.png',c.toDataURL('image/png'));
+      toast('PNG downloaded');
+    });
   };
   $('#btn-print').onclick=doPrint;
   $('#btn-save').onclick=function(){
-    var data={v:1,name:$('#projname').value,plan:S.plan,mpp:S.mpp,ceiling:S.ceiling,
-              fixtures:S.fixtures,rooms:S.rooms,seq:S.seq};
-    var url=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
-    download((($('#projname').value||'plan').replace(/[^\w\- ]+/g,'')||'plan')+'.ghlayout',url);
-    setTimeout(function(){URL.revokeObjectURL(url);},4000);
-    toast('Saved — reopen it with Open');
+    toast('Building the PDF\u2026');
+    composeExport(function(c){
+      if(!c)return toast('Export failed \u2014 try again');
+      var url=URL.createObjectURL(canvasToPdfBlob(c));
+      download((($('#projname').value||'plan').replace(/[^\w\- ]+/g,'')||'plan')+'.pdf',url);
+      setTimeout(function(){URL.revokeObjectURL(url);},4000);
+      toast('PDF downloaded');
+    });
   };
   $('#btn-open').onclick=function(){$('#loadfile').click();};
   $('#loadfile').onchange=function(){
@@ -4944,12 +5067,7 @@ function wire(){
     var fr=new FileReader();
     fr.onload=function(){
       try{
-        var d=JSON.parse(fr.result);
-        S.plan=d.plan||S.plan;S.mpp=d.mpp;S.ceiling=d.ceiling||2.7;
-        S.fixtures=d.fixtures||[];S.rooms=d.rooms||[];S.seq=d.seq||1;S.sel=[];
-        $('#projname').value=d.name||'Untitled plan';
-        $('#ceil').value=String(S.ceiling);
-        renderAll();fitView();toast('Layout reopened');
+        applyPlan(JSON.parse(fr.result));toast('Layout reopened');
       }catch(err){toast('That file would not open');}
     };
     fr.readAsText(f);this.value='';
@@ -5123,7 +5241,18 @@ function init(){
   if(/[?&]qa=1/.test(location.search)&&window.__GHQA) window.__GHQA();
 }
 
+/* Load a saved plan object (the .ghlayout shape) into the planner. Used by
+   the Open button and by layout-admin.html's "Open in planner" links. */
+function applyPlan(d){
+  S.plan=d.plan||S.plan;S.mpp=d.mpp;S.ceiling=d.ceiling||2.7;
+  S.fixtures=d.fixtures||[];S.rooms=d.rooms||[];S.seq=d.seq||1;S.sel=[];
+  $('#projname').value=d.name||'Untitled plan';
+  $('#ceil').value=String(S.ceiling);
+  renderAll();fitView();
+}
+
 window.__GH={
+  applyPlan:applyPlan,
   parseLumens:parseLumens,countForRoom:countForRoom,fittingClass:fittingClass,bandFor:bandFor,bandLabel:bandLabel,DL_BANDS:DL_BANDS,ptToMm:ptToMm,paperName:paperName,mppFromPaper:mppFromPaper,snapToFittings:snapToFittings,nearestGap:nearestGap,symbolFor:symbolFor,productMatches:productMatches,visibleProducts:visibleProducts,recommendedId:recommendedId,productSpecLine:productSpecLine,parseBeam:parseBeam,parseWatts:parseWatts,parseCutout:parseCutout,
   spacingFor:spacingFor,wallOffsetFor:wallOffsetFor,
   isBathroomFitting:isBathroomFitting,exhaustMode:exhaustMode,exhaustForRoom:exhaustForRoom,SPECIAL:SPECIAL,renderSpecial:renderSpecial,applySpecial:applySpecial,setSpecial:function(k,n,a){specPick=k;if(n)S.pick.qty=n;if(a)specArr=a;renderSpecial();if(k)applySpecial();},isCeilingFanProduct:isCeilingFanProduct,isALight:isALight,
@@ -5152,7 +5281,7 @@ window.__GH={
       renderPlaceTeach();
     }
   },
-  doFill:doFill,garageFitting:garageFitting,roomIsDone:roomIsDone,roomIsOpen:roomIsOpen,roomFittings:roomFittings,recommendForRoom:recommendForRoom,renderAll:renderAll,roomSummary:roomSummary,doPrint:doPrint,init:init,composePNG:composePNG,scheduleText:scheduleText,
+  doFill:doFill,garageFitting:garageFitting,roomIsDone:roomIsDone,roomIsOpen:roomIsOpen,roomFittings:roomFittings,recommendForRoom:recommendForRoom,renderAll:renderAll,roomSummary:roomSummary,doPrint:doPrint,init:init,composePNG:composePNG,composeExport:composeExport,canvasToPdfBlob:canvasToPdfBlob,scheduleText:scheduleText,
   fit:fitView,fitBox:fitBox,contentBox:contentBox,padBox:padBox,mainSpan:mainSpan,toolState:toolState,groupPointsAt:groupPointsAt,calRefLength:calRefLength,applyScale:applyScale,renderPdfPager:renderPdfPager,zoomStep:zoomStep,clampPan:clampPan,wheelIntent:wheelIntent,zoomTo:zoomTo,showHelp:showHelp,renderTools:renderTools,recommendProduct:recommendProduct,bestValue:bestValue,showModal:showModal
 };
 
@@ -5169,9 +5298,12 @@ else init();
 "use strict";
 var G=window.__GH, $=function(s){return document.querySelector(s);};
 
-/* Where finished layouts get posted. Leave empty and the app falls back to
-   "download it and email it in" instead of pretending a send worked. */
-var SUBMIT_ENDPOINT="";
+/* Where finished layouts get posted. On the Netlify deploy this is the
+   submit-layout function (netlify/functions/submit-layout.mjs), which stores
+   the plan in Netlify Blobs for the team to review in layout-admin.html.
+   If the endpoint is unreachable (npm run dev / preview have no functions)
+   the app falls back to "download it and email it in". */
+var SUBMIT_ENDPOINT="/api/submit-layout";
 
 /* ---------- geometry of the tutorial room render ---------- */
 var IMG={w:919,h:663};
@@ -5704,7 +5836,11 @@ function submissionPayload(form){
                 return {code:l.sku,name:l.name,qty:l.qty,unitExGst:l.unit,lineExGst:l.line};
               }),
               fittings:tot.units, totalExGst:tot.ex, totalIncGst:tot.inc},
-    planPng:null
+    planPng:null,
+    /* The exact object the Save button writes to a .ghlayout file, so the
+       submission can be reopened AND edited on our side before install. */
+    planData:{v:1,name:form.project,plan:S.plan,mpp:S.mpp,ceiling:S.ceiling,
+              fixtures:S.fixtures,rooms:S.rooms,seq:S.seq}
   };
 }
 function openSend(){
@@ -5723,31 +5859,80 @@ function doSend(){
   }
   $('#s-status').innerHTML='<div class="teach">Packaging the plan…</div>';
   G.composePNG(function(png){
-    var payload=submissionPayload(f);
-    payload.planPng=png;
-    if(!SUBMIT_ENDPOINT){
-      var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-      var url=URL.createObjectURL(blob);
-      var a=document.createElement('a');
-      a.href=url;a.download=(f.project||'layout').replace(/[^\w\- ]+/g,'')+'-greenhse-submission.json';
-      document.body.appendChild(a);a.click();a.remove();
-      setTimeout(function(){URL.revokeObjectURL(url);},4000);
-      $('#s-status').innerHTML='<div class="teach"><h5>Sending is not switched on yet</h5>'+
-        'Your submission file just downloaded. Email it with the printed plan, or call '+
-        '<b>(08) 9297 2969</b>. Once the endpoint is configured this button sends it straight through.</div>';
-      return;
-    }
-    fetch(SUBMIT_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)})
-      .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json().catch(function(){return {};}); })
-      .then(function(){
-        $('#s-status').innerHTML='<div class="teach"><h5>Sent</h5>We have your layout. Someone will come back to you with a quote.</div>';
-      })
-      .catch(function(){
-        $('#s-status').innerHTML='<div class="teach warn"><h5>That did not go through</h5>'+
-          'Save the plan with <b>Plan + schedule</b> and call <b>(08) 9297 2969</b>.</div>';
-      });
+    /* Shrink what travels. The composed plan at print scale can run tens of
+       megabytes as a data URL and the endpoint accepts ~6 MB; the copy on
+       the customer's screen is untouched. */
+    shrinkImage(png,1600,0.82,function(smallPng){
+    shrinkImage(png,360,0.6,function(thumb){
+      var payload=submissionPayload(f);
+      payload.planPng=smallPng;
+      payload.thumb=thumb;                    /* small preview for the admin list */
+      var plan=payload.planData.plan;
+      var send=function(){
+        if(!SUBMIT_ENDPOINT){
+          fallbackDownload(payload,f,false,'<h5>Sending is not switched on yet</h5>'+
+            'Your submission file just downloaded. Email it with the printed plan, or call '+
+            '<b>(08) 9297 2969</b>.');
+          return;
+        }
+        var body=JSON.stringify(payload);
+        if(body.length>5500000){ payload.planPng=null; body=JSON.stringify(payload); }
+        fetch(SUBMIT_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},
+          body:body})
+          .then(function(r){ if(!r.ok) throw new Error(r.status); return r.json().catch(function(){return {};}); })
+          .then(function(){
+            $('#s-status').innerHTML='<div class="teach"><h5>Sent</h5>We have your layout '+
+              'at our end. Someone will come back to you with a quote.</div>';
+          })
+          .catch(function(){
+            fallbackDownload(payload,f,true,'<h5>That did not go through</h5>'+
+              'Your submission file downloaded instead — email it in, or save the plan with '+
+              '<b>Plan + schedule</b> and call <b>(08) 9297 2969</b>.');
+          });
+      };
+      /* An uploaded floor plan can be a full-resolution photo; shrink the
+         travelling copy without mutating the live plan on screen. */
+      if(plan&&plan.src&&String(plan.src).indexOf('data:')===0){
+        shrinkImage(plan.src,2000,0.85,function(s){
+          var p2={},k;for(k in plan){if(Object.prototype.hasOwnProperty.call(plan,k))p2[k]=plan[k];}
+          p2.src=s;payload.planData.plan=p2;send();
+        });
+      } else send();
+    });});
   });
+}
+
+/* Downscale a data-URL image so the submission stays under the endpoint's
+   body limit. Non-data URLs and already-small images pass through as-is. */
+function shrinkImage(src,maxEdge,quality,cb){
+  if(!src||String(src).indexOf('data:')!==0) return cb(src);
+  var img=new Image();
+  img.onload=function(){
+    var w=img.naturalWidth||1,h=img.naturalHeight||1,sc=Math.min(1,maxEdge/Math.max(w,h));
+    if(sc>=1&&src.length<900000) return cb(src);
+    try{
+      var c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(w*sc));c.height=Math.max(1,Math.round(h*sc));
+      var ctx=c.getContext('2d');
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(img,0,0,c.width,c.height);
+      cb(c.toDataURL('image/jpeg',quality));
+    }catch(e){cb(src);}
+  };
+  img.onerror=function(){cb(src);};
+  img.src=src;
+}
+
+/* The old no-endpoint behaviour, kept as the failure path: the customer
+   always leaves with their submission file, never with nothing. */
+function fallbackDownload(payload,f,warn,msg){
+  var blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;a.download=(f.project||'layout').replace(/[^\w\- ]+/g,'')+'-greenhse-submission.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(function(){URL.revokeObjectURL(url);},4000);
+  $('#s-status').innerHTML='<div class="teach'+(warn?' warn':'')+'">'+msg+'</div>';
 }
 
 /* ---------- wiring ---------- */
@@ -5768,6 +5953,28 @@ function boot(){
     if(e.key==='ArrowLeft')$('#tut-back').click();
   });
   if(/[?&]qa=1|[?&]app=1/.test(location.search)) openPlanner();
+  /* ?load=<id> — staff link from layout-admin.html: pull a stored customer
+     submission from /api/layouts and open it in the planner for editing. */
+  var lm=location.search.match(/[?&]load=([\w-]+)/);
+  if(lm){
+    openPlanner();
+    var akey=null;
+    try{akey=localStorage.getItem('greenhse_admin_key');}catch(e){}
+    if(!akey){
+      akey=window.prompt('Admin key to load this plan:')||'';
+      try{if(akey)localStorage.setItem('greenhse_admin_key',akey);}catch(e){}
+    }
+    if(akey) fetch('/api/layouts?id='+encodeURIComponent(lm[1]),{headers:{'x-admin-key':akey}})
+      .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+      .then(function(p){
+        if(p&&p.planData){G.applyPlan(p.planData);}
+        else alert('That submission has no editable plan attached.');
+      })
+      .catch(function(){
+        try{localStorage.removeItem('greenhse_admin_key');}catch(e){}
+        alert('Could not load that plan — check the admin key and the link, then reload.');
+      });
+  }
 }
 
 window.__TUT={
@@ -6719,8 +6926,10 @@ window.__GHQA=function(){
   ok('every schedule line carries a product code and quantity',
      pay.schedule.lines.every(function(l){return l.code&&l.qty>0;}),'line incomplete');
   eq('the plan image is attached separately, not guessed',pay.planPng,null);
-  ok('no send endpoint is configured yet, so the app must fall back to download',
-     U.endpoint()==='','endpoint set');
+  ok('the send endpoint posts to /api/submit-layout on our own site',
+     U.endpoint()==='/api/submit-layout','endpoint wrong');
+  ok('the submission carries the full editable plan, so our side can reopen it',
+     !!(pay.planData&&pay.planData.v===1&&pay.planData.fixtures.length===3),'planData missing');
   G.S.fixtures=[];G.S.rooms=[];G.S.sel=[];G.S.mpp=null;G.S.plan.loaded=false;G.renderAll();
 
   /* ============================================================

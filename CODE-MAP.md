@@ -39,7 +39,9 @@ files in `public/assets/home/` — see `scripts/build-home-app.js`.)
 | About | `/about/` | `app/(chrome)/about/page.js` |
 | Installation hub | `/installation/` | `app/(chrome)/installation/page.js` |
 | Account / Checkout / policies / Light Lab | `/account/` etc. | `app/(chrome)/[...slug]/page.js` (content from `data/site.json`) + `public/assets/account.js`, `checkout.js`, `lightlab.js` |
-| Layout planner | `/layout.html` | `public/layout.html` (self-contained twin: `public/layout-standalone.html`) |
+| Layout planner | `/layout-app/` (301 from `/layout.html`) | `public/layout.html`, folder route made by `scripts/make-folder-routes.js` postbuild (self-contained twin: `/layout-standalone/`) |
+| Layout submissions — staff view | `/layout-admin.html` | `public/layout-admin.html` (needs the ADMIN_KEY set on Netlify) |
+| Layout submission API | `/api/submit-layout`, `/api/layouts` | `netlify/functions/submit-layout.mjs`, `netlify/functions/layouts.mjs` (Netlify Blobs) |
 
 ## Homepage — one file per section (`data/sections/`)
 
@@ -112,7 +114,7 @@ Built into `public/assets/home-app.js` by `scripts/build-home-app.js`
 ## Tests
 
 Homepage: open `/?qa=1` → QA tab → Run tests (baseline 110/116).
-Layout planner: open `/layout.html?qa=1` (baseline 363/379).
+Layout planner: open `/layout-app/?qa=1` (baseline 364/380).
 Test source: `public/assets/home/13-qa-test-suite.js` and the QA block at the end of `public/layout.html`.
 
 ## Live category listings (Magento-driven)
