@@ -43,6 +43,7 @@ files in `public/assets/home/` — see `scripts/build-home-app.js`.)
 | Layout submissions — staff view | `/layout-admin.html` | `public/layout-admin.html` (needs the ADMIN_KEY set on Netlify) |
 | Layout submission API | `/api/submit-layout`, `/api/layouts` | `netlify/functions/submit-layout.mjs`, `netlify/functions/layouts.mjs` (Netlify Blobs) |
 | Layout usage beacon + stats | `/api/track` | `netlify/functions/track.mjs` (Netlify Blobs, dashboard in layout-admin) |
+| Live plan drafts | `/api/draft` | `netlify/functions/draft.mjs` (in-progress cards in layout-admin) |
 
 ## Homepage — one file per section (`data/sections/`)
 

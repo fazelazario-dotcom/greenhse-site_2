@@ -35,14 +35,15 @@ function updateCart(){
   const cg=$("#cartTotalGst"); if(cg) cg.textContent="$"+(cartTotal()*1.1).toFixed(2);
   const wrap=$("#cartItems");
   if(!cart.length){wrap.innerHTML=`<div class="cart-empty">Your cart is empty.<br>Add a few fittings to get started.</div>`;return;}
-  wrap.innerHTML=cart.map(l=>{const p=findP(l.id);
-    const vi=(l.opt&&typeof optImg==="function")?optImg(p,{label:l.opt}):null;
+  wrap.innerHTML=cart.map(l=>{const p=findP(l.id)||{name:l.name||l.id,cat:null,url:null,shape:"round",tone:"warm"};
+    const known=!!findP(l.id);
+    const vi=(known&&l.opt&&typeof optImg==="function")?optImg(p,{label:l.opt}):null;
     return `
     <div class="ci">
-      <div class="img${vi?" hasimg":""}">${vi?`<img class="pimg img" src="${vi}" alt="${l.opt}">`:((typeof media==="function")?media(p,"img"):lamp(p.shape,p.tone))}</div>
+      <div class="img${vi?" hasimg":""}">${vi?`<img class="pimg img" src="${vi}" alt="${l.opt}">`:((known&&typeof media==="function")?media(p,"img"):lamp(p.shape,p.tone))}</div>
       <div class="det">
         <h4>${p.name}</h4>
-        <div class="c">${shortName((CATEGORIES.find(c=>c.id===p.cat)||{}).name)}${l.opt?" · "+l.opt:""}</div>
+        <div class="c">${p.cat?shortName((CATEGORIES.find(c=>c.id===p.cat)||{}).name):""}${l.opt?" · "+l.opt:""}</div>
         ${p.url?`<a class="ci-buy" href="${cleanUrl(p.url)}">View product page &#8594;</a>`:""}
         <div class="qty">
           <button data-q="${l.key}" data-d="-1" aria-label="Decrease">−</button>

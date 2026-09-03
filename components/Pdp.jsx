@@ -50,9 +50,18 @@ export default function Pdp({ p }){
               </div>
             )}
             <div className="panel__buy">
-              <a className="btn panel__quote panel__quote--call" href="tel:0892972969">Call (08) 9297 2969 to order</a>
+              {p.sku
+                ? <button type="button" className="btn panel__quote panel__quote--call"
+                    data-cart-add={p.sku} data-cart-name={p.name} data-cart-price={p.price}>Add to cart</button>
+                : null}
               {catCrumb &&
                 <a className="btn btn-ghost" href={mapHref(catCrumb.href)}>More {String(catCrumb.label||'').toLowerCase()}</a>}
+            </div>
+            <div id="pdp-cartbar" hidden
+              style={{margin:'10px 0 0',display:'flex',gap:'10px',alignItems:'center',flexWrap:'wrap'}}>
+              <span style={{fontSize:'13px',color:'#2c7a4b',fontWeight:600}}>
+                ✓ In your cart: <span data-cart-count>0</span></span>
+              <button type="button" className="btn btn-ghost" data-cart-checkout>Checkout →</button>
             </div>
             <p className="panel__pickup">Pickup: 5/1 Locke Ln, Ellenbrook WA 6069 · Perth stock and support.</p>
             <ul className="trust">
@@ -131,5 +140,8 @@ export default function Pdp({ p }){
     </main>
     <Script src="/assets/sku-map.js" strategy="afterInteractive"/>
     <Script src="/assets/magento.js" strategy="afterInteractive"/>
+    <Script src="/assets/account.js" strategy="afterInteractive"/>
+    <Script src="/assets/checkout.js" strategy="afterInteractive"/>
+    <Script src="/assets/cart.js" strategy="afterInteractive"/>
   </div>);
 }

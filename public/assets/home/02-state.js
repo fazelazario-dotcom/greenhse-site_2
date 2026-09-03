@@ -17,7 +17,9 @@ function saveState(){
 function loadState(){
   try{
     const c=JSON.parse(localStorage.getItem("gh_cart")||"[]");
-    if(Array.isArray(c)) cart=c.filter(l=>l&&l.id&&findP(l.id));
+    /* keep lines added from product pages too - they carry their own
+       name/price snapshot even when the homepage grid doesn't know them */
+    if(Array.isArray(c)) cart=c.filter(l=>l&&l.id&&(findP(l.id)||l.name));
     const w=JSON.parse(localStorage.getItem("gh_wish")||"[]");
     if(Array.isArray(w)) wishlist=new Set(w.filter(id=>findP(id)));
   }catch(e){}

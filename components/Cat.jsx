@@ -60,9 +60,7 @@ function Card({c: raw}){
           <span className="card__amount" {...(c.sku?{'data-price-target':true}:{})}>{c.price}</span>
           <span className="card__gst">{c.priceNote||'ex GST'}</span>
         </div>
-        {c.href
-          ? <span className="btn card__quote card__quote--call">View →</span>
-          : <a className="btn card__quote card__quote--call" href="tel:0892972969">Call us</a>}
+        <span className="btn card__quote card__quote--call">View →</span>
       </div>
     </div>
   </>);
@@ -215,6 +213,7 @@ export default function Cat({ c, path }){
     <Script src="/assets/sku-map.js" strategy="afterInteractive"/>
     <Script src="/assets/magento.js" strategy="afterInteractive"/>
     <Script src="/assets/catalog-map.js" strategy="afterInteractive"/>
+    <Script src="/assets/cart.js" strategy="afterInteractive"/>
     <Script src="/assets/catalog.js" strategy="afterInteractive"/>
   </div>);
 }

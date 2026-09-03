@@ -277,9 +277,11 @@ function init(){
     var btn=this; btn.disabled=true; var was=btn.textContent; btn.textContent="Preparing checkout…";
     var lines=[], unknown=[];
     cart.forEach(function(l){
-      var sku=M.skuFor(l.id);
+      /* snapshot lines from product/category pages may already carry the
+         Magento sku as their id - try it; Magento names anything it refuses */
+      var sku=M.skuFor(l.id)||((!findP(l.id)&&l.name)?l.id:null);
       if(sku) lines.push({sku:sku,qty:l.qty});
-      else{ var p=findP(l.id); unknown.push((p&&p.name)||l.id); }
+      else{ var p=findP(l.id); unknown.push((p&&p.name)||l.name||l.id); }
     });
     if(!lines.length){
       btn.disabled=false; btn.textContent=was;

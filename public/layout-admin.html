@@ -37,6 +37,12 @@
   #list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;
         display:flex;flex-direction:column}
+  .card.complete{border:2px solid var(--green)}
+  .card.draft{border:2px dashed #D9A441}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.06em;
+         text-transform:uppercase;border-radius:99px;padding:2px 9px;margin-bottom:6px}
+  .badge.done{background:#E3F1E8;color:var(--green-d)}
+  .badge.wip{background:#F9EFDC;color:#8A6420}
   .card .shot{height:150px;background:#EDEFEA;display:flex;align-items:center;justify-content:center;
               border-bottom:1px solid var(--line)}
   .card .shot img{max-width:100%;max-height:100%;display:block}
@@ -110,9 +116,10 @@
         <table id="u-recent"></table>
       </details>
     </div>
-    <div class="note">Each card is a plan a customer sent in. <b>Open in planner</b> loads it
-      into the layout app so you can check and edit it before install. <b>.ghlayout</b> downloads
-      the same plan as a file the planner's Open button reads.</div>
+    <div class="note"><b>Green outline</b> = completed &mdash; the customer hit Send.
+      <b>Amber dashed</b> = in progress &mdash; a plan being worked on right now; it updates
+      as they go, no contact details yet, and disappears when they Send (or after 14 quiet
+      days). <b>Open in planner</b> loads any card into the layout app to check and edit.</div>
     <div id="loading">Loading…</div>
     <div id="empty" hidden>No submissions yet. They appear here the moment a customer hits Send in the planner.</div>
     <div id="list"></div>
@@ -136,7 +143,7 @@
 "use strict";
 var $=function(s){return document.querySelector(s);};
 var KEY_LS='greenhse_admin_key';
-var key=null, plansCache={};
+var key=null, plansCache={}, curPlans=[], curDrafts=[];
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){
   return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -163,7 +170,7 @@ function tryEnter(k){
     try{localStorage.setItem(KEY_LS,key);}catch(e){}
     $('#gate').hidden=true;$('#app').hidden=false;
     $('#refresh').hidden=false;$('#signout').hidden=false;
-    render(res.plans||[]);
+    render(res.plans||[],res.drafts||[]);
     loadUsage();
     openFromLink(res.plans||[]);
   }).catch(function(e){
@@ -183,7 +190,7 @@ $('#refresh').onclick=function(){load();};
 
 function load(){
   $('#loading').hidden=false;$('#empty').hidden=true;$('#list').innerHTML='';
-  api('/api/layouts').then(function(res){render(res.plans||[]);loadUsage();})
+  api('/api/layouts').then(function(res){render(res.plans||[],res.drafts||[]);loadUsage();})
     .catch(function(){$('#loading').textContent='Could not load submissions.';});
 }
 
@@ -231,15 +238,21 @@ function openFromLink(plans){
 }
 
 /* ---------- list ---------- */
-function render(plans){
+function render(plans,drafts){
+  curPlans=plans;curDrafts=drafts||[];
   $('#loading').hidden=true;
   var list=$('#list');list.innerHTML='';
-  if(!plans.length){$('#empty').hidden=false;return;}
+  if(!plans.length&&!curDrafts.length){$('#empty').hidden=false;return;}
+  $('#empty').hidden=true;
+  /* In-progress drafts first (they are what is happening right now),
+     then completed submissions, green-outlined. */
+  curDrafts.forEach(function(d){list.appendChild(draftCard(d));});
   plans.forEach(function(p){
-    var card=document.createElement('div');card.className='card';
+    var card=document.createElement('div');card.className='card complete';
     card.innerHTML=
       '<div class="shot">'+(p.thumb?'<img src="'+p.thumb+'" alt="Plan preview">':'<span>No preview</span>')+'</div>'+
       '<div class="body">'+
+        '<span class="badge done">\u2713 Completed</span>'+
         '<h3>'+esc(p.name)+'</h3>'+
         '<div class="proj">'+esc(p.project||'Untitled plan')+'</div>'+
         '<div class="meta">'+esc(when(p.submittedAt))+
@@ -257,15 +270,64 @@ function render(plans){
       window.open('/layout-app/?load='+encodeURIComponent(p.id),'_blank');
     };
     card.querySelector('[data-act=view]').onclick=function(){openDetail(p);};
-    card.querySelector('[data-act=gh]').onclick=function(){downloadGh(p);};
+    var ghBtn=card.querySelector('[data-act=gh]');
+    ghBtn.onclick=function(){
+      if(ghBtn.disabled)return;
+      var t=ghBtn.textContent;ghBtn.disabled=true;ghBtn.textContent='Preparing\u2026';
+      downloadGh(p).then(
+        function(){ghBtn.textContent=t;ghBtn.disabled=false;},
+        function(){ghBtn.textContent=t;ghBtn.disabled=false;});
+    };
     card.querySelector('[data-act=del]').onclick=function(){
       if(!window.confirm('Delete the submission from '+p.name+'? This cannot be undone.'))return;
+      /* Optimistic: the card leaves the moment you confirm; the server call
+         runs behind it. If it fails, the list reloads and the card returns. */
+      card.style.transition='opacity .15s';card.style.opacity='0.35';
+      card.querySelectorAll('button').forEach(function(x){x.disabled=true;});
+      curPlans=curPlans.filter(function(x){return x.id!==p.id;});
+      setTimeout(function(){
+        if(card.parentNode)card.parentNode.removeChild(card);
+        if(!curPlans.length&&!curDrafts.length)$('#empty').hidden=false;
+      },160);
       api('/api/layouts?id='+encodeURIComponent(p.id),{method:'DELETE'})
-        .then(load)
-        .catch(function(){window.alert('Delete failed.');});
+        .catch(function(){window.alert('Delete failed \u2014 bringing it back.');load();});
     };
     list.appendChild(card);
   });
+}
+
+function draftCard(d){
+  var card=document.createElement('div');card.className='card draft';
+  card.innerHTML=
+    '<div class="shot">'+(d.thumb?'<img src="'+d.thumb+'" alt="Plan preview">':'<span>No preview yet</span>')+'</div>'+
+    '<div class="body">'+
+      '<span class="badge wip">In progress</span>'+
+      '<h3>'+esc(d.project||'Untitled plan')+'</h3>'+
+      '<div class="meta">Last change '+esc(when(d.updatedAt))+'</div>'+
+      '<div class="meta">No contact details yet \u2014 not sent</div>'+
+      '<div class="nums">'+(d.fittings||0)+' light'+(d.fittings===1?'':'s')+' \u00b7 '+
+        (d.rooms||0)+' room'+(d.rooms===1?'':'s')+'</div>'+
+    '</div>'+
+    '<div class="acts">'+
+      '<button class="btn pri" data-act="open">Open in planner</button>'+
+      '<button class="btn danger" data-act="del">Delete</button>'+
+    '</div>';
+  card.querySelector('[data-act=open]').onclick=function(){
+    window.open('/layout-app/?draft='+encodeURIComponent(d.sid),'_blank');
+  };
+  card.querySelector('[data-act=del]').onclick=function(){
+    if(!window.confirm('Delete this in-progress draft?'))return;
+    card.style.transition='opacity .15s';card.style.opacity='0.35';
+    card.querySelectorAll('button').forEach(function(x){x.disabled=true;});
+    curDrafts=curDrafts.filter(function(x){return x.sid!==d.sid;});
+    setTimeout(function(){
+      if(card.parentNode)card.parentNode.removeChild(card);
+      if(!curPlans.length&&!curDrafts.length)$('#empty').hidden=false;
+    },160);
+    api('/api/layouts?draft='+encodeURIComponent(d.sid),{method:'DELETE'})
+      .catch(function(){window.alert('Delete failed \u2014 bringing it back.');load();});
+  };
+  return card;
 }
 
 function fullPlan(p){
@@ -276,7 +338,7 @@ function fullPlan(p){
 }
 
 function downloadGh(p){
-  fullPlan(p).then(function(full){
+  return fullPlan(p).then(function(full){
     if(!full.planData){window.alert('This submission has no editable plan attached.');return;}
     var name=(full.planData.name||p.project||'plan').replace(/[^\w\- ]+/g,'')||'plan';
     var blob=new Blob([JSON.stringify(full.planData)],{type:'application/json'});

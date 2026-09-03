@@ -128,7 +128,7 @@ function cardHTML(p){
         <h3 data-view="${p.id}" style="cursor:pointer">${p.name}</h3>
         <div class="foot">
           <span class="price" data-sku="${p.id}"><span data-price-target>${p.options&&p.options.length?'<span class="from">from</span>':''}$${p.price.toFixed(2)}</span><span class="ex">ex-GST</span></span>
-          <button class="add" data-add="${p.id}">${p.options&&p.options.length?'Options':'Add +'}</button>
+          <button class="add" data-add="${p.id}">${p.options&&p.options.length?'Choose options':'Add to cart'}</button>
         </div>
       </div>
     </article>`;

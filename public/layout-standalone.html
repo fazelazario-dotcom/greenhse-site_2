@@ -256,11 +256,13 @@ select.sel:disabled{border-color:var(--line-soft);color:var(--muted);cursor:not-
 .fx.sel .fx-ring{fill:none;stroke:var(--glow);stroke-width:2;stroke-dasharray:5 4}
 .fx{cursor:move}
 .fx-lab{font-family:"JetBrains Mono",monospace;fill:var(--ink);paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
-.room-rect{fill:none;stroke:var(--glow);stroke-opacity:.55;stroke-width:1.4;stroke-dasharray:7 5}
+.room-rect{fill:none;stroke:var(--glow);stroke-opacity:.3;stroke-width:1.2;stroke-dasharray:7 5}
 /* While the box is actually being dragged it needs to read against a busy
    floor plan, so it goes to a much darker green at full opacity. The settled
    room outline stays soft — it is reference, not the thing you are doing. */
 .room-rect.drag{stroke:#14512C;stroke-opacity:1;stroke-width:2.6;stroke-dasharray:9 5}
+.room-rect.hi{stroke:#14512C;stroke-opacity:1;stroke-width:2.4;stroke-dasharray:none;
+  fill:#1E7A46;fill-opacity:.08}
 .guide.drag{stroke:#14512C;stroke-opacity:1;stroke-width:2.6}
 .room-lab{font-family:"JetBrains Mono",monospace;fill:#2a2c24;letter-spacing:.04em}
 .room-x{fill:var(--danger);cursor:pointer}
@@ -430,11 +432,11 @@ button.zoomv:hover{border-color:#4a4f3f;color:var(--paper)}
    question you ask while looking at the plan. Each row changes that room's
    light without opening its card. */
 .donep{
-  position:absolute;right:16px;top:64px;z-index:7;width:236px;max-height:calc(100% - 150px);
+  /* Lives in the rail now, under the room list - the canvas stays clean. */
+  position:static;width:100%;max-height:360px;margin-top:12px;
   display:flex;flex-direction:column;
-  background:rgba(255,255,255,.97);border:1px solid #dedcd2;border-radius:8px;
-  box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.08);
-  backdrop-filter:saturate(1.2) blur(6px);font-size:12px;
+  background:#fff;border:1px solid #dedcd2;border-radius:8px;
+  font-size:12px;
 }
 .donep[hidden]{display:none}
 .donep-h{
@@ -1015,6 +1017,12 @@ img{image-rendering:-webkit-optimize-contrast}
         </div>
         <button type="button" class="act pri" id="btn-room"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/></svg>Drag a box around the room</button>
         <div id="roomlist" style="margin-top:14px"></div>
+        <aside class="donep" id="donep" hidden aria-label="Rooms finished">
+          <button type="button" class="donep-h" id="donep-h">
+            <b>Rooms finished</b><span class="cnt" id="donep-c"></span><i class="cv"></i>
+          </button>
+          <div class="donep-b" id="donep-b"></div>
+        </aside>
       </div>
     </section>
 
@@ -1145,13 +1153,6 @@ img{image-rendering:-webkit-optimize-contrast}
           <g id="g-grid"></g><g id="g-rooms"></g><g id="g-pools"></g><g id="g-fx"></g><g id="g-guide"></g>
         </svg>
       </div>
-
-      <aside class="donep shut" id="donep" hidden aria-label="Rooms finished">
-        <button type="button" class="donep-h" id="donep-h">
-          <b>Rooms finished</b><span class="cnt" id="donep-c"></span><i class="cv"></i>
-        </button>
-        <div class="donep-b" id="donep-b"></div>
-      </aside>
 
       <div class="fxlegend" id="fxlegend" hidden></div>
 
@@ -1402,13 +1403,13 @@ function wallOffsetFor(spacing){ return clamp(spacing/2, 0.65, 0.75); }
    at 2x2 m to 4 at 3x4 m, so a WC or a robe was getting four downlights.
    These steps are finer at the small end, where most of the mistakes were. */
 var DL_BANDS=[
-  {w:1.6, l:2.2,  std:1,  lg:1},   /* WC, linen, pantry            */
-  {w:2.2, l:2.8,  std:2,  lg:2},   /* robe, small ensuite          */
-  {w:2.8, l:3.4,  std:2,  lg:4},   /* small bed, laundry           */
-  {w:3.4, l:4.2,  std:4,  lg:6},   /* bedroom, study               */
-  {w:4.2, l:5.5,  std:6,  lg:8},   /* main bed, dining             */
-  {w:5,   l:8,    std:8,  lg:10},  /* living                       */
-  {w:6,   l:10,   std:10, lg:12}   /* open plan                    */
+  {w:1.5, l:2,   std:1,  lg:1},   /* WC, linen, pantry            */
+  {w:2.5, l:3,   std:2,  lg:2},   /* robe, small ensuite          */
+  {w:3,   l:4,   std:2,  lg:4},   /* small bed, laundry           */
+  {w:4,   l:5,   std:4,  lg:6},   /* bedroom, study, dining       */
+  {w:5,   l:7,   std:6,  lg:8},   /* main bed, family             */
+  {w:6,   l:9,   std:8,  lg:10},  /* living                       */
+  {w:7,   l:12,  std:10, lg:12}   /* open plan                    */
 ];
 /* The two biggest bands - 5 x 8 m and 6 x 10 m, plus anything larger than the
    table - are the only sizes where the right answer is genuinely a judgement
@@ -1418,7 +1419,7 @@ var DL_BANDS=[
 
    6 and 9 are the ends of it. Below 6 a room that size reads patchy; above 9
    you are paying for fittings that only add glare. */
-var BIG_BAND_FROM=5;              /* index into DL_BANDS: the 5 x 8 m band on  */
+var BIG_BAND_FROM=5;              /* index into DL_BANDS: the 6 x 9 m band on  */
 var COMFORT={less:6, more:9};
 var COMFORT_MIN=6, COMFORT_MAX=9;
 
@@ -1466,7 +1467,18 @@ function countForRoom(a,b,klass){
   if(!a||!b) return null;
   klass=klass==='lg'?'lg':'std';
   var band=bandFor(a,b);
-  if(band) return band[klass];
+  if(band){
+    /* A long narrow room (a galley kitchen, a hallway-shaped living strip)
+       lands in a band by its LENGTH alone, but only holds a fraction of the
+       band's area - lighting 9.9 sqm like the 20 sqm the band was written for
+       is how a plan ends up wall-to-wall with downlights. Scale the band's
+       count by the area actually there, but never drop below what the
+       1.5-2 m spacing rule needs along the room's long side. */
+    var n=band[klass];
+    var areaN=Math.ceil((a*b)/(band.w*band.l)*n);
+    var lengthMin=Math.min(n, Math.ceil(Math.max(a,b)/2.2));
+    return clamp(Math.min(n, Math.max(areaN, lengthMin)),1,60);
+  }
   // bigger than the table: carry the density of the largest band forward
   var last=DL_BANDS[DL_BANDS.length-1];
   var per=last[klass]/(last.w*last.l);
@@ -2046,32 +2058,11 @@ function renderRooms(){
     var rect=document.createElementNS(svgns,'rect');
     rect.setAttribute('x',r.x);rect.setAttribute('y',r.y);
     rect.setAttribute('width',r.w);rect.setAttribute('height',r.h);
-    rect.setAttribute('class','room-rect');
+    /* No name tags on the plan any more - the plan shows the plan, and the
+       room's name, size and fittings live in the rail's room list. Clicking
+       a room there highlights its box here (S.hiRoom). */
+    rect.setAttribute('class','room-rect'+(S.hiRoom===r.id?' hi':''));
     g.appendChild(rect);
-    /* The label sat loose on the plan and collided with whatever the floor
-       plan already had printed there. Put it on its own small tag pinned to
-       the room's top-left corner so it always reads cleanly. */
-    var a=roomAreaM2(r);
-    var n=S.fixtures.filter(function(f){return pointInRect(f.x,f.y,r);}).length;
-    var txt=roomName(r).toUpperCase()+
-      (a?'  \u00b7  '+a.toFixed(1)+' m\u00b2':'')+(n?'  \u00b7  '+n:'');
-    var fs=11/S.zoom, padX=6/S.zoom, padY=4/S.zoom;
-    var wEst=txt.length*fs*0.56 + padX*2;
-    var hEst=fs+padY*2;
-
-    var chip=document.createElementNS(svgns,'rect');
-    chip.setAttribute('x',r.x); chip.setAttribute('y',r.y);
-    chip.setAttribute('width',wEst); chip.setAttribute('height',hEst);
-    chip.setAttribute('rx',2/S.zoom);
-    chip.setAttribute('class','room-chip');
-    g.appendChild(chip);
-
-    var t=document.createElementNS(svgns,'text');
-    t.setAttribute('x',r.x+padX); t.setAttribute('y',r.y+hEst-padY-fs*0.16);
-    t.setAttribute('class','room-lab');
-    t.setAttribute('font-size',fs);
-    t.textContent=txt;
-    g.appendChild(t);
   });
 }
 
@@ -2357,14 +2348,14 @@ function renderFixtures(){
           var half='M '+hx1+' '+hy1+' A '+pr.toFixed(1)+' '+pr.toFixed(1)+' 0 0 1 '+hx2+' '+hy2+' Z';
           pools+='<g'+clipRef+'>'+
             '<path d="'+half+'" fill="url(#'+gid+')"/>'+
-            '<path class="fx-pool" d="'+half+'" fill="none" stroke="'+col.ink+'" stroke-opacity="0.5" '+
+            '<path class="fx-pool" d="'+half+'" fill="none" stroke="'+col.ink+'" stroke-opacity="0.22" '+
               'stroke-width="'+(0.8/S.zoom).toFixed(2)+'" stroke-dasharray="'+(4/S.zoom).toFixed(1)+' '+(5/S.zoom).toFixed(1)+'"/>'+
           '</g>';
         }else{
           pools+='<g'+clipRef+'>'+
             '<circle cx="'+f.x+'" cy="'+f.y+'" r="'+pr.toFixed(1)+'" fill="url(#'+gid+')"/>'+
             '<circle class="fx-pool" cx="'+f.x+'" cy="'+f.y+'" r="'+pr.toFixed(1)+'" '+
-              'fill="none" stroke="'+col.ink+'" stroke-opacity="0.5" '+
+              'fill="none" stroke="'+col.ink+'" stroke-opacity="0.22" '+
               'stroke-width="'+(0.8/S.zoom).toFixed(2)+'" stroke-dasharray="'+(4/S.zoom).toFixed(1)+' '+(5/S.zoom).toFixed(1)+'"/>'+
           '</g>';
         }
@@ -3076,6 +3067,7 @@ function renderDoneRooms(){
       if(!r) return;
       S.sel=S.fixtures.filter(function(f){return pointInRect(f.x,f.y,r);})
                       .map(function(f){return f.id;});
+      S.hiRoom=r.id;
       S.roomOpen[r.id]=true;
       openStep(3);
       renderAll();
@@ -3335,6 +3327,8 @@ function renderRoomList(){
       var id=b.dataset.toggle;
       var r=S.rooms.filter(function(x){return x.id===id;})[0];
       S.roomOpen[id]=!roomIsOpen(r);
+      S.hiRoom=roomIsOpen(r)?id:null;
+      renderRooms();
       renderRoomList();
     };
   });
@@ -4414,10 +4408,12 @@ function samplePlan(){
    Export
    ============================================================ */
 function composePNG(cb){
-  /* The exported copy is a marking-up plan: fittings labelled, light pools off.
-     Screen state is restored once the image is built. */
+  /* The exported copy shows JUST the lights on the plan - no fitting-name
+     text, no light pools. What each dot is lives in the summary underneath
+     (composeExport) and in the printed schedule, not scattered over the
+     drawing. Screen state is restored once the image is built. */
   var wasLabels=S.showLabels, wasPools=S.showPools, orig=cb;
-  if(!wasLabels||wasPools){S.showLabels=true;S.showPools=false;renderFixtures();}
+  if(wasLabels||wasPools){S.showLabels=false;S.showPools=false;renderFixtures();}
   cb=function(url){
     S.showLabels=wasLabels;S.showPools=wasPools;renderFixtures();
     orig(url);
@@ -4448,7 +4444,7 @@ function composePNG(cb){
        Room boxes and their label chips are working aids for the screen (the
        chip backgrounds also carry no inline style here, so they would render
        as solid black rectangles) - both are stripped from the exported copy. */
-    Array.prototype.slice.call(clone.querySelectorAll('.room-rect,.room-chip,.room-lab,.guide'))
+    Array.prototype.slice.call(clone.querySelectorAll('.room-rect,.room-chip,.room-lab,.guide,.fx-lab,.fx-ring'))
       .forEach(function(n){if(n.parentNode)n.parentNode.removeChild(n);});
     var svg=new XMLSerializer().serializeToString(clone);
     var im=new Image();
@@ -4966,8 +4962,12 @@ function wire(){
   $('#t-group').onclick=function(){groupSelected();};
   $('#t-ungroup').onclick=function(){ungroupSelected();};
   $('#t-clear').onclick=function(){
-    if(!S.fixtures.length) return;
-    snapshot();S.fixtures=[];S.sel=[];renderAll();toast('All fittings cleared — undo is there if that was a mistake');
+    if(!S.fixtures.length&&!S.rooms.length) return;
+    snapshot();
+    S.fixtures=[];S.sel=[];S.rooms=[];S.hiRoom=null;
+    S.roomPid={};S.roomFan={};S.roomAskFan={};S.roomComfort={};S.roomOpen={};
+    renderAll();
+    toast('Cleared \u2014 fittings and room boxes. Undo brings them back');
   };
 
   // canvas pointer
@@ -5249,6 +5249,10 @@ function applyPlan(d){
   $('#projname').value=d.name||'Untitled plan';
   $('#ceil').value=String(S.ceiling);
   renderAll();fitView();
+  /* A loaded plan is a plan being REVIEWED - open the rooms step so the
+     rail shows the room list (and the staff editing flow matches the
+     normal one) instead of landing back on step 1. */
+  try{if(S.rooms.length)openStep(3);}catch(e){}
 }
 
 window.__GH={
@@ -5477,7 +5481,11 @@ function render(){
   return done(g);
 }
 
-function needed(klass){ return G.countForRoom(ROOM_M.w,ROOM_M.h,klass||'std'); }
+/* The tour room is a BEDROOM, so it teaches what the planner will actually
+   do in one: the bedroom house rule's four standard downlights, and six low
+   glare for the coverage comparison the illustrations were drawn around -
+   not the generic size table, which sits lower for a room this size. */
+function needed(klass){ return klass==='lg'?6:4; }
 /* lay the correct number out properly, rather than telling people to guess */
 function idealLayout(klass){
   var n=needed(klass);
@@ -5867,6 +5875,7 @@ function doSend(){
       var payload=submissionPayload(f);
       payload.planPng=smallPng;
       payload.thumb=thumb;                    /* small preview for the admin list */
+      try{payload.sid=sessionStorage.getItem('gh_sid')||undefined;}catch(e){}
       var plan=payload.planData.plan;
       var send=function(){
         if(!SUBMIT_ENDPOINT){
@@ -5936,6 +5945,60 @@ function fallbackDownload(payload,f,warn,msg){
   $('#s-status').innerHTML='<div class="teach'+(warn?' warn':'')+'">'+msg+'</div>';
 }
 
+/* ------------------------------------------------------------
+   Live drafts. While someone works on a real plan, a snapshot is
+   pushed to our side whenever something has changed (checked every
+   20 s), so the team sees plans IN PROGRESS in layout-admin before
+   the customer hits Send. Send stays the completed signal - the
+   draft is removed and the submission takes its place. Same
+   exclusions as the usage beacon: QA runs and staff loads.
+   ------------------------------------------------------------ */
+(function(){
+  if(/[?&](qa=1|load=|draft=)/.test(location.search)) return;
+  var lastSig='';
+  function sid(){
+    try{return sessionStorage.getItem('gh_sid')||'';}catch(e){return '';}
+  }
+  function sig(){
+    var S=G.S;
+    return [S.plan.loaded?String(S.plan.name)+':'+S.plan.w+'x'+S.plan.h:'',
+            S.fixtures.length,S.rooms.length,S.seq,S.mpp||0,
+            $('#projname')?$('#projname').value:''].join('|');
+  }
+  function push(){
+    var S=G.S, id=sid();
+    if(!id) return;
+    if(!S.plan.loaded && !S.fixtures.length) return;   /* nothing to show yet */
+    var cur=sig(); if(cur===lastSig) return; lastSig=cur;
+    var planData={v:1,name:$('#projname')?$('#projname').value:'',plan:S.plan,mpp:S.mpp,
+                  ceiling:S.ceiling,fixtures:S.fixtures,rooms:S.rooms,seq:S.seq};
+    var finish=function(pd,thumb){
+      try{
+        fetch('/api/draft',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({sid:id,project:planData.name,thumb:thumb,planData:pd,
+                               fittings:S.fixtures.length,rooms:S.rooms.length})})
+          .catch(function(){});
+      }catch(e){}
+    };
+    G.composePNG(function(png){
+      shrinkImage(png,360,0.6,function(thumb){
+        var plan=planData.plan,k;
+        if(plan&&plan.src&&String(plan.src).indexOf('data:')===0){
+          shrinkImage(plan.src,1600,0.8,function(s2){
+            var p2={};for(k in plan){if(Object.prototype.hasOwnProperty.call(plan,k))p2[k]=plan[k];}
+            p2.src=s2;
+            var pd={};for(k in planData){if(Object.prototype.hasOwnProperty.call(planData,k))pd[k]=planData[k];}
+            pd.plan=p2;
+            finish(pd,thumb);
+          });
+        } else finish(planData,thumb);
+      });
+    });
+  }
+  setInterval(push,20000);
+  window.__GHDRAFT=push;
+})();
+
 /* ---------- wiring ---------- */
 function boot(){
   document.getElementById('img-hero').src=ART.hero;
@@ -5956,7 +6019,7 @@ function boot(){
   if(/[?&]qa=1|[?&]app=1/.test(location.search)) openPlanner();
   /* ?load=<id> — staff link from layout-admin.html: pull a stored customer
      submission from /api/layouts and open it in the planner for editing. */
-  var lm=location.search.match(/[?&]load=([\w-]+)/);
+  var lm=location.search.match(/[?&](load|draft)=([\w-]+)/);
   if(lm){
     openPlanner();
     var akey=null;
@@ -5965,7 +6028,9 @@ function boot(){
       akey=window.prompt('Admin key to load this plan:')||'';
       try{if(akey)localStorage.setItem('greenhse_admin_key',akey);}catch(e){}
     }
-    if(akey) fetch('/api/layouts?id='+encodeURIComponent(lm[1]),{headers:{'x-admin-key':akey}})
+    if(akey) fetch('/api/layouts?'+(lm[1]==='draft'
+        ?'draft='+encodeURIComponent(lm[2])
+        :'id='+encodeURIComponent(lm[2])+'&fields=edit'),{headers:{'x-admin-key':akey}})
       .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
       .then(function(p){
         if(p&&p.planData){G.applyPlan(p.planData);}
@@ -6030,11 +6095,13 @@ window.__GHQA=function(){
   eq('and one low glare',G.countForRoom(1.5,2,'lg'),1);
   eq('a 2 × 2.5 m robe takes two',G.countForRoom(2,2.5,'std'),2);
   eq('a 2.5 × 3 m room takes two standard',G.countForRoom(2.5,3,'std'),2);
-  eq('but four low glare, which cover less floor',G.countForRoom(2.5,3,'lg'),4);
-  eq('a 3 × 4 m bedroom takes four standard',G.countForRoom(3,4,'std'),4);
-  eq('and six low glare',G.countForRoom(3,4,'lg'),6);
-  eq('a 4 × 5 m room takes six standard',G.countForRoom(4,5,'std'),6);
-  eq('and eight low glare',G.countForRoom(4,5,'lg'),8);
+  eq('a 3 × 4 m room takes two standard (the bedroom rule lifts bedrooms to four)',
+     G.countForRoom(3,4,'std'),2);
+  eq('but four low glare, which cover less floor',G.countForRoom(3,4,'lg'),4);
+  eq('a narrow 2.2 × 4.5 m galley kitchen takes three, not a wall of five',
+     G.countForRoom(2.2,4.5,'std'),3);
+  eq('a 4 × 5 m room takes four standard',G.countForRoom(4,5,'std'),4);
+  eq('and six low glare',G.countForRoom(4,5,'lg'),6);
   ok('small rooms never get more than two fittings',
      [[1.2,1.5],[1.5,2],[2,2.5],[2.2,2.8]].every(function(d){
        return G.countForRoom(d[0],d[1],'std')<=2 && G.countForRoom(d[0],d[1],'lg')<=2;
@@ -6821,14 +6888,13 @@ window.__GHQA=function(){
   eq('the tour is six steps',U.STEPS.length,6);
   U.go(1);
   eq('the tour offers a standard and a low glare layout',d.querySelectorAll('[data-layout]').length,2);
-  ok('the counts it shows are the ones the planner would use',
-     d.querySelector('[data-layout="std"]').textContent.indexOf(
-       String(G.countForRoom(U.ROOM_M.w,U.ROOM_M.h,'std')))>-1 &&
-     d.querySelector('[data-layout="lg"]').textContent.indexOf(
-       String(G.countForRoom(U.ROOM_M.w,U.ROOM_M.h,'lg')))>-1,
+  ok('the counts it shows are the bedroom-rule counts the planner would place',
+     d.querySelector('[data-layout="std"]').textContent.indexOf('4')>-1 &&
+     d.querySelector('[data-layout="lg"]').textContent.indexOf('6')>-1,
      d.querySelector('[data-layout="std"]').textContent);
-  eq('the tour room is the four standard, six low glare band',
-     G.countForRoom(U.ROOM_M.w,U.ROOM_M.h,'std')+'/'+G.countForRoom(U.ROOM_M.w,U.ROOM_M.h,'lg'),'4/6');
+  eq('the tour bedroom teaches four standard, six low glare',
+     d.querySelector('[data-layout="std"] .lay-n').textContent+'/'+
+     d.querySelector('[data-layout="lg"] .lay-n').textContent,'4/6');
   ok('showing the standard layout places exactly four, all inside the room',
      (function(){
        U.T.shown=null;U.T.lights=[];U.render();
@@ -7065,8 +7131,8 @@ window.__GHQA=function(){
     /* ---- how the two new questions actually render on the card ---- */
     S.rooms=[]; S.fixtures=[]; S.sel=[]; S.roomPid={}; S.roomFan={}; S.roomAskFan={};
     S.roomComfort={}; S.roomOpen={};
-    var cLv={id:'cL',type:'living',x:0,y:0,w:5.5*PX,h:8.5*PX};   /* clamps to 9 */
-    var cDn={id:'cD',type:'dining',x:0,y:0,w:4.6*PX,h:5.4*PX};   /* table says 8 */
+    var cLv={id:'cL',type:'living',x:0,y:0,w:7*PX,h:12*PX};     /* clamps to 9 */
+    var cDn={id:'cD',type:'dining',x:0,y:0,w:5.5*PX,h:8.5*PX};   /* count comes to 7 */
     S.rooms=[cLv,cDn]; S.roomPid[cLv.id]='DL10ES'; S.roomPid[cDn.id]='DL10ES';
     S.roomOpen[cLv.id]=true; S.roomOpen[cDn.id]=true;
     G.renderAll();
@@ -7193,7 +7259,7 @@ window.__GHQA=function(){
    ============================================================ */
 (function(){
 "use strict";
-if(/[?&](qa=1|load=)/.test(location.search)) return;
+if(/[?&](qa=1|load=|draft=)/.test(location.search)) return;
 var EP='/api/track',uid,sid,q=[],timer=null,lastF=-1,lastR=-1;
 try{uid=localStorage.getItem('gh_uid');if(!uid){uid=Math.random().toString(36).slice(2,10);localStorage.setItem('gh_uid',uid);}}catch(e){uid='anon';}
 try{sid=sessionStorage.getItem('gh_sid');if(!sid){sid=Date.now().toString(36)+Math.random().toString(36).slice(2,6);sessionStorage.setItem('gh_sid',sid);}}catch(e){sid='s'+Date.now().toString(36);}
@@ -7207,8 +7273,20 @@ function flush(){
   }catch(e){}
 }
 function ev(name,data){
+  /* A return after 30 quiet minutes counts as a NEW session, even in the
+     same tab - otherwise a reopened tab merges into the old row and a
+     later visit never shows on the dashboard. */
+  try{
+    var now=Date.now(), last=+localStorage.getItem('gh_last')||0;
+    if(last&&now-last>1800000){
+      sid=now.toString(36)+Math.random().toString(36).slice(2,6);
+      try{sessionStorage.setItem('gh_sid',sid);}catch(e2){}
+    }
+    localStorage.setItem('gh_last',String(now));
+  }catch(e){}
   q.push({e:name,t:Date.now(),d:data||null});
-  if(!timer) timer=setTimeout(flush,15000);
+  if(name==='state'){ if(!timer) timer=setTimeout(flush,15000); }
+  else flush();                       /* key actions land immediately */
 }
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')flush();});
 window.addEventListener('pagehide',flush);

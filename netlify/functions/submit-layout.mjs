@@ -62,6 +62,14 @@ export default async (req) => {
   await store.setJSON('plans/' + id, payload);
   await store.setJSON('meta/' + id, meta);
 
+  /* Send = completed: the session's in-progress draft comes down and the
+     submission (green in the admin) takes its place. */
+  const sid = String(payload.sid || '').replace(/[^\w-]/g, '').slice(0, 60);
+  if (sid) {
+    try { await Promise.all([store.delete('drafts/' + sid), store.delete('dmeta/' + sid)]); }
+    catch { /* best effort */ }
+  }
+
   /* Email notification, via Netlify Forms: post a "plan-submission" form entry
      on our own site. Netlify's form notification (configured once in the UI:
      Forms → plan-submission → Notifications → add email) then emails the team

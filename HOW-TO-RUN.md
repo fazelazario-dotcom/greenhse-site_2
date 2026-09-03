@@ -88,6 +88,16 @@ functions, so Send falls back to downloading the submission file — that's
 expected. To exercise the real flow locally use `npx netlify dev`
 (needs a linked Netlify site), or just test on a deploy preview.
 
+**Live drafts:** you don't have to wait for a customer to hit Send. From the
+moment they load a floor plan (or place lights), the app quietly saves a
+snapshot to your side whenever something changes, and it shows in
+`/layout-admin/` as an amber-dashed **In progress** card — thumbnail, light
+and room counts, last-change time, and an "Open in planner" button so you
+can watch the plan take shape. There are no contact details until they
+Send. When they DO send, the draft disappears and the submission takes its
+place with a **green outline and a ✓ Completed badge**. Drafts untouched
+for 14 days clean themselves up.
+
 The customer never needs an account: name + email or phone is all the Send
 form asks for. Oversized plans are handled — the app shrinks the plan photo
 and image before sending so submissions stay under the function's ~6 MB limit.

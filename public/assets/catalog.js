@@ -98,12 +98,27 @@
       '</div>' +
       (local
         ? '<span class="btn card__quote card__quote--call">View →</span>'
-        : '<a class="btn card__quote card__quote--call" href="tel:0892972969">Call us</a>') +
+        : (out
+          ? '<span class="btn card__quote card__quote--call" style="opacity:.55">Out of stock</span>'
+          : '<button type="button" class="btn card__quote card__quote--call" data-live-add="' + esc(p.sku) + '"' +
+            ' data-live-name="' + esc(p.name) + '" data-live-price="' + min.value + '">Add to cart</button>')) +
       '</div></div>';
     return local
       ? '<a class="card" href="' + esc(local) + '">' + body + '</a>'
       : '<div class="card">' + body + '</div>';
   }
+
+  /* API-only cards have no product page, so their button adds straight to
+     the shared cart (assets/cart.js) - line id = the Magento sku, which
+     skuFor passes through at checkout. */
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('[data-live-add]') : null;
+    if (!b || !window.GreenhseCart) return;
+    window.GreenhseCart.add(b.getAttribute('data-live-add'), b.getAttribute('data-live-name'),
+      +b.getAttribute('data-live-price') || 0, 1);
+    var was = b.textContent; b.textContent = '✓ Added'; b.disabled = true;
+    setTimeout(function () { b.textContent = was; b.disabled = false; }, 900);
+  });
 
   function run() {
     gql(QUERY).then(function (d) {

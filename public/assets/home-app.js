@@ -165,7 +165,9 @@ function saveState(){
 function loadState(){
   try{
     const c=JSON.parse(localStorage.getItem("gh_cart")||"[]");
-    if(Array.isArray(c)) cart=c.filter(l=>l&&l.id&&findP(l.id));
+    /* keep lines added from product pages too - they carry their own
+       name/price snapshot even when the homepage grid doesn't know them */
+    if(Array.isArray(c)) cart=c.filter(l=>l&&l.id&&(findP(l.id)||l.name));
     const w=JSON.parse(localStorage.getItem("gh_wish")||"[]");
     if(Array.isArray(w)) wishlist=new Set(w.filter(id=>findP(id)));
   }catch(e){}
@@ -307,7 +309,7 @@ function cardHTML(p){
         <h3 data-view="${p.id}" style="cursor:pointer">${p.name}</h3>
         <div class="foot">
           <span class="price" data-sku="${p.id}"><span data-price-target>${p.options&&p.options.length?'<span class="from">from</span>':''}$${p.price.toFixed(2)}</span><span class="ex">ex-GST</span></span>
-          <button class="add" data-add="${p.id}">${p.options&&p.options.length?'Options':'Add +'}</button>
+          <button class="add" data-add="${p.id}">${p.options&&p.options.length?'Choose options':'Add to cart'}</button>
         </div>
       </div>
     </article>`;
@@ -388,14 +390,15 @@ function updateCart(){
   const cg=$("#cartTotalGst"); if(cg) cg.textContent="$"+(cartTotal()*1.1).toFixed(2);
   const wrap=$("#cartItems");
   if(!cart.length){wrap.innerHTML=`<div class="cart-empty">Your cart is empty.<br>Add a few fittings to get started.</div>`;return;}
-  wrap.innerHTML=cart.map(l=>{const p=findP(l.id);
-    const vi=(l.opt&&typeof optImg==="function")?optImg(p,{label:l.opt}):null;
+  wrap.innerHTML=cart.map(l=>{const p=findP(l.id)||{name:l.name||l.id,cat:null,url:null,shape:"round",tone:"warm"};
+    const known=!!findP(l.id);
+    const vi=(known&&l.opt&&typeof optImg==="function")?optImg(p,{label:l.opt}):null;
     return `
     <div class="ci">
-      <div class="img${vi?" hasimg":""}">${vi?`<img class="pimg img" src="${vi}" alt="${l.opt}">`:((typeof media==="function")?media(p,"img"):lamp(p.shape,p.tone))}</div>
+      <div class="img${vi?" hasimg":""}">${vi?`<img class="pimg img" src="${vi}" alt="${l.opt}">`:((known&&typeof media==="function")?media(p,"img"):lamp(p.shape,p.tone))}</div>
       <div class="det">
         <h4>${p.name}</h4>
-        <div class="c">${shortName((CATEGORIES.find(c=>c.id===p.cat)||{}).name)}${l.opt?" · "+l.opt:""}</div>
+        <div class="c">${p.cat?shortName((CATEGORIES.find(c=>c.id===p.cat)||{}).name):""}${l.opt?" · "+l.opt:""}</div>
         ${p.url?`<a class="ci-buy" href="${cleanUrl(p.url)}">View product page &#8594;</a>`:""}
         <div class="qty">
           <button data-q="${l.key}" data-d="-1" aria-label="Decrease">−</button>
@@ -3093,9 +3096,11 @@ function init(){
     var btn=this; btn.disabled=true; var was=btn.textContent; btn.textContent="Preparing checkout…";
     var lines=[], unknown=[];
     cart.forEach(function(l){
-      var sku=M.skuFor(l.id);
+      /* snapshot lines from product/category pages may already carry the
+         Magento sku as their id - try it; Magento names anything it refuses */
+      var sku=M.skuFor(l.id)||((!findP(l.id)&&l.name)?l.id:null);
       if(sku) lines.push({sku:sku,qty:l.qty});
-      else{ var p=findP(l.id); unknown.push((p&&p.name)||l.id); }
+      else{ var p=findP(l.id); unknown.push((p&&p.name)||l.name||l.id); }
     });
     if(!lines.length){
       btn.disabled=false; btn.textContent=was;
