@@ -94,11 +94,26 @@
       headers.Authorization = 'Bearer ' + t;
     }
     if (opts.captcha) headers['X-ReCaptcha'] = opts.captcha;
+    /* A hard 30s ceiling on every store call. Without it, a struggling
+       Magento leaves buttons stuck on "Working\u2026" forever - the customer
+       sees a frozen screen. With it they get a plain message and can retry. */
+    var ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 30000) : null;
     return fetch(ENDPOINT, {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify({ query: query, variables: variables || {} })
-    }).then(function (r) { return r.json(); }).then(function (j) {
+      body: JSON.stringify({ query: query, variables: variables || {} }),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function (r) {
+      if (timer) clearTimeout(timer);
+      return r.json();
+    }, function (e) {
+      if (timer) clearTimeout(timer);
+      if (e && e.name === 'AbortError') {
+        throw new Error('The store is taking too long to respond right now. Please wait a moment and try again.');
+      }
+      throw e;
+    }).then(function (j) {
       var err = firstError(j);
       if (err) {
         /* Magento says this when the token has expired or been revoked. Treat

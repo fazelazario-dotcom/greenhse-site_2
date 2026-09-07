@@ -20,7 +20,7 @@
     'applied_taxes{amount{value}label}}' +
     'shipping_addresses{firstname lastname street city postcode ' +
     'region{code label}telephone selected_shipping_method{carrier_code method_code method_title amount{value}}' +
-    'available_shipping_methods{carrier_code method_code method_title amount{value}}}' +
+    'available_shipping_methods{carrier_code carrier_title method_code method_title amount{value}}}' +
     'available_payment_methods{code title}';
 
   function cart() {
@@ -44,7 +44,7 @@
       return A.gql(
         'mutation($id:String!,$a:CartAddressInput!){' +
         'setShippingAddressesOnCart(input:{cart_id:$id,shipping_addresses:[{address:$a}]})' +
-        '{cart{shipping_addresses{available_shipping_methods{carrier_code method_code method_title amount{value}}}}}}',
+        '{cart{shipping_addresses{available_shipping_methods{carrier_code carrier_title method_code method_title amount{value}}}}}}',
         { id: id, a: addressInput(a) }
       ).then(function (d) {
         var sa = d.setShippingAddressesOnCart.cart.shipping_addresses[0];
