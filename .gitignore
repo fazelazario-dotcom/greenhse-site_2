@@ -7,6 +7,7 @@ desktop.ini
 .vscode/
 .idea/
 *.swp
+.next
 
 # Netlify CLI local state (site link, not source)
 .netlify/
