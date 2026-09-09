@@ -54,6 +54,6 @@ export default function Home(){
     <Script src="/assets/product-urls.js" strategy="afterInteractive"/>
     <Script src="/assets/url-sync4.js" strategy="afterInteractive"/>
     <Script src="/assets/home-app.js" strategy="afterInteractive"/>
-    <Script src="/assets/announce.js" strategy="afterInteractive"/>
+    <Script src="/assets/hero-slides.js" strategy="afterInteractive"/>
   </>);
 }

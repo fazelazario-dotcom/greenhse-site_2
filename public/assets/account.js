@@ -292,7 +292,11 @@
 (function(){
   function boot(){
     var h=document.querySelector('main h1')||document.querySelector('h1');
-    if(!h||document.querySelector('[data-live-proof]')) return;
+    /* One proof line only: account.js and checkout.js both carry this boot,
+       and both fetches used to pass the DOM check before either inserted -
+       the doubled green line. A synchronous flag settles the race. */
+    if(!h||document.querySelector('[data-live-proof]')||window.__ghProofBoot) return;
+    window.__ghProofBoot=1;
     fetch('/mag/graphql',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({query:'{storeConfig{store_code}}'})})
       .then(function(r){return r.ok?r.json():null;})
