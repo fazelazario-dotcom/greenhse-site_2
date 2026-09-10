@@ -128,6 +128,22 @@ select.sel:disabled{border-color:var(--line-soft);color:var(--muted);cursor:not-
   border-left:2px solid var(--eco-bright);background:#F0EEE4;padding:11px 13px;margin:12px 0 0;
   font-size:12.7px;line-height:1.55;color:#4c5044;
 }
+.discd>summary{list-style:none;cursor:pointer}
+.discd>summary::-webkit-details-marker{display:none}
+.discd>summary::after{content:' \2192 read the full note';color:var(--eco-bright);white-space:nowrap}
+.discd[open]>summary::after{content:''}
+.discd>p{margin-top:8px}
+.whyd{margin:10px 0 0}
+.whyd>summary{
+  list-style:none;cursor:pointer;font-family:"JetBrains Mono",monospace;font-size:9.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--eco-bright);
+  padding:5px 0;display:flex;align-items:center;gap:6px;
+}
+.whyd>summary::-webkit-details-marker{display:none}
+.whyd>summary::before{content:'+';font-size:12px;line-height:1;opacity:.8}
+.whyd[open]>summary::before{content:'\2212'}
+.whyd>summary:hover{color:var(--ink)}
+.whyd .teach{margin-top:4px}
 .teach h5{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--eco-bright);margin-bottom:6px;font-weight:400}
 .teach b{font-weight:600;color:var(--ink)}
 .teach code{font-family:"JetBrains Mono",monospace;font-size:11.5px;background:#e4e1d4;padding:1px 4px}
@@ -949,11 +965,11 @@ img{image-rendering:-webkit-optimize-contrast}
           <button type="button" class="act ghost sm" id="btn-demo">Use sample plan</button>
           <button type="button" class="act ghost sm" id="btn-clearplan">Remove plan</button>
         </div>
-        <div class="teach">
-          <h5>Why this first</h5>
-          A plan lets us work in real metres instead of guessing. A phone photo of a printed
-          plan is fine — as long as the whole plan is in frame and roughly square-on.
-        </div>
+        <details class="whyd"><summary>Why a plan first?</summary>
+          <div class="teach">A plan lets us work in real metres instead of guessing. A phone
+          photo of a printed plan is fine — as long as the whole plan is in frame and
+          roughly square-on.</div>
+        </details>
         <div id="pdfnote"></div>
       </div>
     </section>
@@ -1018,11 +1034,11 @@ img{image-rendering:-webkit-optimize-contrast}
           </select></div>
         </div>
 
-        <div class="teach" id="teach-scale">
-          <h5>What the scale unlocks</h5>
-          Once the app knows metres per pixel it can size fittings to their real cut-out,
-          space them by the rules below, and count what a room actually needs.
-        </div>
+        <details class="whyd"><summary>Why set a scale?</summary>
+          <div class="teach" id="teach-scale">Once the app knows metres per pixel it can size
+          fittings to their real cut-out, space them by the rules below, and count what a room
+          actually needs.</div>
+        </details>
       </div>
     </section>
 
@@ -1030,17 +1046,14 @@ img{image-rendering:-webkit-optimize-contrast}
     <section class="step" data-step="3">
       <button type="button" class="step-head"><span class="step-n">03</span><span class="step-t">Draw your rooms</span><span class="step-state" id="st3">0 rooms</span><i class="chev"></i></button>
       <div class="step-body">
-        <p class="step-lead"><b>This is the whole job.</b> Drag a box around a room and the
-        lights go in by themselves — the right number, in the right places. Do that for
-        every room and you are finished.</p>
+        <p class="step-lead">Pick what the room is, then drag a box around it.</p>
         <div class="scalewarn" data-scalewarn hidden></div>
-        <p class="hint" style="margin-top:-6px">Each room asks its own questions as you go —
-        fan or no fan, more light or comfortable light. The reasoning behind all of it lives
-        under <b>FAQ</b> at the top.</p>
         <div class="q">
           <label class="qlabel" for="rtype">What is this room?</label>
           <div class="selwrap"><select class="sel" id="rtype"></select></div>
-          <div class="teach" id="teach-room"></div>
+          <details class="whyd"><summary>What this room gets</summary>
+            <div class="teach" id="teach-room"></div>
+          </details>
         </div>
         <button type="button" class="act pri" id="btn-room"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/></svg>Drag a box around the room</button>
         <div id="roomchips" class="rchips" hidden aria-label="Rooms on this plan"></div>
@@ -1097,7 +1110,9 @@ img{image-rendering:-webkit-optimize-contrast}
           <summary>More information</summary>
           <div class="moreinfo-body">
             <div class="hint" id="cathint"></div>
-            <div class="teach" id="teach-place" style="margin-top:10px"></div>
+            <details class="whyd"><summary>Why this spacing</summary>
+              <div class="teach" id="teach-place" style="margin-top:6px"></div>
+            </details>
           </div>
         </details>
       </div>
@@ -1116,12 +1131,13 @@ img{image-rendering:-webkit-optimize-contrast}
       </div>
     </section>
 
-    <div class="disc">
-      <b>Indicative only.</b> Quantities and spacings come from standard rules of thumb applied to the
-      dimensions you entered, and prices are the catalogue price excluding GST. Every layout must be
-      verified on site by your licensed electrician before ordering or installation, including
-      measurements, ceiling access, joist and truss positions, IP ratings for wet areas and circuit loads.
-    </div>
+    <details class="disc discd">
+      <summary><b>Indicative only.</b> Your electrician verifies everything on site.</summary>
+      <p>Quantities and spacings come from standard rules of thumb applied to the dimensions you
+      entered, and prices are the catalogue price excluding GST. Every layout must be verified on
+      site by your licensed electrician before ordering or installation, including measurements,
+      ceiling access, joist and truss positions, IP ratings for wet areas and circuit loads.</p>
+    </details>
   </aside>
 
   <!-- ================= STAGE ================= -->
@@ -2485,7 +2501,7 @@ function toolState(){
 function renderTools(){
   var t=toolState();
   var nh=document.getElementById('navhint');
-  if(nh) nh.hidden=!(S.plan.loaded&&!S.hintSeen);
+  if(nh) nh.hidden=!(S.plan.loaded&&S.rooms.length>0&&!S.hintSeen);
   [['grp-view','view'],['grp-show','show'],['grp-edit','edit'],
    ['t-undo','undo'],['t-del','del'],['t-clear','clear'],
    ['t-group','group'],['t-ungroup','ungroup'],['toolhint','hint']].forEach(function(pair){
@@ -3192,7 +3208,7 @@ function renderRoomList(){
   renderRoomChips();
   var w=$('#roomlist');
   if(!S.rooms.length){
-    w.innerHTML='<div class="empty">No rooms marked.<br>Boxing in a room lets the app work out how many fittings it needs.</div>';
+    w.innerHTML='<div class="empty">No rooms yet \u2014 drag a box around your first one.</div>';
     return;
   }
   var html='';
@@ -4338,7 +4354,9 @@ function onUp(e){
         if(card&&card.scrollIntoView) card.scrollIntoView({block:'center',behavior:'smooth'});
       },150);
     } else if(S.mpp){
+      var hadFx=S.fixtures.length;
       doFill(nr);
+      var lit=S.fixtures.length>hadFx;   /* doFill already said what went in */
       /* Freshly placed lights arrive selected, which painted every fitting in
          the heavy selection ring and left the whole room one Delete press from
          gone. A filled room starts calm. */
@@ -4351,7 +4369,7 @@ function onUp(e){
          "stuck in a mode" and sent people hunting for Esc to get out - the
          button is right there when they want another room. */
       setTool('select');
-      toast(nb.label+' marked and lit \u2014 draw another room whenever you like');
+      if(!lit) toast(nb.label+' marked \u2014 draw another room whenever you like');
     } else {
       setTool('select');
       toast((ROOMS[S.roomType]||ROOMS.other).label+' marked \u2014 set the scale to lay the lights');
