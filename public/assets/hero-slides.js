@@ -36,6 +36,24 @@
   var ROTATE_MS  = 7000;
   var MAX_SLIDES = 5;
 
+  /* Ready-made banners, so the slideshow works the moment this ships.
+     The Magento block REPLACES these the instant it exists — treat them
+     as the starting set, not a fallback nobody sees. */
+  var DEFAULT_SLIDES = [
+    { title: 'New in the Ellenbrook showroom',
+      lede: 'Fresh stock on the floor and the full 24V range on display \u2014 come and see the light before you buy it.',
+      cta: { href: '/contact/', label: 'Visit the showroom' },
+      bg: '/images/hero/smart-life-hero.webp' },
+    { title: 'Downlights, done right',
+      lede: 'Standard, low glare, smart and colour \u2014 Australian certified, Perth stock, ready to go.',
+      cta: { href: '/products/lighting-perth/led-downlights-perth/', label: 'Shop downlights' },
+      bg: '/images/hero/downlight-hero.webp' },
+    { title: 'Strip lighting, wall to wall',
+      lede: 'Strips by the metre, every channel profile, transformers and controllers \u2014 all in one place.',
+      cta: { href: '/products/lighting-perth/led-strip-lights/', label: 'Explore strip lighting' },
+      bg: '/images/hero/strip-hero.webp' }
+  ];
+
   var reduced = false;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
 
@@ -282,9 +300,12 @@
         if (timer) clearTimeout(timer);
         var items = j && j.data && j.data.cmsBlocks && j.data.cmsBlocks.items;
         var slides = parse(items && items[0] && items[0].content);
-        if (slides.length) build(hero, wrap, slides);
+        build(hero, wrap, slides.length ? slides : DEFAULT_SLIDES);
       })
-      .catch(function () { if (timer) clearTimeout(timer); /* single static banner stands */ });
+      .catch(function () {
+        if (timer) clearTimeout(timer);
+        build(hero, wrap, DEFAULT_SLIDES);   /* store unreachable - ship the built-ins */
+      });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

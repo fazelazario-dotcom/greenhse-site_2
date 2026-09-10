@@ -263,6 +263,21 @@ select.sel:disabled{border-color:var(--line-soft);color:var(--muted);cursor:not-
 .room-rect.drag{stroke:#14512C;stroke-opacity:1;stroke-width:2.6;stroke-dasharray:9 5}
 .room-rect.hi{stroke:#14512C;stroke-opacity:1;stroke-width:2.4;stroke-dasharray:none;
   fill:#1E7A46;fill-opacity:.08}
+@keyframes ghRoomFlash{
+  0%,100%{stroke-opacity:1;stroke-width:2.4;fill-opacity:.08}
+  50%{stroke-opacity:.3;stroke-width:5.5;fill-opacity:.22}
+}
+.room-rect.flash{stroke:#14512C;stroke-dasharray:none;fill:#1E7A46;
+  animation:ghRoomFlash .5s ease-in-out 3}
+.rchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.rchip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:99px;
+  border:1px solid #dedcd2;background:#fff;color:#14150f;font:600 11.5px/1 inherit;
+  cursor:pointer;transition:border-color .15s,background .15s}
+.rchip:hover{border-color:#1E7A46}
+.rchip.on{border-color:#14512C;background:#14512C;color:#fff}
+.rchip.done .ck{color:#1E7A46;font-size:10px}
+.rchip.on .ck{color:#9fdcb4}
+.rchip .n{font-weight:700;font-size:10px;opacity:.65;font-variant-numeric:tabular-nums}
 .guide.drag{stroke:#14512C;stroke-opacity:1;stroke-width:2.6}
 .room-lab{font-family:"JetBrains Mono",monospace;fill:#2a2c24;letter-spacing:.04em}
 .room-x{fill:var(--danger);cursor:pointer}
@@ -1016,6 +1031,7 @@ img{image-rendering:-webkit-optimize-contrast}
           <div class="teach" id="teach-room"></div>
         </div>
         <button type="button" class="act pri" id="btn-room"><svg viewBox="0 0 24 24"><path d="M3 3h18v18H3z"/></svg>Drag a box around the room</button>
+        <div id="roomchips" class="rchips" hidden aria-label="Rooms on this plan"></div>
         <div id="roomlist" style="margin-top:14px"></div>
         <aside class="donep" id="donep" hidden aria-label="Rooms finished">
           <button type="button" class="donep-h" id="donep-h">
@@ -2062,6 +2078,7 @@ function renderRooms(){
        room's name, size and fittings live in the rail's room list. Clicking
        a room there highlights its box here (S.hiRoom). */
     rect.setAttribute('class','room-rect'+(S.hiRoom===r.id?' hi':''));
+    rect.setAttribute('data-room',r.id);
     g.appendChild(rect);
   });
 }
@@ -3068,7 +3085,8 @@ function renderDoneRooms(){
       S.sel=S.fixtures.filter(function(f){return pointInRect(f.x,f.y,r);})
                       .map(function(f){return f.id;});
       S.hiRoom=r.id;
-      S.roomOpen[r.id]=true;
+      S.rooms.forEach(function(x){ S.roomOpen[x.id]=(x.id===r.id); });
+      setTimeout(function(){flashRoom(r.id);},0);
       openStep(3);
       renderAll();
       var card=document.querySelector('[data-toggle="'+r.id+'"]');
@@ -3092,7 +3110,54 @@ function renderDoneRooms(){
   });
 }
 
+/* Pulse a room's box so the eye lands on it. "Which room am I looking at"
+   is the question the rail could not answer on its own. */
+var flashTimer=null;
+function flashRoom(id){
+  var g=el&&el.gRooms; if(!g) return;
+  var rect=g.querySelector('[data-room="'+id+'"]'); if(!rect) return;
+  if(flashTimer) clearTimeout(flashTimer);
+  Array.prototype.slice.call(g.querySelectorAll('.flash'))
+    .forEach(function(n){n.classList.remove('flash');});
+  void rect.getBoundingClientRect();
+  rect.classList.add('flash');
+  flashTimer=setTimeout(function(){rect.classList.remove('flash');flashTimer=null;},1500);
+}
+
+/* Every room as one small pill - Bed 1, Bed 2, Kitchen - so the whole house
+   reads at a glance instead of as a stack of open cards. Pressing one flashes
+   that box on the plan and opens its card to edit. */
+function focusRoom(id){
+  var r=S.rooms.filter(function(x){return x.id===id;})[0];
+  if(!r) return;
+  S.hiRoom=id;
+  S.sel=S.fixtures.filter(function(f){return pointInRect(f.x,f.y,r);})
+                  .map(function(f){return f.id;});
+  S.rooms.forEach(function(x){ S.roomOpen[x.id]=(x.id===id); });
+  renderAll();
+  flashRoom(id);
+  var card=document.querySelector('[data-toggle="'+id+'"]');
+  if(card&&card.scrollIntoView) card.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+function renderRoomChips(){
+  var w=document.getElementById('roomchips');
+  if(!w) return;
+  if(!S.rooms.length){ w.hidden=true; w.innerHTML=''; return; }
+  w.hidden=false;
+  w.innerHTML=S.rooms.map(function(r){
+    var n=roomFittings(r), done=roomIsDone(r);
+    return '<button type="button" class="rchip'+(S.hiRoom===r.id?' on':'')+(done?' done':'')+
+      '" data-chip="'+r.id+'" title="Show this room on the plan">'+
+      (done?'<span class="ck">\u2713</span>':'')+esc(roomName(r))+
+      (n?'<span class="n">'+n+'</span>':'')+'</button>';
+  }).join('');
+  w.querySelectorAll('[data-chip]').forEach(function(b){
+    b.onclick=function(){ focusRoom(b.dataset.chip); };
+  });
+}
+
 function renderRoomList(){
+  renderRoomChips();
   var w=$('#roomlist');
   if(!S.rooms.length){
     w.innerHTML='<div class="empty">No rooms marked.<br>Boxing in a room lets the app work out how many fittings it needs.</div>';
@@ -3326,10 +3391,14 @@ function renderRoomList(){
     b.onclick=function(){
       var id=b.dataset.toggle;
       var r=S.rooms.filter(function(x){return x.id===id;})[0];
-      S.roomOpen[id]=!roomIsOpen(r);
-      S.hiRoom=roomIsOpen(r)?id:null;
+      var opening=!roomIsOpen(r);
+      /* One room open at a time. Six cards open at once was the rail people
+         called "too much on the side", and it buried the room being worked on. */
+      S.rooms.forEach(function(x){ S.roomOpen[x.id]=(opening&&x.id===id); });
+      S.hiRoom=opening?id:null;
       renderRooms();
       renderRoomList();
+      if(opening) flashRoom(id);
     };
   });
   w.querySelectorAll('[data-roomtype]').forEach(function(sel){
@@ -3351,9 +3420,24 @@ function renderRoomList(){
          way round, so the room goes back to the default when its type
          changes. */
       delete S.roomPid[r.id];
+      /* A room's lights ARE its type. Switching dining to bathroom has to put
+         bathroom lighting in that box then and there - leaving the old set
+         sitting there meant the plan said one thing and the label another. */
+      var had=roomFittings(r), relit=false;
+      if(had){
+        if(S.roomAskFan[r.id]){
+          /* This type asks about a fan before it can be laid out, so the old
+             lights come out now rather than sitting there looking answered. */
+          S.fixtures=S.fixtures.filter(function(f){return !(isRoomLight(f)&&pointInRect(f.x,f.y,r));});
+          S.sel=[];
+        } else if(S.mpp){ doFill(r); relit=true; }
+      }
+      S.hiRoom=r.id;
       S.roomOpen[r.id]=true;                 // keep it open so they can see the change
       renderAll();
-      toast('Changed to '+(ROOMS[r.type]||ROOMS.other).label);
+      flashRoom(r.id);
+      toast('Changed to '+(ROOMS[r.type]||ROOMS.other).label+
+            (relit?' \u2014 lights updated':''));
     };
   });
   w.querySelectorAll('[data-delroom]').forEach(function(b){
@@ -3390,7 +3474,7 @@ function renderRoomList(){
       if(r){ var fresh=!!S.roomAskFan[r.id];
              delete S.roomAskFan[r.id]; if(S.roomFan[r.id]==null) S.roomFan[r.id]='none';
              delete S.roomOpen[r.id]; doFill(r);
-             if(fresh){ setTool('room'); toast('Now drag the next room \u2014 or press Esc if you\u2019re done'); } }
+             if(fresh){ setTool('select'); toast('Room lit \u2014 draw another room whenever you like'); } }
     };
   });
   /* Ticking either box re-plans the room straight away - no separate
@@ -3408,7 +3492,7 @@ function renderRoomList(){
       delete S.roomAskFan[r.id];
       S.roomOpen[r.id]=true;
       if(S.mpp) doFill(r); else renderRoomList();
-      if(fresh&&S.mpp){ setTool('room'); toast('Now drag the next room \u2014 or press Esc if you\u2019re done'); }
+      if(fresh&&S.mpp){ setTool('select'); toast('Room lit \u2014 draw another room whenever you like'); }
       renderAll();
     };
   });
@@ -4206,8 +4290,12 @@ function onUp(e){
     } else if(S.mpp){
       doFill(nr);
       S.sel=[];
-      setTool('room');
-      toast('Now drag the next room \u2014 or press Esc if you\u2019re done');
+      /* Letting go of the box finishes the job: the room is marked, lit and
+         the tool puts itself away. Staying armed for the next room read as
+         "stuck in a mode" and sent people hunting for Esc to get out - the
+         button is right there when they want another room. */
+      setTool('select');
+      toast(nb.label+' marked and lit \u2014 draw another room whenever you like');
     } else {
       setTool('select');
       toast((ROOMS[S.roomType]||ROOMS.other).label+' marked \u2014 set the scale to lay the lights');
