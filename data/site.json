@@ -36255,16 +36255,30 @@
      ]
     },
     {
+     "href": "/products/lighting-perth/led-strip-lights/st24v-9w-15w-cct-cob-1.html",
+     "img": "https://greenhse.com/media/catalog/product/cache/d0ce8581b8eaac8b5e50cad6dde77aa4/c/o/cobx480-24-ycc_cob_strip_light__1.png",
+     "name": "24V Dotless COB Strip Light 15w/m — 2700K & 3000K",
+     "sku": "ST24V-12- 2700k COB",
+     "price": "$17.00",
+     "priceNote": "/m ex GST",
+     "chips": [
+      "24V",
+      "15w/m",
+      "2700K / 3000K"
+     ],
+     "cats": []
+    },
+    {
      "href": "/products/strip/st24v-longrun-ip68.html",
      "img": "https://greenhse.com/media/catalog/product/cache/d0ce8581b8eaac8b5e50cad6dde77aa4/c/o/cob_3000k.png",
      "name": "24V Long Run COB Strip Light 7.5w/m",
      "sku": "ST24V-7.5 3000k COB",
-     "price": "from $16.00",
-     "priceNote": "ex GST",
+     "price": "from $12.00",
+     "priceNote": "/m ex GST",
      "chips": [
       "24V",
       "7.5w/m",
-      "2700/3000/4000K"
+      "IP20 / IP68"
      ],
      "cats": [
       "longrun"
@@ -36336,58 +36350,62 @@
      ]
     },
     {
-     "name": "Garden Strip IP68",
-     "price": "Enquire",
-     "priceNote": "call for pricing",
+     "name": "Long Run Garden Strip IP68",
+     "price": "from $15.00",
+     "priceNote": "/m ex GST",
      "chips": [
       "24V",
       "IP68",
       "Garden"
      ],
      "cats": [
-      "wet"
+      "wet",
+      "specialised"
      ]
     },
     {
-     "name": "Sidebend Neon CCT",
+     "name": "6×12 CCT Neon",
      "price": "Enquire",
      "priceNote": "call for pricing",
      "chips": [
+      "6×12",
       "Neon",
-      "Sidebend",
       "CCT"
      ],
      "cats": [
       "white",
-      "wet"
+      "wet",
+      "specialised"
      ]
     },
     {
-     "name": "12×12 SPI Neon RGB",
+     "name": "12×12 Neon RGB (Magic)",
      "price": "Enquire",
      "priceNote": "call for pricing",
      "chips": [
       "12×12",
-      "Neon",
-      "SPI RGB"
+      "Neon RGB",
+      "+ U profile"
      ],
      "cats": [
       "fullcolour",
-      "wet"
+      "wet",
+      "specialised"
      ]
     },
     {
-     "name": "SPI RGBW",
+     "name": "SPI RGBW IP65 (Magic)",
      "price": "Enquire",
      "priceNote": "call for pricing",
      "chips": [
-      "SPI",
-      "RGBW",
-      "Addressable"
+      "SPI RGBW",
+      "IP65",
+      "+ U profile"
      ],
      "cats": [
       "fullcolour",
-      "wet"
+      "wet",
+      "specialised"
      ]
     },
     {
@@ -36413,7 +36431,9 @@
       "Cabinet",
       "Speciality"
      ],
-     "cats": []
+     "cats": [
+      "specialised"
+     ]
     },
     {
      "href": "/products/lighting-perth/led-strip-lights/tr24v-all.html",
@@ -36530,6 +36550,10 @@
     {
      "id": "fullcolour",
      "label": "Full colour"
+    },
+    {
+     "id": "specialised",
+     "label": "Specialised (display)"
     },
     {
      "id": "controllers",

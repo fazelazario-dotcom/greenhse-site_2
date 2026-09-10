@@ -93,6 +93,7 @@ export const CATEGORIES = [
   { id: 'rgb',        label: 'RGB' },
   { id: 'longrun',    label: 'Long run' },
   { id: 'fullcolour', label: 'Full colour' },
+  { id: 'specialised',label: 'Specialised (display)' },
   { id: 'controllers',label: 'Controllers' },
 ];
 
@@ -161,7 +162,7 @@ export const PRODUCTS = {
     sku: 'ST24V-7.5 3000k COB', key: '24v-dotless-cob-strip-light-3000k', magento: true,
     name: '24V Long Run COB Strip Light 7.5w/m',
     blurb: 'Low wattage per metre means a much longer run off a single transformer, with the same dotless line of light. Pick the colour temperature — it is fixed, not adjustable.',
-    price: 12.00, unit: '/m', from: true, chips: ['24V', '7.5w/m', 'Dotless', 'Long run'],
+    price: 12.00, unit: '/m', from: true, chips: ['24V', '7.5w/m', 'IP20 / IP68'],
     img: `${MEDIA}/c/o/cob_3000k.png`,
     variants: ['2700K — warm', '3000K — warm white', '4000K — neutral'],
     reviewPrice: 'Brief says from $12/m; Magento currently $16.',
@@ -231,35 +232,35 @@ export const PRODUCTS = {
   /* ---------- Specialised display strip (photos to come) ---------- */
   gardenIp68: {
     sku: 'ST24V-GARDEN-IP68', key: '24v-long-run-garden-strip-ip68', magento: false,
-    name: 'Garden Strip IP68',
+    name: 'Long Run Garden Strip IP68',
     blurb: 'Sealed for garden beds and in-ground use, and low enough per metre to run the length of a yard.',
     price: 15.00, unit: '/m', from: true, chips: ['24V', 'IP68', 'Garden'],
     img: null,
-    cats: ['wet'],
+    cats: ['wet', 'specialised'],
   },
   neonRgbMagic: {
     sku: 'NEON-12X12-RGB-MAGIC', key: '12x12-neon-rgb-magic', magento: false,
-    name: '12×12 SPI Neon RGB',
+    name: '12×12 Neon RGB (Magic)',
     blurb: 'Addressable colour in a 12×12 neon profile — chase, fade and pixel effects, not just one colour at a time. Comes with its own profile.',
-    price: null, unit: '/m', chips: ['12×12', 'Neon', 'SPI RGB', 'Own profile'],
+    price: null, unit: '/m', chips: ['12×12', 'Neon RGB', 'Magic', '+ U profile'],
     img: null,
-    cats: ['rgb', 'fullcolour', 'wet'],
+    cats: ['rgb', 'fullcolour', 'wet', 'specialised'],
   },
   spaRgbwMagic: {
     sku: 'SPA-RGBW-IP65-MAGIC', key: 'spa-rgbw-ip65-magic', magento: false,
-    name: 'SPI RGBW',
+    name: 'SPI RGBW IP65 (Magic)',
     blurb: 'RGBW addressable — full colour plus a dedicated white chip, sealed to IP65 for spa and wet surrounds. Comes with its own profile.',
-    price: null, unit: '/m', chips: ['SPI', 'RGBW', 'IP65', 'Own profile'],
+    price: null, unit: '/m', chips: ['SPI RGBW', 'IP65', 'Magic', '+ U profile'],
     img: null,
-    cats: ['rgb', 'fullcolour', 'wet'],
+    cats: ['rgb', 'fullcolour', 'wet', 'specialised'],
   },
   neonCct: {
     sku: 'NEON-6X12-CCT', key: '6x12-cct-neon-strip', magento: false,
-    name: 'Sidebend Neon CCT',
+    name: '6×12 CCT Neon',
     blurb: 'A slim 6×12 neon profile in adjustable white — soft, continuous line light for detail work and signage.',
-    price: null, unit: '/m', chips: ['Neon', 'Sidebend', 'CCT'],
+    price: null, unit: '/m', chips: ['6×12', 'Neon', 'CCT'],
     img: null,
-    cats: ['white', 'wet'],
+    cats: ['white', 'wet', 'specialised'],
   },
   meatStrip: {
     sku: 'MEAT-STRIP', key: 'meat-display-strip', magento: false,
@@ -267,8 +268,7 @@ export const PRODUCTS = {
     blurb: 'Purpose-tuned display strip for butchery and deli cabinets — the spectrum that keeps product looking fresh rather than grey.',
     price: null, unit: '/m', chips: ['Display', 'Food-safe cabinet', 'Speciality'],
     img: null,
-    reviewCat: 'Filed under "Full colour" for now — tell us which filter the meat strip should sit under.',
-    cats: ['fullcolour'],
+    cats: ['specialised'],
   },
 
   /* ---------- Controllers & accessories ---------- */
