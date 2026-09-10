@@ -1,4 +1,5 @@
 import Script from 'next/script';
+import { asset } from '../lib/assets';
 import { SITE, mapHref } from '../lib/site';
 import extras from '../data/cat-extras.json';
 
@@ -40,33 +41,60 @@ function Title({t}){
   });
 }
 
-function Card({c: raw}){
+const HeartSvg=(
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+       strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21.2l7.8-7.7 1-1.1a5.5 5.5 0 0 0 0-7.8z"/>
+  </svg>
+);
+
+function Card({c: raw, v2, eyebrowFallback}){
   const c=withProduct(raw);
-  const Tag=c.href?'a':'div';
+  const chips=(c.chips||[]).slice(0, v2?3:0);
   const body=(<>
     <div className="card__tile">
       <div className="visual visual--photo">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         {c.img && <img src={c.img} alt={c.name} loading="lazy"/>}
       </div>
+      {/* Save-for-later. Sits inside the card's link, so assets/saved.js has to
+          swallow the click — see the preventDefault there. It shares the
+          homepage's gh_wish list, so a heart here lights up the homepage badge. */}
+      {v2 && c.sku && (
+        <span className="card__wishlist" role="button" tabIndex={0}
+              data-wish={c.sku} aria-label={'Save '+c.name+' for later'}>{HeartSvg}</span>
+      )}
     </div>
     <div className="card__body">
-      {/* the card is the light, its name and its price — spec chips live on
-          the product page itself, not here */}
-      {(c.eyebrow||c.meta) ? <span className="eyebrow">{c.eyebrow||c.meta}</span> : null}
+      {/* the card is the light, its name and its price — the spec chips are the
+          three that decide the buy (voltage, rating, finish); the full table
+          stays on the product page */}
+      {(c.eyebrow||c.meta||(v2?eyebrowFallback:null)) ? <span className="eyebrow">{c.eyebrow||c.meta||eyebrowFallback}</span> : null}
       <span className="card__title">{c.name}</span>
+      {!!chips.length && (
+        <div className="card__chips">{chips.map(x=><span key={x} className="chip-spec">{x}</span>)}</div>
+      )}
       <div className="card__foot">
         <div className="card__price" {...(c.sku?{'data-sku':c.sku}:{})}>
           <span className="card__amount" {...(c.sku?{'data-price-target':true}:{})}>{c.price}</span>
           <span className="card__gst">{c.priceNote||'ex GST'}</span>
         </div>
-        <span className="btn card__quote card__quote--call">View →</span>
+        {/* Not "Add to cart": these cards are the product families — the
+            wattage, the colour temperature and the IP rating are chosen on the
+            product page, so a one-click add here would put the wrong reel in
+            the cart. The per-SKU Add to cart lives on the product page (and on
+            the rebuilt /strip-lights/ page, where every card IS one SKU). */}
+        <span className="btn card__quote card__quote--call">{v2?'Choose options →':'View →'}</span>
       </div>
     </div>
   </>);
+  /* data-cats drives the category filter boxes (assets/cat-filters.js).
+     A product can carry several, so one card can sit under Wet areas and
+     White adjustable at once without being listed twice. */
+  const attrs = c.cats && c.cats.length ? {'data-cats': c.cats.join(' ')} : {};
   return c.href
-    ? <a className="card" href={mapHref(c.href)}>{body}</a>
-    : <div className="card">{body}</div>;
+    ? <a className="card" href={mapHref(c.href)} {...attrs}>{body}</a>
+    : <div className="card" {...attrs}>{body}</div>;
 }
 
 const PlaySvg=(
@@ -125,7 +153,30 @@ export default function Cat({ c, path }){
           </div>
           {finderHref && <a className="link-mono range__finder" href={finderHref}>Open the finder <span aria-hidden="true">→</span></a>}
         </div>
-        {(sections.length>1 || (c.jumpExtra||[]).length>0) && (
+        {/* Category filters. When a category carries `filters`, the boxes stop
+            being jump links and become real filters over one grid — that way a
+            strip that is BOTH wet-area and white-adjustable appears under both
+            without being printed on the page twice. assets/cat-filters.js does
+            the filtering; with JS off every card simply stays visible. */}
+        {(c.filters||[]).length>0 && (
+          <nav className="shelfnav shelfnav--filters" aria-label="Filter by category" data-cat-filters>
+            {c.filters.map(f=>(
+              <button key={f.id} type="button" className="shelfnav__box" data-cat={f.id} aria-pressed={f.id==='all'}>
+                <span className="shelfnav__label">{f.label}</span>
+                <span className="shelfnav__count" data-cat-count>{f.note||''}</span>
+              </button>
+            ))}
+            {/* jump links (the channel profiles block further down) ride in the
+                same row so the boxes stay one tidy grid rather than two. */}
+            {(c.jumpExtra||[]).map(j=>(
+              <a key={j.id} className="shelfnav__box shelfnav__box--jump" href={'#'+j.id}>
+                <span className="shelfnav__label">{j.label}</span>
+                <span className="shelfnav__count">{j.count} ↓</span>
+              </a>
+            ))}
+          </nav>
+        )}
+        {!(c.filters||[]).length && (sections.length>1 || (c.jumpExtra||[]).length>0) && (
           <nav className="shelfnav" aria-label="Product groups">
             {sections.map(s=>(
               <a key={s.id} className="shelfnav__box" href={'#'+s.id}>
@@ -148,7 +199,8 @@ export default function Cat({ c, path }){
             <span>{x.banner.caption}</span>
           </div>
         )}
-        {flatCards && <div className="grid">{flatCards.map((cd,i)=><Card key={i} c={cd}/>)}</div>}
+        {flatCards && <div className="grid">{flatCards.map((cd,i)=>
+          <Card key={i} c={cd} v2={c.cardStyle==='v2'} eyebrowFallback={c.cardEyebrow}/>)}</div>}
         {sections.map((s,si)=>(
           <div key={si} id={s.id||undefined} className="range__section">
             {(si>0||s.h2!==x?.range?.title) && s.h2 && (
@@ -160,7 +212,8 @@ export default function Cat({ c, path }){
                 </div>
               </div>
             )}
-            <div className="grid">{s.cards.map((cd,i)=><Card key={i} c={cd}/>)}</div>
+            <div className="grid">{s.cards.map((cd,i)=>
+              <Card key={i} c={cd} v2={c.cardStyle==='v2'} eyebrowFallback={c.cardEyebrow}/>)}</div>
           </div>
         ))}
       </div>
@@ -210,10 +263,12 @@ export default function Cat({ c, path }){
       </section>
     ) : (c.endHtml ? <div className="page-end" dangerouslySetInnerHTML={{__html:c.endHtml}}/> : null)}
 
-    <Script src="/assets/sku-map.js" strategy="afterInteractive"/>
-    <Script src="/assets/magento.js" strategy="afterInteractive"/>
-    <Script src="/assets/catalog-map.js" strategy="afterInteractive"/>
-    <Script src="/assets/cart.js" strategy="afterInteractive"/>
-    <Script src="/assets/catalog.js" strategy="afterInteractive"/>
+    <Script src={asset("/assets/sku-map.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/magento.js")} strategy="afterInteractive"/>
+    {(c.filters||[]).length>0 && <Script src={asset("/assets/cat-filters.js")} strategy="afterInteractive"/>}
+    {c.cardStyle==='v2' && <Script src={asset("/assets/saved.js")} strategy="afterInteractive"/>}
+    <Script src={asset("/assets/catalog-map.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/cart.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/catalog.js")} strategy="afterInteractive"/>
   </div>);
 }

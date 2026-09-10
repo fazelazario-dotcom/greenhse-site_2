@@ -168,8 +168,12 @@ function loadState(){
     /* keep lines added from product pages too - they carry their own
        name/price snapshot even when the homepage grid doesn't know them */
     if(Array.isArray(c)) cart=c.filter(l=>l&&l.id&&(findP(l.id)||l.name));
+    /* keep hearts saved from category and product pages too - the wishlist is
+       only a badge count and an on/off state, so an id the homepage grid
+       doesn't know costs nothing to hold on to. Dropping them here used to
+       wipe a save the moment the customer came back to the homepage. */
     const w=JSON.parse(localStorage.getItem("gh_wish")||"[]");
-    if(Array.isArray(w)) wishlist=new Set(w.filter(id=>findP(id)));
+    if(Array.isArray(w)) wishlist=new Set(w.filter(id=>typeof id==="string"&&id));
   }catch(e){}
 }
 let modalProduct=null, modalOpt=null, modalQty=1;

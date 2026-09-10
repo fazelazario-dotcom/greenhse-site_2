@@ -1,4 +1,5 @@
 import Script from 'next/script';
+import { asset } from '../lib/assets';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -47,13 +48,13 @@ export default function Home(){
     <link rel="stylesheet" href="/assets/home.css"/>
     <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(JSONLD)}}/>
     <div dangerouslySetInnerHTML={{__html:skeleton}}/>
-    <Script src="/assets/sku-map.js" strategy="afterInteractive"/>
-    <Script src="/assets/account.js" strategy="afterInteractive"/>
-    <Script src="/assets/checkout.js" strategy="afterInteractive"/>
-    <Script src="/assets/magento.js" strategy="afterInteractive"/>
-    <Script src="/assets/product-urls.js" strategy="afterInteractive"/>
-    <Script src="/assets/url-sync4.js" strategy="afterInteractive"/>
-    <Script src="/assets/home-app.js" strategy="afterInteractive"/>
-    <Script src="/assets/hero-slides.js" strategy="afterInteractive"/>
+    <Script src={asset("/assets/sku-map.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/account.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/checkout.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/magento.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/product-urls.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/url-sync4.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/home-app.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/hero-slides.js")} strategy="afterInteractive"/>
   </>);
 }

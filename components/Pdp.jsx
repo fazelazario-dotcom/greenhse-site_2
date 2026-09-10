@@ -1,4 +1,5 @@
 import Script from 'next/script';
+import { asset } from '../lib/assets';
 import { mapHref } from '../lib/site';
 import Gallery from './Gallery';
 
@@ -138,10 +139,10 @@ export default function Pdp({ p }){
         )}
       </div>
     </main>
-    <Script src="/assets/sku-map.js" strategy="afterInteractive"/>
-    <Script src="/assets/magento.js" strategy="afterInteractive"/>
-    <Script src="/assets/account.js" strategy="afterInteractive"/>
-    <Script src="/assets/checkout.js" strategy="afterInteractive"/>
-    <Script src="/assets/cart.js" strategy="afterInteractive"/>
+    <Script src={asset("/assets/sku-map.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/magento.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/account.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/checkout.js")} strategy="afterInteractive"/>
+    <Script src={asset("/assets/cart.js")} strategy="afterInteractive"/>
   </div>);
 }

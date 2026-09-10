@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { asset } from '../../../lib/assets';
 import Script from 'next/script';
 import { SITE, cleanPath } from '../../../lib/site';
 import Pdp from '../../../components/Pdp';
@@ -64,7 +65,10 @@ export default function Page({params}){
   return (<>
     {d.css ? <style dangerouslySetInnerHTML={{__html:d.css}}/> : null}
     <div dangerouslySetInnerHTML={{__html:d.bodyHtml}}/>
-    {(d.scripts||[]).map(src=><Script key={src} src={src} strategy="afterInteractive"/>)}
+    {/* Version-stamp the /assets/ scripts these pages list in data/site.json,
+        the same as every other page — otherwise the checkout keeps running a
+        cached copy of account.js/checkout.js after a deploy. */}
+    {(d.scripts||[]).map(src=><Script key={src} src={src.startsWith('/assets/')?asset(src):src} strategy="afterInteractive"/>)}
     {(d.inline||[]).map((code,i)=><Script key={'i'+i} id={'inline-'+params.slug.join('-')+'-'+i} strategy="lazyOnload" dangerouslySetInnerHTML={{__html:code}}/>)}
   </>);
 }

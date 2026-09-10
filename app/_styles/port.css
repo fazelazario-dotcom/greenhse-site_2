@@ -631,7 +631,6 @@ main.home+.site-footer{margin-top:0}
 .tpl .range__note{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-muted)}
 /* the live-catalogue proof line + live-rendered extras (catalog.js) */
 .tpl .range__live{margin:10px 0 0;font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#1e7a3c}
-.tpl .range__section--live{margin-top:34px}
 .tpl a.card{color:inherit;text-decoration:none}
 .tpl .card:hover .card__title{color:var(--green)}
 .tpl .card .visual{position:absolute;inset:0}
@@ -656,3 +655,12 @@ main.home+.site-footer{margin-top:0}
 .tpl .shelfnav__label{font-weight:600;font-size:14.5px;letter-spacing:-.01em}
 .tpl .shelfnav__count{font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted)}
 .tpl .range__section{scroll-margin-top:92px}
+
+/* Category filter boxes (assets/cat-filters.js). Same box as .shelfnav__box so
+   the row looks unchanged — these just filter the grid instead of jumping. */
+.tpl .shelfnav--filters{margin-bottom:26px}
+.tpl .shelfnav--filters .shelfnav__box{text-align:left;font:inherit;cursor:pointer;-webkit-appearance:none;appearance:none}
+.tpl .shelfnav--filters .shelfnav__box.is-on{border-color:var(--green);background:var(--bg-raised);box-shadow:inset 0 0 0 1px var(--green)}
+.tpl .shelfnav--filters .shelfnav__box:disabled{cursor:default}
+.tpl .shelfnav--filters .shelfnav__box:disabled:hover{border-color:var(--line);background:var(--bg-card)}
+.tpl .shelfnav--filters .shelfnav__box--jump{border-style:dashed}
