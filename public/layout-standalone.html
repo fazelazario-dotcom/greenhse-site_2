@@ -966,7 +966,8 @@ img{image-rendering:-webkit-optimize-contrast}
     <section class="step" data-step="2">
       <button type="button" class="step-head"><span class="step-n">02</span><span class="step-t">Tell it how big</span><span class="step-state" id="st2">Not set</span><i class="chev"></i></button>
       <div class="step-body">
-        <p class="step-lead">Put 2 red points on the plan and drag them onto something you already know the size of. A door is easiest.</p>
+        <p class="step-lead">Put 2 points across any internal door on the plan. That is the
+        scale set &mdash; everything else sizes itself from there.</p>
 
         <div id="paperbox"></div>
 
@@ -975,7 +976,7 @@ img{image-rendering:-webkit-optimize-contrast}
           <div class="hint" style="margin:0 0 8px">Pick something on your plan you already know the size of, then drag the 2 red points onto it.</div>
           <div class="selwrap"><select class="sel" id="calref">
             <optgroup label="Doors">
-              <option value="0.82">Standard internal door — 820 mm</option>
+              <option value="0.82" selected>Standard internal door — 820 mm</option>
               <option value="0.92">Wide door — 920 mm</option>
               <option value="1.64">Double doors — 1640 mm</option>
               <option value="2.4">Single garage door — 2400 mm</option>
@@ -992,7 +993,7 @@ img{image-rendering:-webkit-optimize-contrast}
               <option value="0.09">Single brick course — 90 mm</option>
             </optgroup>
             <optgroup label="Other">
-              <option value="custom" selected>I'll type the length</option>
+              <option value="custom">Something else — I'll type the length</option>
             </optgroup>
           </select></div>
           <button type="button" class="act pri" id="btn-cal" style="margin-top:9px"><svg viewBox="0 0 24 24"><path d="M3 12h18M6 9v6M18 9v6"/></svg>Put 2 points on the plan</button>
@@ -2486,8 +2487,9 @@ var RATIOS=[20,25,50,75,100,125,150,200,250,500];
 function renderPaper(){
   var w=document.getElementById('paperbox'); if(!w) return;
   if(!S.paper||!S.plan.loaded){
-    w.innerHTML='<div class="hint" style="margin:0 0 16px">Load a PDF and the app can read the page size '+
-      'and work the scale out for you. For a photo or a screenshot, measure something known below.</div>';
+    w.innerHTML='<details class="whyd" style="margin:0 0 12px"><summary>Got a PDF?</summary>'+
+      '<div class="teach">Load a PDF and the app reads the page size and works the scale out for '+
+      'you. For a photo or a screenshot, put the 2 points on a door as above.</div></details>';
     return;
   }
   var nm=paperName(S.paper.wMm,S.paper.hMm);
@@ -2586,7 +2588,7 @@ function nextAction(){
             s:'Drop a photo or a PDF into the box below. No plan handy? Press \u201cUse sample plan\u201d and have a play.'};
   if(!S.mpp)
     return {n:2,t:'Tell it how big',
-            s:'Press \u201cPut 2 points on the plan\u201d, then drag the 2 red points across a door. Type how wide it is.'};
+            s:'Press \u201cPut 2 points on the plan\u201d, then drag the 2 red points across any internal door. That sets the scale.'};
   if(!S.rooms.length)
     return {n:3,t:'Draw your first room',
             s:'Press the black button, then drag a box around one room. The lights go in by themselves.'};
