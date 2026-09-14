@@ -1,95 +1,38 @@
-# Greenhse Technologies — Next.js build
+# Greenhse Technologies — website
 
-The Greenhse site as a Next.js 14 (App Router) project. **335 routes, four page
-components, one data file.** Same design, same URLs (via 301s), same live
-Magento commerce as the static build it replaces.
+Next.js 14 (App Router, static export). Deploys to Netlify from `main`.
 
-```bash
+This build is the demolights.greenhse.com design and pages, rebuilt as source
+in this project — every page, the product catalogue, cart, checkout and
+account area — plus this site's own blog (`/blog/`) and layout planner
+(`/layout-app/`).
+
+```
 npm install
-npm run dev        # http://localhost:3000
-npm run build      # static export to out/
+npm run build      # fetches the catalogue, builds every page into out/
+npm run preview    # serves out/ at http://localhost:8080 with the Magento proxy
+npm run dev        # development server at http://localhost:3000
 ```
 
-Deploys on Netlify with `command = "npm run build"`, `publish = "out"`
-(already in `netlify.toml`).
+## Where things are
 
-## Architecture
+| Folder | What |
+| --- | --- |
+| `app/` | One route file per page. `app/layout.js` is the shared shell (store, header, page, footer, overlays). |
+| `site/pages/` | The page components: homepage, each category page, products, cart, checkout, account, contact, about, installation, policies. |
+| `site/components/` | Header, footer, product card, product detail, quick view, finders, forms, cart drawer, cookie notice. |
+| `site/lib/` | Data: `api.jsx` (catalogue feeds, product shaping, forms), `productsApi.jsx` (lookups), `cartApi.jsx`, `customerApi.jsx`, `ordersApi.jsx`, `nav.jsx` (menus), `storage.jsx`. |
+| `site/store/` | Redux slices: cart, user, wishlist, catalogue, finder products, UI. |
+| `data/catalog.json` | Snapshot of the product feeds, refreshed by `scripts/fetch-catalog.js` on every build (product pages are built from it). |
+| `data/site.json` | This site's blog posts: `bodyHtml` (the rewritten post, 600 to 1000 words), `bodyHtmlOriginal` (the Magento original, kept for reference), `hero` (the header photograph, from `public/images/hero/`), `lede`, `date`. Rendered by `lib/blog.js` (clean-up, link mapping, no dashes) and `components/BlogPost.jsx`; styles in `app/_styles/blog.css`; the list at `/blog/` in `app/blog/page.js`; the homepage journal reads `data/blog-list.json`, written by `scripts/build-blog-list.js` on every build. To add a post: add an entry to `data/site.json` (HTML fragment with `p, h2, h3, ul, ol, li, strong, em, a, img, table`), pick a `hero` from `public/images/hero/`, put pictures in `public/blog/img/`, and build. |
+| `public/layout.html` | The layout planner (`/layout-app/`), with `layout-standalone.html` and `layout-admin.html`. |
+| `netlify/functions/` | Layout planner submissions, drafts and tracking. |
+| `public/_redirects` | Magento proxy (`/mag/*`) and redirects from old addresses. |
 
-```
-app/
-  layout.js                 fonts (next/font) + global stylesheet
-  page.js                   homepage — see "The homepage" below
-  (chrome)/
-    layout.js               shared <Header/> / <Footer/> for every other page
-    [...slug]/page.js       ONE route drives all 331 templated pages
-    blog/page.js            blog index, sorted from data
-    categories/page.js      category directory, driven by nav data
-    installation/page.js    spec-sheet library (194 products, 117 PDFs)
-    about/page.js
-components/
-  Chrome.jsx                header (mega menu) + footer — defined once, not 334 times
-  Pdp.jsx                   product detail page
-  Cat.jsx                   category landing page
-  BlogPost.jsx              blog article
-data/
-  site.json                 every product, category and post, extracted from the
-                            audited static build (names, prices, specs, options,
-                            spec sheets, galleries, SEO meta)
-  nav.json                  the menu, one place
-lib/site.js                 URL mapping + data access
-public/
-  assets/*.js               the Magento client layer (see below) + homepage app
-  img/, blog/img/           localised imagery
-  layout.html               the lighting layout planner (see below)
-  _redirects                Magento proxies + 301s from every old .html URL
-```
+## How the backend is reached
 
-## How the commerce works
-
-Pages are fully static; **price, stock and cart are painted client-side from
-Magento**, exactly as before:
-
-- `public/_redirects` proxies `/mag/*` → `greenhse.com` with **status 200**
-  (a server-side proxy, not a redirect — that is what avoids CORS).
-- `assets/magento.js` posts GraphQL to `/mag/graphql` and fills
-  `[data-price-target]`, `[data-stock-target]`, `[data-options-target]` —
-  the React components render those exact attributes.
-- `assets/account.js` / `assets/checkout.js` run the customer flows on
-  `/account/` and `/checkout/`. Customer token in `localStorage.greenhse_token`.
-  **No admin credential anywhere in the client.**
-
-Hard-won integration facts (do not relearn these the hard way):
-site IDs ≠ Magento SKUs — `assets/sku-map.js` holds the 249 mappings;
-the payment method input is `worldline_hosted_checkout`;
-`country_code` must be the string `"AU"` or Magento 500s;
-GraphQL is POST-only.
-
-## The homepage
-
-The homepage is an application, not a document: 27 KB of skeleton markup that
-`public/assets/home-app.js` (730 KB) renders the shop grid, cart, both finder
-wizards and the applications carousel into. It ships its own header because the
-cart/search/menu buttons are wired into it by id. It is loaded as a module by
-`app/page.js` and is the natural next thing to componentise, section by section
-— everything else already is.
-
-## The layout planner
-
-`public/layout.html` is a deliberate exception: a self-contained 730 KB canvas
-application (the room-by-room lighting planner) with its own 372-test QA suite
-(`/layout.html?qa=1`). It has no server dependency and no reason to be React
-today. Treat it as a bundled tool.
-
-## URLs
-
-Clean URLs everywhere (`/products/.../tr12v-all/`). Every address from the
-static build — all 334 `.html` paths, plus the legacy `/blogs/<slug>` Magento
-addresses — 301s to its new home via `public/_redirects`, so nothing indexed
-or bookmarked breaks.
-
-## At the domain cutover
-
-Point `/mag/*`, `/docs/*` and `/brand/*` in `public/_redirects` at
-`mag.greenhse.com` (they currently target `greenhse.com`), or the site will
-proxy to itself. Creating that subdomain + SSL and moving the Magento base URL
-is infrastructure work, not a change in this repo.
+- **Products, categories, finders**: `https://www.getestimate.greenhse.com/api/product.php?id=<category>` and `categories.php` — public, read-only, CORS-open. Same feeds the live demo uses.
+- **Cart, sign-in, account, orders, checkout**: Magento on greenhse.com, through the site's own `/mag/*` proxy (Netlify `_redirects`; `scripts/serve.js` and `next.config.js` give `preview`/`dev` the same proxy). The proxy is needed because greenhse.com only accepts demolights.greenhse.com as a browser origin.
+- **Orders list**: Magento GraphQL with the customer's own token (the demo used an admin token in the browser — removed).
+- **Product images**: served through images.weserv.nl, as on the demo.
+- **Forms** (quote, enquiry, contact, subscribe): the same endpoints as the demo.

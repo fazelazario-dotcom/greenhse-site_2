@@ -14,15 +14,11 @@
 /blog/img/*
   Cache-Control: public, max-age=31536000, immutable
 
-# These filenames never change, so a long cache meant a code fix could sit
-# invisible in a returning visitor's browser for up to a week - exactly the
-# "why is it still there" problem. They are small and ETagged, so revalidating
-# every load costs a 304 and guarantees a deploy is what people actually see.
-/assets/*.js
-  Cache-Control: public, max-age=0, must-revalidate
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
 
-/assets/*.css
-  Cache-Control: public, max-age=0, must-revalidate
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
 
 /*.html
   Cache-Control: public, max-age=0, must-revalidate

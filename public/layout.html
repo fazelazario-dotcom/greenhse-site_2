@@ -978,37 +978,23 @@ img{image-rendering:-webkit-optimize-contrast}
     <section class="step" data-step="2">
       <button type="button" class="step-head"><span class="step-n">02</span><span class="step-t">Tell it how big</span><span class="step-state" id="st2">Not set</span><i class="chev"></i></button>
       <div class="step-body">
-        <p class="step-lead">Put 2 points across any internal door on the plan. That is the
-        scale set &mdash; everything else sizes itself from there.</p>
+        <p class="step-lead">Tell it what you are going to measure, then put 2 points across
+        that thing on the plan. That is the scale set &mdash; everything else sizes itself
+        from there.</p>
 
         <div id="paperbox"></div>
 
         <div class="q">
-          <label class="qlabel" for="calref">Set your own scale</label>
-          
+          <label class="qlabel" for="calref">What are you going to measure?</label>
+          <div class="hint" style="margin:0 0 8px">Pick something on your plan you already know the real size of. Everything the planner counts, spaces and prices comes off this one measurement.</div>
           <div class="selwrap"><select class="sel" id="calref">
-            <optgroup label="Doors">
-              <option value="0.82" selected>Standard internal door — 820 mm</option>
-              <option value="0.92">Wide door — 920 mm</option>
-              <option value="1.64">Double doors — 1640 mm</option>
-              <option value="2.4">Single garage door — 2400 mm</option>
-              <option value="4.8">Double garage door — 4800 mm</option>
-            </optgroup>
-            <optgroup label="Fixtures">
-              <option value="0.6">Kitchen cabinet — 600 mm</option>
-              <option value="0.9">Kitchen bench depth — 900 mm</option>
-              <option value="1.5">Bath — 1500 mm</option>
-              <option value="0.6">Shower tray — 600 mm</option>
-            </optgroup>
-            <optgroup label="On the drawing">
-              <option value="1">The 1 m mark on a scale bar</option>
-              <option value="0.09">Single brick course — 90 mm</option>
-            </optgroup>
-            <optgroup label="Other">
-              <option value="custom">Something else — I'll type the length</option>
-            </optgroup>
+            <option value="" selected disabled>Choose one…</option>
+            <option value="0.82">A standard internal door — 820 mm</option>
+            <option value="2.4">A single garage door — 2400 mm</option>
+            <option value="0.9">A kitchen bench, front to back — 900 mm</option>
+            <option value="custom">Something else — I'll type the real length</option>
           </select></div>
-          <button type="button" class="act pri" id="btn-cal" style="margin-top:9px"><svg viewBox="0 0 24 24"><path d="M3 12h18M6 9v6M18 9v6"/></svg>Put 2 points on the plan</button>
+          <button type="button" class="act pri" id="btn-cal" style="margin-top:9px" disabled><svg viewBox="0 0 24 24"><path d="M3 12h18M6 9v6M18 9v6"/></svg>Put 2 points on the plan</button>
           <div id="calcustom" style="display:none">
             <div class="row2" style="margin-top:8px">
               <input class="txt" id="callen" type="number" min="0.05" step="0.01" placeholder="e.g. 3.6" disabled>
@@ -1073,8 +1059,8 @@ img{image-rendering:-webkit-optimize-contrast}
       <button type="button" class="step-head"><span class="step-n">04</span><span class="step-t">Add extra lights</span><span class="step-state" id="st4">Optional</span><i class="chev"></i></button>
       <div class="step-body">
         <p class="step-lead"><b>You can skip this.</b> Your rooms are lit already. This is only
-        for extras you want on top — strip light under the kitchen benches, star lights in the
-        alfresco ceiling, a light inside a wardrobe.</p>
+        for extras you want on top — star lights in the alfresco ceiling, an outdoor
+        wall light beside the front door, a pendant over the island bench.</p>
         <p class="step-lead" style="margin-top:-4px">Nothing you choose here changes a room.
         To change the light <em>in</em> a room, use <b>Change type of light</b> on that room in
         step 03.</p>
@@ -1271,8 +1257,8 @@ img{image-rendering:-webkit-optimize-contrast}
         </div>
       </div>
       <figure class="home-fig">
-        <img id="img-hero" alt="Living room lit with recessed downlights and a cove strip">
-        <figcaption>Downlights on an even grid, cove strip for the soft layer.</figcaption>
+        <img id="img-hero" alt="Living room lit with an even grid of recessed downlights">
+        <figcaption>Downlights on an even grid &mdash; what the planner lays out for you.</figcaption>
       </figure>
     </div>
 
@@ -1828,7 +1814,6 @@ var CATS=[
   {id:'downlights', label:'Downlights',           hint:'Recessed into the ceiling. The default for general lighting through a house.'},
   {id:'ceiling',    label:'Ceiling & wall lights',hint:'Surface mounted. Use where you cannot recess — concrete ceilings, rentals, low voids.'},
   {id:'batten',     label:'Battens',              hint:'Linear surface fittings. Cheap even light for garages, laundries and sheds.'},
-  {id:'strip',      label:'Strip & linear',       hint:'Sold per metre for coves, under-cabinet, stairs. Drop one marker per run and note the length.'},
   {id:'star',       label:'Star lights',          hint:'Small 3W points. Alfresco ceilings, feature nooks, stair risers.'},
   {id:'fans',       label:'Fans',                 hint:'One per room, centred. A fan with a light does the room on its own; a fan without one still needs four low glare downlights around it.'}
 ];
@@ -1845,6 +1830,14 @@ var CATS=[
    cull - without this the "Outdoor" buttons pointed at products that had
    already been spliced out, and clicking one placed nothing at all. */
 var WALL_KEEP=['W10-CCT-BW','SEAFORD-UPDOWN-WAL','WL12-18-CCT-SENSOR','WL10R-40K-BLACK'];
+/* Strip lighting is not laid out on a floor plan any more. How long the run is,
+   which channel it sits in, what drives it and what controls it are a quoting
+   conversation, not a spacing one, and the whole range is still on the website.
+   The products stay in the catalogue data so a plan saved before this change
+   still resolves every fitting on it - they are simply never offered anywhere
+   in the planner: not in the extras picker, not in a room's light list, not in
+   the search. */
+var DATA_ONLY_CATS={strip:1};
 (function(){
   WALL_KEEP.forEach(function(id){
     var p=PRODUCTS.filter(function(x){return x.id===id;})[0];
@@ -1852,7 +1845,8 @@ var WALL_KEEP=['W10-CCT-BW','SEAFORD-UPDOWN-WAL','WL12-18-CCT-SENSOR','WL10R-40K
   });
   var keep={};
   CATS.forEach(function(c){ keep[c.id]=1; });
-  for(var i=PRODUCTS.length-1;i>=0;i--) if(!keep[PRODUCTS[i].cat]) PRODUCTS.splice(i,1);
+  for(var i=PRODUCTS.length-1;i>=0;i--)
+    if(!keep[PRODUCTS[i].cat] && !DATA_ONLY_CATS[PRODUCTS[i].cat]) PRODUCTS.splice(i,1);
 })();
 
 /* ============================================================
@@ -2907,10 +2901,76 @@ function garageFitting(){ return byId('T40-CCT-BATTEN-PRO'); }
 function smartLights(){
   return PRODUCTS.filter(function(p){ return isALight(p) && fxKind(p)==='smart'; });
 }
+/* The room picker offers the MAIN fittings only - the ones people actually
+   choose between. Every group had grown to the full category, so a bedroom
+   dropdown ran to two dozen names, several of which read identically once the
+   trailing spec was trimmed off (two "90mm 9W Downlight", two "24W Smart WiFi
+   Ceiling Light", two "3W Smart RGBW Star Lights"). Three or four real choices
+   per group is the whole point of the picker; the full range is one click away
+   on the website. Order matters - the first in each list is the one we lead
+   with. An id that is not in the catalogue is skipped, so this list can never
+   empty a group out. */
+var PICKER_MAIN={
+  downlights:['DL9ES-FLAT-HL',        /* 8W high lumen flat - the default   */
+              'DL8ES-FLAT-ALL-FP-',   /* 8W flat, switch adjustable         */
+              'DL10ES-FLAT-WHITE-',   /* 10W flat                           */
+              'DL10-PS'],             /* 10W low glare 60 deg               */
+  smart:     ['DL9RGBW-BT1',          /* RGBW bluetooth                     */
+              'DL9RGBW-PBT',          /* RGBW low glare bluetooth           */
+              '25W-SMART-LED-TUYA'],  /* 25W smart wifi                     */
+  ceiling:   ['C25-CCT-PA',           /* premium 25W oyster                 */
+              'P24SE-CCT',            /* 24W slim                           */
+              'P24-WIFI'],            /* 24W smart wifi                     */
+  batten:    ['T40-CCT-BATTEN-PRO'],
+  star:      ['DL03-ALL-1',           /* single 3W starlight                */
+              'DL03-4KIT-2',          /* 4 head kit                         */
+              'DL03-6KIT-1']          /* 6 head kit                         */
+};
 /* One lookup for the room picker, so a real category and the virtual smart
    group are fetched the same way. */
 function pickerGroupProducts(key){
+  var main=PICKER_MAIN[key];
+  if(main){
+    var out=[];
+    main.forEach(function(id){ var p=byId(id); if(p&&isALight(p)) out.push(p); });
+    if(out.length) return out;
+  }
   return key==='smart' ? smartLights() : catProducts(key).filter(isALight);
+}
+/* What a fitting is called in the picker. plainName cuts the catalogue name at
+   the first comma, which is what makes the list readable - but it also turns
+   several of these into the same line ("90mm 8W Downlight" for two different
+   fittings, "90mm 9W Downlight" for two more), so the customer is choosing
+   blind between them. These are the fourteen fittings the picker offers, named
+   the way you would say them out loud: what size, what wattage, and the one
+   thing that tells it apart from the one above it. */
+var PICKER_NAME={
+  'DL9ES-FLAT-HL':      '90mm 8W Downlight \u2014 high lumen',
+  'DL8ES-FLAT-ALL-FP-': '90mm 8W Downlight \u2014 switch adjustable',
+  'DL10ES-FLAT-WHITE-': '90mm 10W Downlight',
+  'DL10-PS':            '90mm 10W Downlight \u2014 low glare',
+  'DL9RGBW-BT1':        '90mm 9W Downlight \u2014 RGBW colour',
+  'DL9RGBW-PBT':        '90mm 9W Downlight \u2014 RGBW, low glare',
+  '25W-SMART-LED-TUYA': '25W Smart Downlight \u2014 WiFi',
+  'C25-CCT-PA':         '25W Ceiling Light \u2014 premium',
+  'P24SE-CCT':          '24W Ceiling Light \u2014 slim',
+  'P24-WIFI':           '24W Ceiling Light \u2014 smart WiFi',
+  'T40-CCT-BATTEN-PRO': '1.2m 40W Batten Pro',
+  'DL03-ALL-1':         '3W Star Light \u2014 single',
+  'DL03-4KIT-2':        '3W Star Light Kit \u2014 4 heads',
+  'DL03-6KIT-1':        '3W Star Light Kit \u2014 6 heads'
+};
+function pickerLabel(p){
+  if(!p) return 'fitting';
+  if(PICKER_NAME[p.id]) return PICKER_NAME[p.id];
+  /* Anything reaching this line came off an older saved plan, not the short
+     list. Fall back to the plain name, and say "low glare" if the name does
+     not - except on a star light, where the narrow beam is the whole point of
+     the fitting and calling it low glare means nothing to anybody. */
+  var n=plainName(p);
+  if(!isStarLight(p) && fittingClass(p)==='lg' && !/low glare|anti.?glare/i.test(n))
+    n+=' \u2014 low glare';
+  return n;
 }
 
 /* What lights this room. Three things decide it, in order:
@@ -3091,17 +3151,22 @@ function renderDoneRooms(){
         ? [['downlights','Low glare downlights'],['smart','Smart & colour changing']]
         : [['downlights','Downlights'],['smart','Smart & colour changing'],
            ['ceiling','Ceiling & wall lights'],['batten','Battens'],['star','Star lights']];
+      /* Dedupe on the line the customer reads, not on the product id. Two
+         different ids that trim down to the same words are the same choice as
+         far as anyone looking at the list is concerned, and showing both is
+         how the picker ended up with "90mm 9W Downlight" twice in a row. */
       var taken={}, cur=(p||{}).id, sawCur=false;
       groups.forEach(function(g){
         var list=pickerGroupProducts(g[0]).filter(function(pp){
-          if(taken[pp.id]) return false; taken[pp.id]=1; return true;
+          var k=pickerLabel(pp).toLowerCase();
+          if(taken[k] && pp.id!==cur) return false; taken[k]=1; return true;
         });
         if(fanRoom) list=list.filter(function(pp){return fittingClass(pp)==='lg';});
         if(!list.length) return;
         opts+='<optgroup label="'+g[1]+'">'+list.map(function(pp){
           if(pp.id===cur) sawCur=true;
           return '<option value="'+pp.id+'"'+(pp.id===cur?' selected':'')+'>'+
-                 esc(plainName(pp))+'</option>';
+                 esc(pickerLabel(pp))+'</option>';
         }).join('')+'</optgroup>';
       });
       /* The groups are a curated short list, so a room can be lit by
@@ -3354,16 +3419,18 @@ function renderRoomList(){
         groups.forEach(function(g){
           var list=pickerGroupProducts(g[0]).filter(function(pp){
             /* A smart downlight is in both the downlights category and the
-               smart group. Listing it twice in one dropdown is confusing, so
-               the first group that claims it keeps it. */
-            if(takenInGroup[pp.id]) return false;
-            takenInGroup[pp.id]=1; return true;
+               smart group, and two different ids can trim down to the same
+               words. Either way it is one choice to the person reading it, so
+               the first group that claims that line keeps it. */
+            var k=pickerLabel(pp).toLowerCase();
+            if(takenInGroup[k] && pp.id!==current) return false;
+            takenInGroup[k]=1; return true;
           });
           if(fanRoom) list=list.filter(function(pp){return fittingClass(pp)==='lg';});
           if(!list.length) return;
           opts+='<optgroup label="'+g[1]+'">'+list.map(function(pp){
             return '<option value="'+pp.id+'"'+(pp.id===current?' selected':'')+'>'+
-                   esc(pp.name)+'</option>';
+                   esc(pickerLabel(pp))+'</option>';
           }).join('')+'</optgroup>';
         });
         if(!opts) return '';
@@ -3491,7 +3558,17 @@ function renderRoomList(){
     };
   });
   w.querySelectorAll('[data-delroom]').forEach(function(b){
-    b.onclick=function(){snapshot();S.rooms=S.rooms.filter(function(r){return r.id!==b.dataset.delroom;});
+    b.onclick=function(){snapshot();
+      /* Take the room's fittings with it. Anything sitting inside the box is
+         there because of this room, so leaving them behind left lights on the
+         plan and on the invoice for a room that no longer exists. */
+      var gone=S.rooms.filter(function(r){return r.id===b.dataset.delroom;})[0];
+      if(gone){
+        S.fixtures=S.fixtures.filter(function(f){return !pointInRect(f.x,f.y,gone);});
+        S.sel=[];
+        if(S.hiRoom===gone.id) S.hiRoom=null;
+      }
+      S.rooms=S.rooms.filter(function(r){return r.id!==b.dataset.delroom;});
       delete S.roomOpen[b.dataset.delroom];
       delete S.roomFan[b.dataset.delroom];
       delete S.roomFanSize[b.dataset.delroom];
@@ -3978,6 +4055,21 @@ function doFillInner(r){
     }
   }
 
+  /* A wet room nobody has answered the exhaust question for yet. It still must
+     not be lit with open downlights, so the sealed ceiling light goes in now
+     and the card's exhaust choice is what is left to do. */
+  if(brief.exhaust && exhaustMode(r)==null){
+    var lamp0=byId(brief.rec);
+    if(lamp0){
+      snapshot();
+      S.fixtures=S.fixtures.filter(function(f){ return !(isRoomLight(f)&&pointInRect(f.x,f.y,r)); });
+      placeAs(lamp0.id,[{x:r.x+r.w*0.5, y:r.y+r.h*0.45}]);
+      S.roomOpen[r.id]=true;
+      toast(brief.label+': sealed ceiling light in \u2014 now pick the exhaust on the room card');
+      return;
+    }
+  }
+
   /* Bathrooms and laundries get the sealed ceiling light plus an exhaust,
      which is the whole plan for that room. */
   if(brief.exhaust && exhaustMode(r)==='light'){
@@ -4091,7 +4183,9 @@ function armedMessage(t){
   if(t==='scale'){
     var r=document.getElementById('calref');
     var lab=r&&r.selectedOptions[0]?r.selectedOptions[0].textContent:'';
-    return calRefLength()!=null ? 'Drag the 2 red points onto it: '+lab.toLowerCase()+'.'
+    var L=calRefLength();
+    if(L===undefined) return 'Pick what you are measuring first, in step 02.';
+    return L!=null ? 'Drag the 2 red points onto it: '+lab.toLowerCase()+'.'
       : 'Drag the 2 red points to something you know the length of, then type how long it really is.';
   }
   if(t==='room')  return 'Drag a box around the '+((ROOMS[S.roomType]||ROOMS.other).label).toLowerCase()+'.';
@@ -4179,7 +4273,7 @@ function updateCalFromHandles(commit){
   if(!S.cal.a||!S.cal.b) return;
   S.cal.px=Math.hypot(S.cal.b.x-S.cal.a.x,S.cal.b.y-S.cal.a.y);
   renderCalHandles();
-  if(commit&&S.cal.px>=8&&calRefLength()!=null) applyScale();
+  if(commit&&S.cal.px>=8&&calRefLength()) applyScale();
 }
 
 function onDown(e){
@@ -4319,7 +4413,9 @@ function onUp(e){
     S.cal={a:d.a,b:d.b,px:len};
     renderCalHandles();   /* the ends of a traced line are draggable too */
     $('#callen').disabled=false;$('#calunit').disabled=false;$('#btn-calapply').disabled=false;
-    if(calRefLength()!=null){ applyScale(); return; }
+    var L=calRefLength();
+    if(L===undefined){ toast('Pick what you are measuring first'); $('#calref').focus(); return; }
+    if(L!=null){ applyScale(); return; }
     $('#callen').focus();
     toast('Now type what that length is in real life');
     return;
@@ -4800,7 +4896,7 @@ function doPrint(){
         '<td><b>Fittings</b>'+t.units+'</td>'+
         '<td><b>Total inc GST</b>'+money(t.inc)+'</td></tr></table>'+
       '<img class="pplan" src="'+png+'">'+
-      '<div class="pleg">Symbols: ● downlight / oyster &nbsp; ▬ batten, strip or track &nbsp; ' +
+      '<div class="pleg">Symbols: ● downlight / oyster &nbsp; ▬ batten or linear run &nbsp; ' +
         '■ outdoor, flood or driver &nbsp; ▲ sensor &nbsp; ⊕ fan</div>';
 
     if(rooms.length){
@@ -5020,12 +5116,21 @@ function renderRoomTeach(){
     (b.wet?'<br><br><b>Wet area.</b> Check the IP rating of anything you place here.':'');
 }
 
+/* Three answers, and they are not the same thing:
+     a number  - a reference was chosen, we already know the real length
+     null      - 'something else', so the length has to be typed in
+     undefined - nothing has been chosen yet, so nothing can happen at all.
+   Everything downstream reads a guessed scale as a real one, which is how a
+   plan ends up costed off a door that was never measured. */
+function calRefChosen(){ return !!$('#calref').value; }
 function calRefLength(){
   var r=$('#calref').value;
+  if(!r) return undefined;
   return r==='custom' ? null : parseFloat(r);
 }
 function applyScale(){
   var preset=calRefLength();
+  if(preset===undefined){toast('Pick what you are measuring first');$('#calref').focus();return;}
   var v=preset!=null?preset:parseFloat($('#callen').value);
   var u=preset!=null?1:parseFloat($('#calunit').value);
   if(!v||v<=0){toast('Type the real length first');return;}
@@ -5079,13 +5184,18 @@ function wire(){
   // scale
   $('#btn-cal').onclick=function(){
     if(!S.plan.loaded){toast('Load a plan first');return;}
+    if(!calRefChosen()){toast('Pick what you are measuring first');$('#calref').focus();return;}
     setTool(S.tool==='scale'?'select':'scale');
   };
   $('#btn-calapply').onclick=applyScale;
   $('#calref').onchange=function(){
-    var custom=this.value==='custom';
+    var chosen=calRefChosen(), custom=this.value==='custom';
     $('#calcustom').style.display=custom?'':'none';
-    if(!custom&&S.cal.px) applyScale();
+    /* Nothing is pre-chosen, so the button stays dead until they say what they
+       are measuring. Without this the old default quietly scaled every plan off
+       an 820 mm door whether or not there was one on the drawing. */
+    $('#btn-cal').disabled=!chosen;
+    if(chosen && !custom && S.cal.px) applyScale();
     if(S.tool==='scale') setTool('scale');   // refresh the on-plan instruction
   };
   $('#calref').dispatchEvent(new Event('change'));
@@ -5362,11 +5472,18 @@ function showFaq(){
       'moves as one, with a faint string showing the run. <b>Ungroup</b> on the '+
       'toolbar frees each dot when you are threading them between walls.')+
 
-    faqItem('Strip lights and battens — where do they fit?',
-      'Strip is sold per metre and lives in coves, under kitchen benches and along '+
-      'stairs — drop one marker per run and note the length. Battens are the '+
-      'garage and shed answer: a 1.2 m batten throws far more light per dollar '+
-      'than downlights and needs no ceiling cut-outs.')+
+    faqItem('Battens — where do they fit?',
+      'Battens are the garage, laundry and shed answer: a 1.2 m batten throws far '+
+      'more light per dollar than downlights and needs no ceiling cut-outs. The '+
+      'planner puts one in a garage for you.')+
+
+    faqItem('What about strip lighting?',
+      'Strip is not something you lay out on a floor plan. It is sold per metre, and '+
+      'the run length, the channel it sits in, the driver that powers it and the '+
+      'controller all depend on each other — get one wrong and the run does not '+
+      'work. Plan your downlights here, then talk to us about the strip: call '+
+      '(08) 9297 2969 or come into the Ellenbrook showroom and we will size '+
+      'the whole run with you.')+
 
     faqItem('Can I trust the plan enough to build from it?',
       'It is a real plan in real metres — counts, spacings and prices your '+
@@ -5462,6 +5579,7 @@ window.__GH={
   isBigRoom:isBigRoom,roomComfort:roomComfort,applyComfort:applyComfort,COMFORT:COMFORT,
   wallFacing:wallFacing,rotateSelected:rotateSelected,
   smartLights:smartLights,pickerGroupProducts:pickerGroupProducts,
+  DATA_ONLY_CATS:DATA_ONLY_CATS,PICKER_MAIN:PICKER_MAIN,pickerLabel:pickerLabel,plainName:plainName,
   symbolSvg:symbolSvg,fxKind:fxKind,
   addFixtures:addFixtures,undo:undo,snapshot:snapshot,byId:byId,catProducts:catProducts,
   setPick:function(o){
@@ -6384,10 +6502,12 @@ window.__GHQA=function(){
   /* ---- catalogue integrity ---- */
   ok('every product carries an id and a category',
      G.PRODUCTS.every(function(p){return p.id&&p.cat;}),'missing fields');
-  ok('every product category has a picker entry',
+  ok('every product category has a picker entry, or is kept as data only',
      (function(){
        var known=G.CATS.map(function(c){return c.id;});
-       return G.PRODUCTS.every(function(p){return known.indexOf(p.cat)>-1;});
+       return G.PRODUCTS.every(function(p){
+         return known.indexOf(p.cat)>-1 || !!G.DATA_ONLY_CATS[p.cat];
+       });
      })(),'unmapped category');
   eq('downlights category holds 35 products',G.catProducts('downlights').length,35);
   ok('every room brief says whether it takes downlights',
@@ -6535,16 +6655,31 @@ window.__GHQA=function(){
   G.S.fixtures=[];G.S.rooms=[];G.S.sel=[];G.S.mpp=null;G.renderAll();
 
   /* ---- the catalogue the planner offers ---- */
-  eq('the picker offers six kinds of fitting',G.CATS.length,6);
+  eq('the picker offers five kinds of fitting',G.CATS.length,5);
   ok('and none of the categories that are not laid out on a plan',
      ['track','sensors','outdoor','flood','landscape','highbay','industrial',
-      'emergency','transformers'].every(function(c){
+      'emergency','transformers','strip'].every(function(c){
         return G.CATS.every(function(x){return x.id!==c;});
      }),'a removed category is still offered');
-  ok('nothing in the catalogue sits in a category the picker cannot show',
+  ok('nothing in the catalogue sits in a category the picker cannot show, bar the data-only ones',
      G.PRODUCTS.every(function(p){
-       return G.CATS.some(function(c){return c.id===p.cat;});
+       return G.CATS.some(function(c){return c.id===p.cat;}) || !!G.DATA_ONLY_CATS[p.cat];
      }),'orphan product');
+
+  /* ---- strip lighting is out of the planner, but not out of the data ---- */
+  ok('strip lighting cannot be picked as a thing to place',
+     G.CATS.every(function(c){return c.id!=='strip';}),'strip is still in the picker');
+  ok('and no picker group can reach a strip product',
+     ['downlights','smart','ceiling','batten','star'].every(function(k){
+       return G.pickerGroupProducts(k).every(function(p){return p.cat!=='strip';});
+     }),'a strip product is still offered');
+  ok('and nothing offered anywhere is a strip run',
+     G.PRODUCTS.filter(function(p){return p.cat==='strip';}).every(function(p){
+       return G.catProducts('downlights').indexOf(p)<0 &&
+              G.catProducts('ceiling').indexOf(p)<0;
+     }),'strip leaked into a picker category');
+  ok('but a plan saved before the change still resolves its strip fittings',
+     !!G.byId('ST24V-SMD-ALL-1'),'strip product dropped from the catalogue');
   eq('the T40 Pro is the only batten',G.catProducts('batten').length,1);
   eq('and it is the T40 Pro',G.catProducts('batten')[0].id,'T40-CCT-BATTEN-PRO');
   ok('exhaust fans and bathroom mates are recognised as bathroom fittings',
@@ -6893,8 +7028,18 @@ window.__GHQA=function(){
   G.S.mpp=null;
 
   /* ---- known-object calibration ---- */
-  eq('the easiest option is the default',d.getElementById('calref').value,'0.82');
+  eq('nothing is pre-chosen, so no plan gets scaled off a guess',
+     d.getElementById('calref').value,'');
+  ok('and the button that starts it is dead until they choose',
+     d.getElementById('btn-cal').disabled,'button live with nothing chosen');
+  eq('with nothing chosen there is no length to scale by',G.calRefLength(),undefined);
+  ok('there are three references plus "type it myself", not a dozen',
+     d.getElementById('calref').options.length===5,
+     d.getElementById('calref').options.length+' options');
+  d.getElementById('calref').value='0.82';
+  d.getElementById('calref').dispatchEvent(new window.Event('change'));
   eq('picking a standard door gives its real width',G.calRefLength(),0.82);
+  ok('and that frees the button',!d.getElementById('btn-cal').disabled,'button still dead');
   eq('the typed-length fields stay hidden until they are needed',
      d.getElementById('calcustom').style.display,'none');
   d.getElementById('calref').value='custom';
@@ -6963,6 +7108,16 @@ window.__GHQA=function(){
        d.querySelector('[data-delroom]').click();
        return G.S.rooms.length===0;
      })(),G.S.rooms.length);
+  ok('removing a room takes its fittings with it',
+     (function(){
+       G.S.fixtures=[];G.S.rooms=[{id:'rx',type:'living',x:0,y:0,w:460,h:300}];
+       G.S.roomOpen={rx:true};
+       G.doFill(G.S.rooms[0]);
+       if(!G.S.fixtures.length) return false;   /* nothing placed - test is void */
+       G.renderAll();
+       d.querySelector('[data-delroom]').click();
+       return G.S.rooms.length===0 && G.S.fixtures.length===0;
+     })(),'left '+G.S.fixtures.length+' fittings behind');
   ok('a part-filled room stays open',
      (function(){
        G.S.fixtures=[];G.S.roomOpen={};
@@ -7314,10 +7469,39 @@ window.__GHQA=function(){
     ok('there are smart fittings to offer',G.smartLights().length>0,'none found');
     ok('every one of them is a light, not a controller or a driver',
        G.smartLights().every(function(p){return G.fxKind(p)==='smart';}),'non-smart in the group');
-    eq('the picker fetches the smart group the same way as a real category',
-       G.pickerGroupProducts('smart').length,G.smartLights().length);
+    eq('the picker offers a short smart list, not every smart fitting we sell',
+       G.pickerGroupProducts('smart').length,3);
+    ok('and every one of them is really in the catalogue',
+       G.pickerGroupProducts('smart').every(function(p){return !!G.byId(p.id);}),
+       'a listed id is not a product');
     ok('and a real category still comes back from the catalogue',
        G.pickerGroupProducts('batten').length>0,'batten group empty');
+
+    /* ---- the picker is a short list of real choices ---- */
+    ok('no picker group runs past four fittings',
+       ['downlights','smart','ceiling','batten','star'].every(function(k){
+         return G.pickerGroupProducts(k).length<=4;
+       }),'a group is still too long');
+    ok('and no group is empty',
+       ['downlights','smart','ceiling','batten','star'].every(function(k){
+         return G.pickerGroupProducts(k).length>0;
+       }),'a group came back empty');
+    ok('no two fittings in one group read as the same line',
+       ['downlights','smart','ceiling','batten','star'].every(function(k){
+         var seen={};
+         return G.pickerGroupProducts(k).every(function(p){
+           var l=G.pickerLabel(p).toLowerCase();
+           if(seen[l]) return false; seen[l]=1; return true;
+         });
+       }),'two identical lines in one group');
+    ok('a low glare fitting says so when its plain name does not',
+       G.pickerGroupProducts('downlights').every(function(p){
+         return G.fittingClass(p)!=='lg' || /low glare/i.test(G.pickerLabel(p));
+       }),'low glare not called out');
+    ok('a room with a fan still has a low glare fitting to offer',
+       G.pickerGroupProducts('downlights').filter(function(p){
+         return G.fittingClass(p)==='lg';
+       }).length>0,'no low glare downlight left for a fan room');
 
     /* ---- how the two new questions actually render on the card ---- */
     S.rooms=[]; S.fixtures=[]; S.sel=[]; S.roomPid={}; S.roomFan={}; S.roomAskFan={};
