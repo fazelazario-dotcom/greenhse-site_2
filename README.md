@@ -36,3 +36,23 @@ npm run dev        # development server at http://localhost:3000
 - **Orders list**: Magento GraphQL with the customer's own token (the demo used an admin token in the browser — removed).
 - **Product images**: served through images.weserv.nl, as on the demo.
 - **Forms** (quote, enquiry, contact, subscribe): the same endpoints as the demo.
+
+## Light Lab — `/light-lab/`
+
+`public/light-lab.html` + `public/light-lab.js`, a standalone app served at
+`/light-lab/` by `scripts/make-folder-routes.js`, the same way the planner is.
+It is deliberately not a Next route.
+
+The customer loads a photo of their own room, drops real fittings into it,
+turns them on and sees the light. Everything runs in the browser and the photo
+is never uploaded; only a small preview goes with a sent list.
+
+- Catalogue: `public/light-lab-data.json`, written at `prebuild` by
+  `scripts/build-lightlab-data.js` from `public/layout.html` (parsed specs) and
+  `data/catalog.json` (live price, photo, product page). Joined by Magento
+  url_key, not by SKU.
+- Self test: `/light-lab/?qa=1`. Baseline **62/62**.
+- Quote requests post to `/.netlify/functions/submit-layout` with
+  `jobType: 'Light Lab'`, so they land in the same admin list as the planner's.
+- The lighting is an impression, not a photometric simulation, and the page
+  says so in three places. Keep it that way.

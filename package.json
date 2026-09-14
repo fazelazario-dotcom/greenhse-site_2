@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "prebuild": "node scripts/fetch-catalog.js && node scripts/build-blog-list.js",
+    "prebuild": "node scripts/fetch-catalog.js && node scripts/build-blog-list.js && node scripts/build-lightlab-data.js",
     "build": "next build",
     "start": "next start",
     "preview": "node scripts/serve.js",

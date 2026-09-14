@@ -171,6 +171,11 @@ export const footerColumns = [
         external: !1,
       },
       {
+        label: 'Light Lab',
+        href: '/light-lab/',
+        external: !1,
+      },
+      {
         label: 'Green Charge',
         href: 'https://www.greencharge.com.au/',
         external: !0,
@@ -236,9 +241,13 @@ export const navLinks = [
     menu: !0,
   },
   {
+    label: 'Light Lab',
+    href: '/light-lab/',
+    dot: !0,
+  },
+  {
     label: 'Strip Lights',
     href: '/strip-lights/',
-    dot: !0,
   },
   {
     label: 'Smart Life',

@@ -10,6 +10,7 @@ import * as api from '../../lib/api';
 import * as withPinnedOrder from '../../lib/withPinnedOrder';
 import * as asset from '../../lib/asset';
 import * as Icons from '../../components/ui/Icons';
+import HighBayFinder from '../../components/catalog/HighBayFinder';
 function G() {
   return (
     <section
@@ -219,6 +220,10 @@ export default function Default() {
   return (
     <main className="jsx-3ac0f3074f9c414a home">
       <G />
+      {/* The finder comes before the grid: ceiling height decides the beam
+          angle, and nobody browsing a grid of four fittings can tell which
+          one suits their roof. */}
+      <HighBayFinder />
       <section id="highbay" className="jsx-3ac0f3074f9c414a range">
         <div className="jsx-3ac0f3074f9c414a container">
           <div className="jsx-3ac0f3074f9c414a range__head">

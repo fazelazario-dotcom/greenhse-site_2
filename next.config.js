@@ -20,6 +20,8 @@ const MAGENTO_PROXIES = [
   { source: '/layout-standalone/',destination: '/layout-standalone.html' },
   { source: '/layout-admin',      destination: '/layout-admin.html' },
   { source: '/layout-admin/',     destination: '/layout-admin.html' },
+  { source: '/light-lab',         destination: '/light-lab.html' },
+  { source: '/light-lab/',        destination: '/light-lab.html' },
 ];
 
 const isDev = process.env.NODE_ENV !== 'production';

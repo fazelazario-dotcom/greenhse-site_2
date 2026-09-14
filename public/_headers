@@ -22,3 +22,9 @@
 
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
+
+/light-lab-data.json
+  Cache-Control: public, max-age=0, must-revalidate
+
+/light-lab.js
+  Cache-Control: public, max-age=0, must-revalidate

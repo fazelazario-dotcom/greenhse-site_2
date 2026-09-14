@@ -11,6 +11,8 @@ let r = [
       ['Shelving & cabinets — dry inside joinery (no water can reach it)', 'cabinet'],
       ['Stairs or hallway', 'stairs'],
       ['Long run strip light — one continuous line over about 10 metres', 'longrun'],
+      ['Signage, curves or letters — a shape a straight strip will not follow', 'neon'],
+      ['Shop, display or food cabinet', 'display'],
       ['Somewhere else', 'other'],
     ],
   },
@@ -198,9 +200,140 @@ function u(e) {
   let t = `${(e.specs || []).map((e) => e.value).join(' ')} ${e.name}`.toLowerCase().match(/ip\s?(\d{2})/);
   return t ? parseInt(t[1], 10) : 20;
 }
+/* Watts per metre, read off the product name.
+   The catalogue used to carry one strip per family, so each family could hard
+   code its wattage. It now carries the same dotless COB at 7.5, 12 and 16 W/m
+   and the same SMD at 12, 20 and 23, and the figure is in the name of every
+   one of them. Reading it means the driver sizing, the run lengths and the
+   wording all follow the product the customer actually picked rather than a
+   number frozen when the range was smaller. Falls back to the family default
+   when a name carries no figure. */
+function wattsPerMetre(e, t) {
+  let i = String((e && e.name) || '')
+    .toLowerCase()
+    .match(/(\d+(?:\.\d+)?)\s*w\s*\/?\s*m/);
+  return i ? parseFloat(i[1]) : t;
+}
+/* How far a 24V run goes before it has to be fed from the other end too.
+   Voltage drop decides this, so it tracks watts per metre: the 7.5 W/m COB is
+   sold on 40 m rolls, the 16 W/m COB wants a feed every 5 m. These are the
+   numbers off the product pages, not a formula. */
+function runLimits(e) {
+  return e <= 8 ? { single: 20, dual: 40 } : e <= 12 ? { single: 10, dual: 20 } : { single: 5, dual: 10 };
+}
 function h(e) {
   let t = e.name.toLowerCase(),
     i = u(e);
+
+  /* ---- Neon flex ----
+     Side bend flex, so it takes a curve or a letter shape that no rigid strip
+     will follow. Two of them: 6x12mm CCT at IP67, and 12x12mm RGB SPI at IP66.
+     Both run on Bluetooth and both need their own matching channel, which is
+     why they are their own family rather than another kind of strip. */
+  if (t.includes('neon')) {
+    let r = t.includes('rgb'),
+      n = wattsPerMetre({ name: t }, 10),
+      /* Both neon flex products state 5m on a single feed and 10m fed from
+         both ends on their own product pages. Not derived - taken from there. */
+      o = { single: 5, dual: 10 };
+    return {
+      fam: 'NEON',
+      wpm: n,
+      wpmTxt: r ? 'Neon Flex RGB SPI · 12x12mm' : 'Neon Side Bend Flex CCT · 6x12mm',
+      single: o.single,
+      dual: o.dual,
+      channel: 'required',
+      spec: r
+        ? `24V Neon Flex RGB SPI · 12x12mm · IP${i} · fully programmable · ${o.single}m one feed / ${o.dual}m both ends`
+        : `24V Neon Side Bend Flex CCT · 6x12mm · IP${i} · 3000–6000K · ${o.single}m one feed / ${o.dual}m both ends`,
+      ipTxt: i >= 67 ? `IP${i} — fully sealed, fine outdoors` : `IP${i} — splash resistant`,
+      where: 'Signage, curves, letters and feature shapes — anywhere a rigid strip will not bend',
+      teach: [
+        'Side bend: it curves flat on its side, so it follows a shape or a letter',
+        r ? 'Fully programmable colour, addressed section by section' : 'Adjustable warm to cool white, 3000K to 6000K',
+        'Bluetooth control, so it needs no WiFi',
+        r ? 'Sits in a 12x12mm support channel' : 'Sits in a 6x12mm support channel',
+      ],
+    };
+  }
+
+  /* ---- Addressable RGBW ----
+     SPI means each section is addressed on its own, so it chases and fades
+     rather than the whole run changing together. The RGBW version has a real
+     4000K white in it as well as the colour. */
+  if (t.includes('spi')) {
+    let n = wattsPerMetre({ name: t }, 14),
+      o = { single: 5, dual: 10 };   /* stated on the product page */
+    return {
+      fam: 'SPI',
+      wpm: n,
+      wpmTxt: 'RGBW SPI · addressable',
+      single: o.single,
+      dual: o.dual,
+      channel: 'required',
+      spec: `24V RGBW SPI · 4000K white plus full colour · IP${i} · fully programmable · ${o.single}m one feed / ${o.dual}m both ends`,
+      ipTxt: `IP${i} — indoor and sheltered spots`,
+      where: 'Feature walls, bars and anywhere you want the light to move rather than sit still',
+      teach: [
+        'Addressable: every section is controlled on its own, so it can chase, fade and run effects',
+        'RGBW — a real 4000K white as well as the colour, so it works as a light and not only an effect',
+        'Bluetooth control, no WiFi needed',
+        'A data cable links one run to the next',
+      ],
+    };
+  }
+
+  /* ---- Fresh meat display ----
+     A specialist strip: the red and white mix is tuned so meat reads fresh in
+     a display cabinet. IP68, because it lives somewhere that gets hosed out. */
+  if (t.includes('meat')) {
+    let n = wattsPerMetre({ name: t }, 14),
+      o = { single: 5, dual: 10 };   /* stated on the product page */
+    return {
+      fam: 'MEAT',
+      wpm: n,
+      wpmTxt: 'Fresh Meat display strip · red and white',
+      single: o.single,
+      dual: o.dual,
+      channel: 'required',
+      spec: `24V Fresh Meat strip · red and white · ${n}W/m · IP${i} · ${o.single}m one feed / ${o.dual}m both ends`,
+      ipTxt: `IP${i} — fully sealed, washes down`,
+      where: 'Butcher and deli display cabinets',
+      teach: [
+        'A red and white mix tuned so fresh meat reads the right colour under it',
+        `IP${i} — sealed for a cabinet that gets cleaned down`,
+        'Bluetooth control, no WiFi needed',
+        'This is a specialist strip. Ring us and we will spec the cabinet with you',
+      ],
+    };
+  }
+
+  /* ---- Display grade SMD ----
+     The 23 W/m high colour strip. Very bright and CRI 90+, which is what
+     retail display needs, and what separates it from the 12 W/m wet-area SMD
+     it shares most of its name with. */
+  if (t.includes('display') || (t.includes('high colour') && t.includes('smd'))) {
+    let n = wattsPerMetre({ name: t }, 23),
+      o = { single: 5, dual: 10 };   /* stated on the product page */
+    return {
+      fam: 'DISPLAY',
+      wpm: n,
+      wpmTxt: `High Lumen High Colour SMD · ${n}W/m display grade`,
+      single: o.single,
+      dual: o.dual,
+      channel: 'required',
+      spec: `24V High Lumen High Colour SMD · ${n}W/m · up to 3800 lumens a metre · 240 LEDs a metre · CRI 90+ · IP20 or IP65 · ${o.single}m one feed / ${o.dual}m both ends`,
+      ipTxt: i >= 65 ? `IP${i} — sealed against steam and splashes` : 'IP20 — dry indoor spots, IP65 available',
+      where: 'Retail display, shelving and joinery — anywhere the goods have to look their real colour',
+      teach: [
+        `Very bright: up to 3800 lumens a metre from ${n}W/m, 240 LEDs a metre`,
+        'CRI 90+ — colours read true, which is the whole point in a display',
+        'Warm, natural or bright white',
+        'Dotless, so it reads as one line of light rather than a row of dots',
+      ],
+    };
+  }
+
   if (t.includes('240v')) {
     let e = t.includes('rgb');
     return {
@@ -224,33 +357,46 @@ function h(e) {
       ],
     };
   }
-  return t.includes('long run') || t.includes('longrun') || t.includes('long-run')
-    ? {
-        fam: 'LONGRUN',
-        wpm: 7.5,
-        wpmTxt: '24V Long Run COB · 7.5W/m',
-        min: 5,
-        single: 20,
-        dual: 40,
-        channel: 'optional',
-        spec: '24V Long Run COB · dot-less · 7.5W/m · IP68 · 20m one feed / 40m both ends',
-        ipTxt: 'IP68 — fully sealed, submersible',
-        where: 'Long continuous runs, 10 metres and up — indoors or fully exposed outdoors',
-        teach: [
-          'Built for distance: low 7.5W/m keeps voltage drop down over long runs',
-          'One driver feeds 20m from one end; power both ends for up to 40m',
-          'Fully sealed IP68 — equally happy indoors, outdoors, even wet areas',
-          "Under 5m? This isn't the right strip for the job — call us and we'll match something better suited",
-        ],
-      }
+  /* The long run strip is now sold as the 7.5 W/m dotless COB, in 3000K and
+     4000K. It used to be listed as "Long Run COB" and the finder matched that
+     phrase, so when Magento renamed it this whole branch stopped matching
+     anything and the long run answer fell through to a 5 metre strip. Match it
+     on what actually makes it the long run strip instead: a COB at 8 W/m or
+     under. It is sold on 40, 30, 20, 15 and 10 metre rolls. */
+  return t.includes('long run') ||
+    t.includes('longrun') ||
+    t.includes('long-run') ||
+    (t.includes('cob') && wattsPerMetre({ name: t }, 16) <= 8)
+    ? (() => {
+        let e = wattsPerMetre({ name: t }, 7.5);
+        return {
+          fam: 'LONGRUN',
+          wpm: e,
+          wpmTxt: `24V Long Run COB · ${e}W/m`,
+          min: 5,
+          single: 20,
+          dual: 40,
+          channel: 'optional',
+          spec: `24V Long Run dotless COB · ${e}W/m · IP20, IP67 option · 20m one feed / 40m both ends · rolls of 10, 15, 20, 30 and 40m`,
+          ipTxt: i >= 65 ? `IP${i} — sealed for wet areas and outdoors` : 'IP20 indoors, IP67 silicon injected version for outdoors',
+          where: 'Long continuous runs, 10 metres and up — indoors, or the IP67 version outdoors',
+          teach: [
+            `Built for distance: ${e}W/m keeps the voltage drop down over a long run`,
+            'One driver feeds 20m from one end; power both ends for up to 40m',
+            'Comes on 10, 15, 20, 30 and 40 metre rolls, so a long run has no joins in it',
+            'Silicon injected IP67 version for outdoors',
+            "Under 5m? This isn't the right strip for the job — call us and we'll match something better suited",
+          ],
+        };
+      })()
     : t.includes('rgb') && t.includes('cob')
       ? {
           fam: 'RGBCOB',
-          wpm: 16,
+          wpm: wattsPerMetre({ name: t }, 16),
           single: 5,
           dual: 10,
           channel: 'required',
-          spec: '24V RGB COB · dot-less · 16W/m IP20 (15W/m IP65) · 5m one feed / 10m both ends',
+          spec: `24V RGB COB · dot-less · ${wattsPerMetre({ name: t }, 16)}W/m · IP${i} · 5m one feed / 10m both ends`,
           ipTxt: i >= 65 ? 'IP65 — handles steam & splashes' : 'IP20 — dry indoor spots',
           where: 'Under kitchen cabinets, bars, bulkheads, shelving — anywhere you want colour',
           teach: [
@@ -261,31 +407,41 @@ function h(e) {
           ],
         }
       : t.includes('cob')
-        ? {
-            fam: 'CCTCOB',
-            wpm: 16,
-            single: 5,
-            dual: 10,
-            channel: 'required',
-            spec: '24V CCT COB · dot-less · 16W/m · IP20 · 2700–6500K · 5m one feed / 10m both ends',
-            ipTxt: 'IP20 — dry indoor spots',
-            where: 'Cabinets, shelving, bulkheads — beautiful smooth white light',
-            teach: [
-              'Dot-less: one clean line of light, no spotty dots',
-              'Adjustable warm ↔ cool white (2700K–6500K) with the remote',
-              'Feed one end up to 5m; power BOTH ends for up to 10m',
-              '16W per metre — needs an aluminium channel to stay cool',
-            ],
-          }
+        ? (() => {
+            /* The dotless COB is now stocked at 7.5, 12 and 16 W/m, and the
+               12 W/m is a fixed 2700K rather than adjustable, so neither the
+               wattage nor the colour line can be hard coded any more. */
+            let e = wattsPerMetre({ name: t }, 16),
+              r = runLimits(e),
+              n = t.match(/(\d{4})\s*k/),
+              s = n ? `${n[1]}K fixed` : '2700–6500K adjustable';
+            return {
+              fam: 'CCTCOB',
+              wpm: e,
+              wpmTxt: `24V dotless COB · ${e}W/m`,
+              single: r.single,
+              dual: r.dual,
+              channel: 'required',
+              spec: `24V dotless COB · ${e}W/m · IP${i} · ${s} · ${r.single}m one feed / ${r.dual}m both ends`,
+              ipTxt: i >= 65 ? `IP${i} — handles steam and splashes` : 'IP20 — dry indoor spots',
+              where: 'Cabinets, shelving, bulkheads — beautiful smooth white light',
+              teach: [
+                'Dot-less: one clean line of light, no spotty dots',
+                n ? `Fixed ${n[1]}K white` : 'Adjustable warm to cool white, 2700K to 6500K, from the remote',
+                `Feed one end up to ${r.single}m; power BOTH ends for up to ${r.dual}m`,
+                `${e}W per metre — needs an aluminium channel to stay cool`,
+              ],
+            };
+          })()
         : t.includes('high lumen')
           ? {
               fam: 'HILUMEN',
-              wpm: 20,
-              wpmTxt: 'High Lumen SMD · 12W/m IP65 wet-area strip',
+              wpm: wattsPerMetre({ name: t }, 12),
+              wpmTxt: `High Lumen SMD · ${wattsPerMetre({ name: t }, 12)}W/m IP65 wet-area strip`,
               single: 5,
               dual: 10,
               channel: 'required',
-              spec: '24V High Lumen SMD · CRI 90+ · 12W/m IP65 · fixed whites 3000/4000/5500/6000K · 5m one feed / 10m both ends',
+              spec: `24V High Lumen SMD · CRI 90+ · ${wattsPerMetre({ name: t }, 12)}W/m IP65 · fixed whites 3000/4000/5500/6000K · 5m one feed / 10m both ends`,
               ipTxt: 'IP65 — sealed against kitchen & bathroom steam',
               where: 'All wet areas — kitchen benchtops, bathroom niches & outdoors — plus bars, shelving & display',
               teach: [
@@ -726,7 +882,16 @@ export const pickRecommendation = function (e, t) {
       ((i = e),
       (r = t),
       i
-        .filter((e) => 'strip' === c(e) && /strip|cob|linear/i.test(e.name) && !/suspension|modular/i.test(e.name))
+        /* Neon flex is sold by the metre and lives on this page, but it is
+           named "Neon Flex" and "Neon Side Bend Flex" with the word strip
+           nowhere in it, so the old filter dropped both before anything was
+           scored and the signage answer came back as a rigid COB strip. */
+        .filter(
+          (e) =>
+            'strip' === c(e) &&
+            /strip|cob|linear|neon|flex/i.test(e.name) &&
+            !/suspension|modular/i.test(e.name),
+        )
         .map((e) => {
           var t;
           let i, n, s, o, a;
@@ -760,7 +925,29 @@ export const pickRecommendation = function (e, t) {
                   ? (('CCTCOB' === o.fam || 'RGBCOB' === o.fam) && (i += 3), 'HILUMEN' === o.fam && (i += 2))
                   : 'cove' === t.place
                     ? ('CCTCOB' === o.fam || 'HILUMEN' === o.fam) && (i += 2)
-                    : s <= 24 && (i += 1),
+                    : /* Signage and curves: only the neon flex bends on its
+                         side, so nothing else is a real answer here. */
+                      'neon' === t.place
+                      ? (i += 'NEON' === o.fam ? 14 : -100)
+                      : /* A display or food cabinet wants colour accuracy
+                           before brightness. The 23W/m high colour display
+                           strip is the pick; the fresh meat strip is the
+                           specialist answer for a butcher or deli. */
+                        'display' === t.place
+                        ? (i +=
+                            'DISPLAY' === o.fam
+                              ? 12
+                              : 'MEAT' === o.fam
+                                ? 6
+                                : 'HILUMEN' === o.fam
+                                  ? 3
+                                  : 'NEON' === o.fam
+                                    ? -100
+                                    : 0)
+                        : /* Anywhere else, the specialist strips are the wrong
+                             thing to lead with even though they would work. */
+                          (('NEON' === o.fam || 'MEAT' === o.fam || 'SPI' === o.fam) && (i -= 6),
+                          s <= 24 && (i += 1)),
               'rgb' === t.colour
                 ? n.includes('rgb')
                   ? (i += 6)

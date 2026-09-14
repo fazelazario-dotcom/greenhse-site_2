@@ -3,6 +3,7 @@
 /layout/                 /layout-app/         301
 /layout-standalone.html  /layout-standalone/  301!
 /layout-admin.html       /layout-admin/       301!
+/light-lab.html          /light-lab/          301!
 
 # ---- Magento proxies (status 200 = server-side proxy, avoids CORS). The
 # store only allows demolights.greenhse.com as a browser origin, so every

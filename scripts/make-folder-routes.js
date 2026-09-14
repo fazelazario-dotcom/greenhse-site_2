@@ -9,7 +9,8 @@ const path = require('path');
 const OUT = path.join(__dirname, '..', 'out');
 /* 'layout' can't be a dev route (it collides with Next's reserved layout.js
    concept and loops the dev router), so the planner's route is /layout-app/. */
-const PAGES = { 'layout': 'layout-app', 'layout-standalone': 'layout-standalone', 'layout-admin': 'layout-admin' };
+const PAGES = { 'layout': 'layout-app', 'layout-standalone': 'layout-standalone',
+                'layout-admin': 'layout-admin', 'light-lab': 'light-lab' };
 
 for (const name of Object.keys(PAGES)) {
   const src = path.join(OUT, name + '.html');
