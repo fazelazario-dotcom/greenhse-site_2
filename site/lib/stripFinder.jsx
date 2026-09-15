@@ -219,7 +219,12 @@ function wattsPerMetre(e, t) {
    sold on 40 m rolls, the 16 W/m COB wants a feed every 5 m. These are the
    numbers off the product pages, not a formula. */
 function runLimits(e) {
-  return e <= 8 ? { single: 20, dual: 40 } : e <= 12 ? { single: 10, dual: 20 } : { single: 5, dual: 10 };
+  /* Only the low wattage COB is the long run product — that is the one sold on
+     20 and 40 metre rolls. Everything else in the COB range is 5 m from one end
+     and 10 m fed from both, which is what the strip lighting brochure states for
+     the whole family. The middle band used to hand the 12 W/m COB 10 m and 20 m,
+     which was a straight over-statement: it is not the long run strip. */
+  return e <= 8 ? { single: 20, dual: 40 } : { single: 5, dual: 10 };
 }
 function h(e) {
   let t = e.name.toLowerCase(),
@@ -443,9 +448,9 @@ function h(e) {
               channel: 'required',
               spec: `24V High Lumen SMD · CRI 90+ · ${wattsPerMetre({ name: t }, 12)}W/m IP65 · fixed whites 3000/4000/5500/6000K · 5m one feed / 10m both ends`,
               ipTxt: 'IP65 — sealed against kitchen & bathroom steam',
-              where: 'All wet areas — kitchen benchtops, bathroom niches & outdoors — plus bars, shelving & display',
+              where: 'Wet areas indoors — kitchen benchtops, bathroom niches — plus bars, shelving & display',
               teach: [
-                'The wet-area pick: 12W/m in IP65 — sealed against steam, splashes & weather',
+                'The wet-area pick: IP65 — sealed against kitchen and bathroom steam and splashes',
                 'Fixed single-colour whites (3000/4000/5500/6000K) — no RGB in this range',
                 'True-colour light (CRI 90+) — things look their real colour',
                 'Feed one end up to 5m; power from 2 points for 5–10m',
