@@ -1146,6 +1146,9 @@ img{image-rendering:-webkit-optimize-contrast}
         <span class="tsep"></span>
         <button type="button" class="tool" id="t-undo" title="Undo (Ctrl+Z)"><svg viewBox="0 0 24 24"><path d="M3 10h11a5 5 0 0 1 0 10H8"/><path d="M3 10l5-5M3 10l5 5"/></svg>Undo</button>
         <button type="button" class="tool" id="t-del" title="Delete selected (Del)"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>Delete</button>
+        <button type="button" class="tool" id="t-rotl" title="Turn the selected outdoor wall light anticlockwise 15° ( [ )"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 2.3 5.7"/><path d="M4 7v5h5"/></svg>Turn left</button>
+        <button type="button" class="tool" id="t-rotr" title="Turn the selected outdoor wall light clockwise 15° ( ] )"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 0-2.3 5.7"/><path d="M20 7v5h-5"/></svg>Turn right</button>
+        <button type="button" class="tool" id="t-aimreset" title="Point it away from the nearest wall again"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg>Auto aim</button>
         <button type="button" class="tool" id="t-group" title="Group the selected fittings so they move as one — made for star-light runs between walls"><svg viewBox="0 0 24 24"><circle cx="6" cy="12" r="2.4"/><circle cx="12" cy="12" r="2.4"/><circle cx="18" cy="12" r="2.4"/><path d="M6 12h12" stroke-dasharray="2 2"/></svg>Group</button>
         <button type="button" class="tool" id="t-ungroup" title="Ungroup — each fitting moves on its own again"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="2.4"/><circle cx="12" cy="7" r="2.4"/><circle cx="19" cy="14" r="2.4"/></svg>Ungroup</button>
         <button type="button" class="tool" id="t-clear" title="Remove every fitting">Clear all</button>
@@ -2412,7 +2415,21 @@ function renderFixtures(){
       }
     }
 
-    marks+='<g class="fx'+(on?' sel':'')+'" data-id="'+f.id+'">'+
+    /* A selected wall light grows an aim handle: a stalk out in front of it
+       with a grab dot on the end. Drag the dot and the light turns to follow,
+       which is the only way to aim one on a phone - [ and ] need a keyboard. */
+    var aim='';
+    if(on && isWallLight(p)){
+      var ah=aimHandlePt(f), aw=Math.max(1.4,2/S.zoom), ar=Math.max(5.5,7.5/S.zoom);
+      aim='<g class="fx-aim" data-aim="'+f.id+'">'+
+        '<line x1="'+f.x+'" y1="'+f.y+'" x2="'+ah.x.toFixed(1)+'" y2="'+ah.y.toFixed(1)+'" '+
+          'stroke="#00c400" stroke-width="'+aw.toFixed(2)+'" stroke-linecap="round"/>'+
+        '<circle cx="'+ah.x.toFixed(1)+'" cy="'+ah.y.toFixed(1)+'" r="'+ar.toFixed(1)+'" '+
+          'fill="#fff" stroke="#00c400" stroke-width="'+aw.toFixed(2)+'"/>'+
+        '<circle cx="'+ah.x.toFixed(1)+'" cy="'+ah.y.toFixed(1)+'" r="'+(ar*2.2).toFixed(1)+'" fill="transparent"/>'+
+      '</g>';
+    }
+    marks+='<g class="fx'+(on?' sel':'')+'" data-id="'+f.id+'">'+aim+
       (on?'<circle class="fx-ring" cx="'+f.x+'" cy="'+f.y+'" r="'+(rPix+7)+'"/>':'')+
       scaleStrokes(symbolSvg(symbolFor(p.cat,p),f.x,f.y,rPix,col,p,f.rot), S.zoom)+
       (S.showLabels?'<text class="fx-lab" x="'+(f.x+rPix+3)+'" y="'+(f.y-rPix-2)+'" font-size="'+labelSize+'">'+esc(f.pid)+'</text>':'')+
@@ -2488,6 +2505,10 @@ function toolState(){
   var selFx=S.fixtures.filter(function(f){return S.sel.indexOf(f.id)>-1;});
   return {view:hasPlan,show:hasFx,
           undo:S.undo.length>0, del:S.sel.length>0, clear:hasFx,
+          /* The turn controls only appear when an outdoor wall light is
+             selected - they do nothing for a downlight, and a button that
+             does nothing is worse than no button. */
+          aim:selFx.some(function(f){return isWallLight(byId(f.pid));}),
           group:selFx.length>1,
           ungroup:selFx.some(function(f){return f.grp;}),
           edit:(S.undo.length>0||S.sel.length>0||hasFx),
@@ -2499,6 +2520,7 @@ function renderTools(){
   if(nh) nh.hidden=!(S.plan.loaded&&S.rooms.length>0&&!S.hintSeen);
   [['grp-view','view'],['grp-show','show'],['grp-edit','edit'],
    ['t-undo','undo'],['t-del','del'],['t-clear','clear'],
+   ['t-rotl','aim'],['t-rotr','aim'],['t-aimreset','aim'],
    ['t-group','group'],['t-ungroup','ungroup'],['toolhint','hint']].forEach(function(pair){
     var el=document.getElementById(pair[0]);
     if(el) el.hidden=!t[pair[1]];
@@ -3836,9 +3858,13 @@ var SPECIAL={
     blurb:'For outside walls \u2014 entries, the alfresco, along a path. They bolt to the wall and throw light out in front of them, about 180\u00b0, and nothing behind. Drop one and it points away from the nearest wall on its own.',
     steps:['Pick which one.',
            'Click the plan against the outside wall you want it on.',
-           'It faces away from that wall on its own \u2014 press [ or ] to turn it.'],
+           'It faces away from that wall on its own. To aim it somewhere else, click it and drag the green dot in front of it \u2014 or use the Turn buttons.',
+           'Drag the light itself to move it. It keeps the aim you gave it.'],
+    /* The budget wall light (W10-CCT-BW) is no longer offered - Lazar:
+       "BUDGET OUTDOOR LIGHT NEEDS TO BE REMOVED". It is deliberately still in
+       WALL_KEEP, so a plan saved before today still resolves and prices it;
+       it just cannot be reached from the picker any more. */
     choices:[{id:'MR10-CCT-WALL-B', t:'Up/down, IP65'},
-             {id:'W10-CCT-BW', t:'Budget'},
              {id:'SEAFORD-UPDOWN-WAL', t:'Seaford up/down'},
              {id:'WL12-18-CCT-SENSOR', t:'With sensor'}],
     note:'Mount them about 1.6\u20131.8 m off the floor, above eye level, and keep them off a wall you look straight at from a window.'
@@ -4302,6 +4328,11 @@ function onDown(e){
     return;
   }
   // select tool
+  /* The aim handle is checked first: it sits outside the fitting's own hit
+     circle, but it overlaps neighbouring fittings often enough that grabbing
+     it has to win. */
+  var ah=aimHandleAt(pt);
+  if(ah){ snapshot(); drag={mode:'aim',id:ah.id}; aimTowards(ah,pt); renderAll(); return; }
   var hit=e.target.closest?e.target.closest('.fx'):null;
   if(hit){
     var id=hit.dataset.id;
@@ -4365,6 +4396,11 @@ function onMove(e){
       var mm=Math.hypot(pt.x-drag.a.x,pt.y-drag.a.y)*S.mpp;
       guideLabel((drag.a.x+pt.x)/2,(drag.a.y+pt.y)/2,mm.toFixed(2)+' m');
     }
+    return;
+  }
+  if(drag.mode==='aim'){
+    var af=S.fixtures.filter(function(f){return f.id===drag.id;})[0];
+    if(af){ aimTowards(af,pt); renderFixtures(); }
     return;
   }
   if(drag.mode==='calpt'){S.cal[drag.which]={x:pt.x,y:pt.y};updateCalFromHandles(false);return;}
@@ -4500,13 +4536,21 @@ function onUp(e){
     }
     return;
   }
+  if(d.mode==='aim'){
+    guideClear(); renderAll();
+    var af=S.fixtures.filter(function(f){return f.id===d.id;})[0];
+    if(af) toast('Aimed '+Math.round(af.rot)+'\u00b0 — drag the green dot again to change it');
+    return;
+  }
   if(d.mode==='move'){
     guideClear();
     if(d.moved){
       /* A dragged wall light re-reads which wall it is now closest to, so it
-         keeps throwing into the space — never back into the wall. */
+         keeps throwing into the space — never back into the wall. But only
+         while nobody has aimed it by hand: once they have, moving it must
+         carry that aim with it, or aiming and moving fight each other. */
       S.fixtures.forEach(function(f){
-        if(S.sel.indexOf(f.id)>-1 && isWallLight(byId(f.pid))) f.rot=wallFacing(f.x,f.y);
+        if(S.sel.indexOf(f.id)>-1 && !f.aimed && isWallLight(byId(f.pid))) f.rot=wallFacing(f.x,f.y);
       });
       renderAll();
     }
@@ -5253,6 +5297,9 @@ function wire(){
   $('#t-labels').onclick=function(){S.showLabels=!S.showLabels;this.classList.toggle('on',S.showLabels);renderFixtures();};
   $('#t-grid').onclick=function(){S.showGrid=!S.showGrid;this.classList.toggle('on',S.showGrid);renderGrid();};
   $('#t-undo').onclick=undo;
+  $('#t-rotl').onclick=function(){rotateSelected(-1);};
+  $('#t-rotr').onclick=function(){rotateSelected(1);};
+  $('#t-aimreset').onclick=function(){resetAim();};
   $('#t-group').onclick=function(){groupSelected();};
   $('#t-ungroup').onclick=function(){ungroupSelected();};
   $('#t-del').onclick=delSel;
@@ -5493,21 +5540,71 @@ function showFaq(){
       'ceiling access, IP ratings and circuit loads.'));
 }
 /* Turn the selected wall lights. The auto-facing gets a rectangular room
-   right nearly every time, but a plan with a diagonal wall, a return, or a
-   light on a post needs a hand. 45 deg steps - finer than that is false
-   precision on a floor plan. */
+   right nearly every time, but a plan with a diagonal wall, a return, a light
+   on a post or one deliberately washing along a wall needs a hand. 15 deg
+   steps: 45 was too coarse to aim a light down a path, and anything finer is
+   false precision on a floor plan.
+   Turning marks the fitting as hand-aimed, which is what stops the next drag
+   from snapping it back to facing the nearest wall. */
+var ROT_STEP=15;
 function rotateSelected(dir){
   var hit=0;
   S.fixtures.forEach(function(f){
     if(S.sel.indexOf(f.id)===-1) return;
     if(!isWallLight(byId(f.pid))) return;
     if(!hit) snapshot();
-    f.rot=(((typeof f.rot==='number'?f.rot:0)+dir*45)%360+360)%360;
+    f.rot=(((typeof f.rot==='number'?f.rot:0)+dir*ROT_STEP)%360+360)%360;
+    f.aimed=true;
     hit++;
   });
-  if(!hit){ toast('Select an outdoor wall light first, then press [ or ] to turn it'); return; }
+  if(!hit){ toast('Select an outdoor wall light first, then use the turn buttons (or press [ and ])'); return; }
   renderAll();
   toast(hit>1?hit+' wall lights turned':'Wall light turned');
+}
+/* Put a hand-aimed light back on automatic, so it faces away from the nearest
+   wall again. Without this there is no way back from a bad aim except undo. */
+function resetAim(){
+  var hit=0;
+  S.fixtures.forEach(function(f){
+    if(S.sel.indexOf(f.id)===-1) return;
+    if(!isWallLight(byId(f.pid))) return;
+    if(!hit) snapshot();
+    delete f.aimed; f.rot=wallFacing(f.x,f.y);
+    hit++;
+  });
+  if(!hit){ toast('Select an outdoor wall light first'); return; }
+  renderAll(); toast('Facing away from the nearest wall again');
+}
+/* The selected wall lights, in one place - the aim handle and the toolbar
+   both need to know whether there are any. */
+function selectedWallLights(){
+  return S.fixtures.filter(function(f){
+    return S.sel.indexOf(f.id)>-1 && isWallLight(byId(f.pid));
+  });
+}
+/* Where the aim handle sits for a given wall light: out in front of it, in the
+   direction it throws. Returned in image coordinates. */
+function aimHandlePt(f){
+  var a=((typeof f.rot==='number'?f.rot:0)-90)*Math.PI/180;
+  var d=Math.max(26, 34/S.zoom);
+  return {x:f.x+Math.cos(a)*d, y:f.y+Math.sin(a)*d};
+}
+/* Hit test for the aim handle, so a finger or a mouse can grab it. Generous on
+   purpose: this is the control people will use on a phone. */
+function aimHandleAt(pt){
+  var tol=Math.max(14, 18/S.zoom);
+  var hit=null;
+  selectedWallLights().forEach(function(f){
+    var h=aimHandlePt(f);
+    if(Math.hypot(pt.x-h.x, pt.y-h.y)<=tol) hit=f;
+  });
+  return hit;
+}
+/* Point the dragged light at wherever the finger is, snapped to 15 deg. */
+function aimTowards(f,pt){
+  var ang=Math.atan2(pt.y-f.y, pt.x-f.x)*180/Math.PI + 90;
+  f.rot=((Math.round(ang/ROT_STEP)*ROT_STEP)%360+360)%360;
+  f.aimed=true;
 }
 
 function delSel(){
@@ -5577,7 +5674,8 @@ window.__GH={
   roomName:roomName,renderDoneRooms:renderDoneRooms,
   isStarLight:isStarLight,isWallLight:isWallLight,STAR_SPACING_M:STAR_SPACING_M,groupSelected:groupSelected,ungroupSelected:ungroupSelected,showFaq:showFaq,
   isBigRoom:isBigRoom,roomComfort:roomComfort,applyComfort:applyComfort,COMFORT:COMFORT,
-  wallFacing:wallFacing,rotateSelected:rotateSelected,
+  wallFacing:wallFacing,rotateSelected:rotateSelected,resetAim:resetAim,
+  aimTowards:aimTowards,aimHandlePt:aimHandlePt,aimHandleAt:aimHandleAt,ROT_STEP:ROT_STEP,
   smartLights:smartLights,pickerGroupProducts:pickerGroupProducts,
   DATA_ONLY_CATS:DATA_ONLY_CATS,PICKER_MAIN:PICKER_MAIN,pickerLabel:pickerLabel,plainName:plainName,
   symbolSvg:symbolSvg,fxKind:fxKind,
@@ -7444,7 +7542,30 @@ window.__GHQA=function(){
     var wf=S.fixtures[S.fixtures.length-1];
     eq('a placed wall light carries the way it faces',wf.rot,90);
     S.sel=[wf.id]; G.rotateSelected(1);
-    eq('and it turns 45 degrees at a time',S.fixtures[S.fixtures.length-1].rot,135);
+    eq('and it turns 15 degrees at a time',S.fixtures[S.fixtures.length-1].rot,105);
+    ok('turning it by hand marks it as aimed',wf.aimed===true,'not marked');
+    /* The bug Lazar reported: you could move an outdoor light or aim it, never
+       both, because every drag re-ran the auto-facing and threw the aim away. */
+    var keep=wf.rot; wf.x+=40; wf.y+=40;
+    if(!wf.aimed) wf.rot=G.wallFacing(wf.x,wf.y);
+    eq('a hand-aimed light keeps its aim when it is moved',wf.rot,keep);
+    G.resetAim();
+    ok('auto aim puts it back on the nearest wall',
+       wf.aimed===undefined && wf.rot===G.wallFacing(wf.x,wf.y),'still hand-aimed');
+    /* Dragging the handle: point it straight down and it should read 180. */
+    G.aimTowards(wf,{x:wf.x,y:wf.y+100});
+    eq('dragging the aim handle points it that way',wf.rot,180);
+    var hp=G.aimHandlePt(wf);
+    ok('the aim handle sits in front of the light, not on top of it',
+       Math.hypot(hp.x-wf.x,hp.y-wf.y)>20,'handle is on the fitting');
+    ok('the aim handle can be grabbed where it is drawn',
+       !!G.aimHandleAt({x:hp.x,y:hp.y}),'handle not hit-testable');
+    /* Lazar: "BUDGET OUTDOOR LIGHT NEEDS TO BE REMOVED" - gone from the
+       picker, but still resolvable so older saved plans still price. */
+    ok('the budget outdoor light is not offered any more',
+       !G.SPECIAL.wall.choices.some(function(c){return c.id==='W10-CCT-BW';}),'still offered');
+    ok('but a plan saved with it in still resolves it',
+       !!G.byId('W10-CCT-BW'),'no longer resolvable');
     G.setPick({cat:'downlights',qty:1,arr:'row'}); S.pick.pid='DL10ES';
     S.fixtures=[]; G.addFixtures([{x:300,y:200}]);
     eq('a ceiling fitting has no facing to carry',

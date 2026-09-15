@@ -1,0 +1,43 @@
+{
+  "_comment": "The running bar at the foot of the home page. Add, remove or reorder items here and rebuild - no code change needed. Keep each one short: it has to be readable as it slides past. 'label' is an optional small tag. Set \"kind\": \"notice\" for something a customer is worse off for missing - holiday hours, a stock delay, a price change. Notices show in amber and always come round first. Delete a notice once it stops being true; a stale one costs you the whole bar.",
+  "items": [
+    {
+      "kind": "notice",
+      "label": "Notice",
+      "text": "All 240V lighting must be installed by a licensed electrician in WA",
+      "href": "/installation/"
+    },
+    {
+      "label": "New",
+      "text": "Light Lab — take a photo of your room and see it lit with real Greenhse fittings",
+      "href": "/light-lab/"
+    },
+    {
+      "label": "Tool",
+      "text": "Strip Light Finder — four questions and it builds your package: strip, profile, driver",
+      "href": "/strip-lights/"
+    },
+    {
+      "label": "Tool",
+      "text": "High Bay Finder — tells you the right high bay for your ceiling height",
+      "href": "/high-bay-lights/"
+    },
+    {
+      "label": "Free",
+      "text": "Layout Planner — plan your downlights room by room before you buy",
+      "href": "/layout-app/"
+    },
+    {
+      "text": "New in the strip range: 24V Neon Flex — bends on its side, so it follows a curve or a letter",
+      "href": "/strip-lights/"
+    },
+    {
+      "text": "Showroom open in Ellenbrook — 5/1 Locke Lane, WA 6069",
+      "href": "/contact/"
+    },
+    {
+      "text": "Trade and project pricing available — talk to us about your job",
+      "href": "/contact/"
+    }
+  ]
+}

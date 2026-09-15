@@ -185,7 +185,7 @@ function KC({ both: e }) {
     </div>
   );
 }
-function VC({ len: e }) {
+function VC({ len: e, carries: kc = 2 }) {
   return (
     <div className="jsx-8adf51769f9020ba cn-panel">
       <h4 className="jsx-8adf51769f9020ba cn-h">
@@ -196,7 +196,7 @@ function VC({ len: e }) {
         <svg
           viewBox="0 0 340 118"
           role="img"
-          aria-label="The strip comes in one continuous length; if you cut it, a clip connector rejoins the pieces and carries up to 2.5 metres"
+          aria-label={`The strip comes in one continuous length; if you cut it, a clip connector rejoins the pieces and carries up to ${kc} metres`}
           className="jsx-8adf51769f9020ba"
         >
           <text x="14" y="11" fontSize="8" fill="#8a8d7f" className="jsx-8adf51769f9020ba">
@@ -263,7 +263,7 @@ function VC({ len: e }) {
             cut at a marked line
           </text>
           <text x={326} y="110" fontSize="8.5" fill="#5d6151" textAnchor="end" className="jsx-8adf51769f9020ba">
-            connector carries up to 2.5m
+            {`connector carries up to ${kc}m`}
           </text>
         </svg>
       </div>
@@ -271,7 +271,7 @@ function VC({ len: e }) {
         A straight run needs no connectors at all. If you do cut it — to turn a corner, get past an obstacle or split
         the run — rejoin the pieces with a solderless clip connector: the strip end pushes into the clear housing and
         the lid clips shut, no soldering.{' '}
-        <b className="jsx-8adf51769f9020ba">One connector carries up to 2.5m of strip.</b>
+        <b className="jsx-8adf51769f9020ba">{`One connector carries up to ${kc}m of strip.`}</b>
         {" Connectors aren't part of this kit — tell us if you know you'll be cutting and we'll add them."}
       </p>
       <JSXStyle id="8adf51769f9020ba">
@@ -455,8 +455,8 @@ function L({ media: e }) {
         ))}
       </div>
       <p className="jsx-607e75253ba7e1bc cob-shotnote">
-        Supplier photos show the bare strip. The version we sell is the same strip sealed inside a clear silicone sleeve
-        for IP68.
+        Supplier photos show the bare strip — that is the IP20. The IP67 is the same strip with clear silicone injected
+        the whole way along.
       </p>
       <JSXStyle id="607e75253ba7e1bc">
         {
@@ -515,24 +515,25 @@ function A({ media: e }) {
   );
 }
 function M({ media: e }) {
-  let i = e.ipGrades[0];
-  if (!i) return null;
-  let [t, r, n] = i;
+  let i = e.ipGrades || [];
+  if (!i.length) return null;
   return (
     <>
-      <h4 className="jsx-8f185c330e4cb3bf cob-h4">Sealed for outdoors</h4>
+      <h4 className="jsx-8f185c330e4cb3bf cob-h4">Two grades — pick by where it goes</h4>
       <p className="jsx-8f185c330e4cb3bf cob-outdoor">
-        This one only comes fully sealed, so it goes where other strip can't — garden beds and planters, pergolas and
-        outdoor features, under decks, around pools and water features, and floating steps. Rain and a hose are no
-        problem. It's just as happy indoors; the sealing means damp is never something you have to think about.
+        The bare IP20 is the one for dry indoor work — coves, bulkheads, joinery — and it sits in an aluminium channel.
+        The IP67 is the same strip with silicone injected the whole way along, so it goes where other strip can't:
+        garden beds and planters, pergolas, under decks, around pools and water features, and floating steps. Rain and a
+        hose are no problem. Tell us which one the job needs and we'll send that.
       </p>
       <div className="jsx-8f185c330e4cb3bf cob-ips">
-        <div className="jsx-8f185c330e4cb3bf cob-ip cob-ip-on">
-          <b className="jsx-8f185c330e4cb3bf">{t}</b>
-          <span className="jsx-8f185c330e4cb3bf cob-ip-dim">{r}</span>
-          <span className="jsx-8f185c330e4cb3bf cob-ip-use">{n}</span>
-          <em className="jsx-8f185c330e4cb3bf">The only grade we sell it in</em>
-        </div>
+        {i.map(([t, r, n]) => (
+          <div key={t} className="jsx-8f185c330e4cb3bf cob-ip cob-ip-on">
+            <b className="jsx-8f185c330e4cb3bf">{t}</b>
+            <span className="jsx-8f185c330e4cb3bf cob-ip-dim">{r}</span>
+            <span className="jsx-8f185c330e4cb3bf cob-ip-use">{n}</span>
+          </div>
+        ))}
       </div>
       <JSXStyle id="8f185c330e4cb3bf">
         {
@@ -727,7 +728,23 @@ function W({ open: e, onClose: t }) {
               </button>
               <span className="jsx-a408cbbe3f04beea prog">✓ Your complete kit</span>
               <h2 className="jsx-a408cbbe3f04beea">{F.name}</h2>
-              {'240V' === Z.facts.fam ? <_ /> : <YC image={stripFinder.PLACE_IMAGES[S.place]} size="full" />}
+              {/* The picture on the kit screen used to follow the PLACE answer,
+                  which is wrong the moment the kit is not the strip that place
+                  usually gets: pick a recessed ceiling, end up on a 24V COB,
+                  and the header showed the 240V reel captioned "240V strip on
+                  the reel — the one that sits in a ceiling recess" above a kit
+                  with no 240V in it. The picture now comes off the strip that
+                  is actually in the kit, so it can never disagree with it. */}
+              {'240V' === Z.facts.fam ? (
+                <_ />
+              ) : (
+                <figure className="jsx-a408cbbe3f04beea q-photo q-photo--full kitshot">
+                  <div className="jsx-a408cbbe3f04beea kitshot__img">
+                    <ProductVisual product={F} fit="panel" />
+                  </div>
+                  <figcaption className="jsx-a408cbbe3f04beea">{F.name}</figcaption>
+                </figure>
+              )}
               {'240V' !== Z.facts.fam && <KC both={'both' === Z.feed} />}
               <p className="jsx-a408cbbe3f04beea result__summary">
                 {'Everything you need for your '}
@@ -803,7 +820,7 @@ function W({ open: e, onClose: t }) {
                 Tap any photo or product name above for the full product page — specs, every option and the install
                 guide.
               </p>
-              {'240V' !== Z.facts.fam && <VC len={Z.len} />}
+              {'240V' !== Z.facts.fam && <VC len={Z.len} carries={Z.facts.connector || 2} />}
               <div className="jsx-a408cbbe3f04beea total">
                 <span className="jsx-a408cbbe3f04beea">Kit total</span>
                 <span className="jsx-a408cbbe3f04beea total__val">
@@ -956,9 +973,9 @@ function W({ open: e, onClose: t }) {
                         {stripFinder.LONGRUN_COB_MEDIA.run.wpm}W a metre, which is the whole trick — low current means
                         one driver at one end pushes light {stripFinder.LONGRUN_COB_MEDIA.run.single}
                         {' metres without the far end going dim. Feed it from both ends and you get '}
-                        {stripFinder.LONGRUN_COB_MEDIA.run.dual}. It's fully sealed{' '}
+                        {stripFinder.LONGRUN_COB_MEDIA.run.dual}. It comes bare as{' '}
                         {stripFinder.LONGRUN_COB_MEDIA.run.ip}, so it's equally at home down a garden bed or along an
-                        indoor bulkhead.
+                        indoor bulkhead — the sealed one outside, the bare one in.
                       </>
                     )}
                   </p>

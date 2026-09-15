@@ -34,3 +34,54 @@
   .site-header .container.site-header__inner { padding-left: 12px; padding-right: 12px; }
   .site-header .brand__img { width: 92px; height: auto; }
 }
+
+/* ============================================================
+   Applications section on black.
+
+   Lazar pointed at the band holding the three project types and the client
+   logo carousel and asked for it black. It sat on the page's grey, which put a
+   grey gutter between two dark bands. Everything inside it is re-coloured here
+   rather than in the component, because HomePage.jsx is decompiled from Jatin's
+   bundle and gets regenerated; this file does not.
+   ============================================================ */
+#applications.applications{ background:#060d0a; padding:80px 0 64px; }
+#applications .eyebrow{ color:#00c400; }
+#applications .section-title{ color:#fff; }
+#applications .section-sub{ color:rgba(255,255,255,.68); }
+#applications .head-row__link{ color:#fff; }
+#applications .head-row__link:hover{ color:#00c400; }
+
+#applications .applications__type{
+  background:rgba(255,255,255,.045);
+  border-color:rgba(255,255,255,.14);
+}
+#applications .applications__type h3{ color:#fff; }
+#applications .applications__type p{ color:rgba(255,255,255,.66); }
+#applications .applications__type .applications__type-icon{ color:#00c400; }
+#applications .applications__type-link{ color:#fff; }
+#applications .applications__type-link:hover{ color:#00c400; }
+
+/* the logo slides carry their own black label bar, so on a black ground they
+   need an edge of their own or they bleed into the background */
+#applications .applications__slide{
+  border-color:rgba(255,255,255,.18);
+  box-shadow:0 10px 30px rgba(0,0,0,.55);
+}
+#applications .applications__slide:hover{
+  border-color:#00c400;
+  box-shadow:0 22px 44px -12px rgba(0,0,0,.75);
+}
+#applications .applications__slide-sk{
+  background:linear-gradient(90deg,#14180f 0%,#242a1c 50%,#14180f 100%);
+  background-size:200% 100%;
+}
+
+/* Strip finder — the complete-kit header photo.
+   The kit screen now shows the strip that is actually in the kit (see the
+   comment in StripLightsPage.jsx) instead of a picture chosen from the place
+   answer. ProductVisual fills its container, so it needs a box with a height;
+   these rules give it the same frame the old .q-photo--full image had. */
+.sheet .q-photo.kitshot { background:#fff; }
+.sheet .q-photo.kitshot .kitshot__img { height:200px; background:#fff; }
+.sheet .q-photo.kitshot .kitshot__img .visual { width:100%; height:100%; }
+.sheet .q-photo.kitshot .kitshot__img img { width:100%; height:100%; object-fit:contain; }

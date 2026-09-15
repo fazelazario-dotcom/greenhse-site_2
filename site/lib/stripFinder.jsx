@@ -45,9 +45,9 @@ let r = [
         ? '240V recessed strip comes in fixed colours: 3000K warm, 4000K natural, 6000K cool, blue — or full-colour RGB.'
         : 'wet' === e.place
           ? 'bright' === e.brightness
-            ? 'The 20W/m bright variant is only made in two colours — 4000K natural and 5500K crisp. Need warm 3000K? Go back and pick standard brightness.'
-            : 'Wet areas use the 24V High Lumen SMD — fixed single-colour whites only: 3000K warm, 4000K natural, 5500K & 6000K crisp. (No RGB or adjustable white in this range.)'
-          : 'Fixed whites come in 2700/3000K (warm & cosy), 4000K (natural) and 5500/6000K (crisp). CCT = adjust warm↔cool (2700–6500K) with the remote. RGB = millions of colours — note its white is less natural than a dedicated white strip.',
+            ? 'The 20W/m bright variant is only made in two colours — 4000K natural and 5700K crisp. Need a warm white? Go back and pick standard brightness.'
+            : 'Wet areas use the 24V High Lumen SMD — fixed single-colour whites only: 2700K and 3000K warm, 4000K natural, 5700K crisp. (No RGB or adjustable white in this range.)'
+          : 'Fixed whites come in 2700/3000K (warm & cosy), 4000K (natural) and 5700K (crisp). CCT = adjust warm↔cool (2700–6500K) with the remote. RGB = millions of colours — note its white is less natural than a dedicated white strip.',
     opts: (e) =>
       'cove' === e.place
         ? [
@@ -58,16 +58,20 @@ let r = [
             ['Full colour (RGB)', 'rgb'],
           ]
         : 'wet' === e.place
-          ? 'bright' === e.brightness
+          ? /* The colours offered have to be the colours the strip is made in.
+               Off the brochure: the 12 W/m comes in 2700, 3000, 4000 and 5700K,
+               the 20 W/m in 4000 and 5700K only. This list used to offer 5500K
+               and 6000K — neither exists in this range — and left 2700K out. */
+            'bright' === e.brightness
             ? [
                 ['Natural white — 4000K', 'w4000'],
-                ['Crisp white — 5500K', 'w5500'],
+                ['Crisp white — 5700K', 'w5700'],
               ]
             : [
+                ['Extra warm white — 2700K', 'w2700'],
                 ['Warm white — 3000K', 'w3000'],
                 ['Natural white — 4000K', 'w4000'],
-                ['Crisp white — 5500K', 'w5500'],
-                ['Cool white — 6000K', 'w6000'],
+                ['Crisp white — 5700K', 'w5700'],
               ]
           : [
               ['One fixed white (pick warm, natural or cool)', 'single'],
@@ -101,51 +105,61 @@ function n(e) {
   return 'longrun' === e.place || ('cove' === e.place && 'tight' === e.space);
 }
 let s = {
+    /* Every card in the finder now shows the actual product rather than a
+       styled room. Lazar's note: "the finder needs to just have product images
+       so they can actually see what is good." These are the Greenhse product
+       photographs off the live catalogue, one per path, so the picture on the
+       card is the strip the answer leads to. */
     cove: {
-      src: asset.asset('/images/finder/image1.png'),
-      alt: 'Recessed ceiling cove with strip light',
-      caption: 'Strip sits on the hidden shelf, washing light up the ceiling',
+      src: asset.asset('/images/finder/place-cove.webp'),
+      alt: '240V LED strip light reels, warm white and cool white',
+      caption: '240V strip on the reel — the one that sits in a ceiling recess',
     },
     wet: {
-      src: asset.asset('/images/finder/image2.png'),
-      alt: 'Strip light in a bathroom niche',
-      caption: 'Strip at the top of the niche — IP65 so steam is no problem',
+      src: asset.asset('/images/finder/place-wet.webp'),
+      alt: 'IP65 silicone sleeved 24V LED strip light on the reel',
+      caption: 'The IP65 sleeved strip — sealed the whole way along',
     },
     cabinet: {
-      src: asset.asset('/images/finder/image3.png'),
-      alt: 'Strip light under kitchen cabinets',
-      caption: 'Strip hides under the cabinet, lighting the benchtop',
+      src: asset.asset('/images/finder/place-cabinet.webp'),
+      alt: 'Dot-less COB LED strip light coiled and lit warm white',
+      caption: 'Dot-less COB — one smooth line, no spots, for open joinery',
     },
     stairs: {
-      src: asset.asset('/images/finder/image4.png'),
-      alt: 'Strip light under stair nosings',
-      caption: 'Strip tucks under each step nosing',
+      src: asset.asset('/images/finder/place-stairs.webp'),
+      alt: 'Short cut length of COB LED strip light with its lead attached',
+      caption: 'Cut to length with a lead on the end — one per step or one run',
     },
     longrun: {
-      src: asset.asset('/images/finder/image6.webp'),
-      alt: 'Long continuous strip light run',
-      caption: 'One continuous line of light, built to run long distances',
+      src: asset.asset('/images/finder/place-longrun.webp'),
+      alt: 'Long run 24V COB LED strip light roll',
+      caption: 'The long run roll — 20 m from one end, 40 m fed from both',
+    },
+    neon: {
+      src: asset.asset('/images/finder/place-neon.webp'),
+      alt: 'Neon flex strip light bent into a zig-zag across a building facade',
+      caption: 'Neon flex, bent on its side — it follows a curve or a letter',
+    },
+    display: {
+      src: asset.asset('/images/finder/place-display.webp'),
+      alt: 'High lumen high colour SMD display strip light, 240 LEDs per metre',
+      caption: 'Display grade — 240 LEDs a metre, CRI 90+ for true colour',
     },
     other: {
-      src: asset.asset('/images/finder/image5.png'),
-      alt: 'Strip light along a hidden edge',
-      caption: 'Strip runs hidden along the edge, throwing a soft wash of light',
+      src: asset.asset('/images/finder/place-other.webp'),
+      alt: 'Coiled COB LED strip light lit warm white',
+      caption: 'The everyday dot-less COB — the one most jobs end up using',
     },
   },
-  o = {
-    single: {
-      src: asset.asset('/images/finder/colour-opt-single.webp'),
-      alt: 'Fixed white LED strip light, lit',
-    },
-    cct: {
-      src: asset.asset('/images/finder/colour-opt-cct.webp'),
-      alt: 'Adjustable white CCT LED strip light, lit',
-    },
-    rgb: {
-      src: asset.asset('/images/finder/colour-opt-rgb.webp'),
-      alt: 'Full-colour RGB LED strip light, lit green',
-    },
-  },
+  /* The colour question has no thumbnails. Lazar: "these 2 images should not
+     be in the finder" — the CCT and RGB shots were supplier bench photos, a
+     loose reel on a worktop with the driver and flying leads in frame, which
+     is the opposite of what the rest of the finder now shows. The fixed-white
+     shot was a proper studio photo, but one picture above two blank rows reads
+     as broken, so the whole set is off and the question stands on its words,
+     which already say what each option does. Put three matching studio shots
+     in /images/finder/ and fill this object back in to bring them back. */
+  o = {},
   a = [
     {
       img: asset.asset('/images/finder/cabinet-cool-white.webp'),
@@ -248,9 +262,11 @@ function h(e) {
       single: o.single,
       dual: o.dual,
       channel: 'required',
+      /* Both neon grades are IP67 on the brochure — the RGB one used to be
+         carried here as IP66, off an older product page. */
       spec: r
-        ? `24V Neon Flex RGB SPI · 12x12mm · IP${i} · fully programmable · ${o.single}m one feed / ${o.dual}m both ends`
-        : `24V Neon Side Bend Flex CCT · 6x12mm · IP${i} · 3000–6000K · ${o.single}m one feed / ${o.dual}m both ends`,
+        ? `24V Neon Flex RGB SPI · 12x12mm · IP67 · fully programmable · ${o.single}m one feed / ${o.dual}m both ends`
+        : `24V Neon Side Bend Flex CCT · 6x12mm · IP67 · 3000–6000K · ${o.single}m one feed / ${o.dual}m both ends`,
       ipTxt: i >= 67 ? `IP${i} — fully sealed, fine outdoors` : `IP${i} — splash resistant`,
       where: 'Signage, curves, letters and feature shapes — anywhere a rigid strip will not bend',
       teach: [
@@ -382,6 +398,7 @@ function h(e) {
           single: 20,
           dual: 40,
           channel: 'optional',
+          connector: 4,
           spec: `24V Long Run dotless COB · ${e}W/m · IP20, IP67 option · 20m one feed / 40m both ends · rolls of 10, 15, 20, 30 and 40m`,
           ipTxt: i >= 65 ? `IP${i} — sealed for wet areas and outdoors` : 'IP20 indoors, IP67 silicon injected version for outdoors',
           where: 'Long continuous runs, 10 metres and up — indoors, or the IP67 version outdoors',
@@ -435,23 +452,30 @@ function h(e) {
                 n ? `Fixed ${n[1]}K white` : 'Adjustable warm to cool white, 2700K to 6500K, from the remote',
                 `Feed one end up to ${r.single}m; power BOTH ends for up to ${r.dual}m`,
                 `${e}W per metre — needs an aluminium channel to stay cool`,
+                'Connectors join short lengths with no waste, up to 2m',
               ],
             };
           })()
         : t.includes('high lumen')
           ? {
               fam: 'HILUMEN',
+              connector: 4,
               wpm: wattsPerMetre({ name: t }, 12),
               wpmTxt: `High Lumen SMD · ${wattsPerMetre({ name: t }, 12)}W/m IP65 wet-area strip`,
               single: 5,
               dual: 10,
               channel: 'required',
-              spec: `24V High Lumen SMD · CRI 90+ · ${wattsPerMetre({ name: t }, 12)}W/m IP65 · fixed whites 3000/4000/5500/6000K · 5m one feed / 10m both ends`,
+              /* Only the 12 W/m is made in all four whites. The 20 W/m is
+                 4000K and 5700K only — the finder's own colour question already
+                 says so, and this line used to contradict it. */
+              spec: `24V High Lumen SMD · CRI 90+ · ${wattsPerMetre({ name: t }, 12)}W/m IP65 · ${wattsPerMetre({ name: t }, 12) >= 18 ? 'fixed whites 4000 & 5700K' : 'fixed whites 2700/3000/4000/5700K'} · 5m one feed / 10m both ends`,
               ipTxt: 'IP65 — sealed against kitchen & bathroom steam',
               where: 'Wet areas indoors — kitchen benchtops, bathroom niches — plus bars, shelving & display',
               teach: [
                 'The wet-area pick: IP65 — sealed against kitchen and bathroom steam and splashes',
-                'Fixed single-colour whites (3000/4000/5500/6000K) — no RGB in this range',
+                wattsPerMetre({ name: t }, 12) >= 18
+                  ? 'Fixed single-colour whites — 4000K natural and 5700K crisp (no RGB in this range)'
+                  : 'Fixed single-colour whites (2700/3000/4000/5700K) — no RGB in this range',
                 'True-colour light (CRI 90+) — things look their real colour',
                 'Feed one end up to 5m; power from 2 points for 5–10m',
               ],
@@ -493,7 +517,7 @@ let m = {
       wpm: 7.5,
       single: 20,
       dual: 40,
-      ip: 'IP68',
+      ip: 'IP20 or IP67',
     },
     img: {
       reel: asset.asset('/images/longrun-cob/reel.webp'),
@@ -505,10 +529,15 @@ let m = {
       ['LED density', '480 LEDs per metre — dot-free COB'],
       ['Power', '7.5W per metre'],
       ['Voltage', '24V DC'],
-      [
-        'Colour',
-        'Tri-colour in one strip — 3000K warm, 4000K natural and 5500K crisp, switched from the dimming remote',
-      ],
+      /* Sold as two separate fixed-colour products — "7.5w/m 3000k" and
+         "7.5w/m 4000k" — so this row states the choice, not a switchable
+         tri-colour strip the kit cannot actually supply. The supplier
+         datasheet for SELS-COBX480-24-YCC does describe a tri-colour
+         version; whether Greenhse stocks that is a question for Keri. */
+      /* Brochure: the IP67 is made in 3000K only; the IP20 comes in 3000K and
+         4000K. So the choice of colour depends on which grade the job needs,
+         which is why both are spelled out rather than offered as a free pick. */
+      ['Colour', 'Fixed white — IP20 in 3000K or 4000K; IP67 in 3000K only'],
       ['Brightness', '675–712 lm per metre depending on the colour setting (±10%)'],
       ['Colour accuracy', 'CRI >90'],
       ['Beam angle', '180°'],
@@ -517,16 +546,22 @@ let m = {
       ['Cutting', 'Every 50mm, between the soldering pads only'],
       ['Minimum bend', '50mm diameter — never tighter than 40mm'],
       ['Leads', '150mm of 20AWG red/black wire on both ends'],
+      ['Sealing', 'IP20 bare, or IP67 silicone injected for outdoors and wet areas'],
       ['Working temperature', '-40°C to +45°C'],
       ['Life span', '50,000 hours'],
       ['Warranty', '3 years'],
       ['Supplied as', '20m roll (other lengths can be cut to order)'],
     ],
+    /* Two grades, off the brochure: the bare IP20 for dry indoor work, and the
+       silicone-injected IP67 for outside and wet areas. It used to be listed as
+       a single IP68 "the only grade we sell it in", which was both the wrong
+       rating and the wrong number of options. */
     ipGrades: [
+      ['IP20', '10 × 4 mm', 'Bare strip for dry indoor runs — bulkheads, coves, joinery. Sits in a channel.'],
       [
-        'IP68',
+        'IP67',
         '10 × 4 mm',
-        'Sealed in a silicone tube and glue-filled at both ends. Rated for use underwater to 1 metre.',
+        'Silicone injected the whole way along. Rain, hose and splash proof — garden beds, pergolas, under decks and around pools.',
       ],
     ],
   },
@@ -588,10 +623,24 @@ export const buildPackage = function (e, i, r, n = {}) {
     },
     l = a.colour;
   l && ('w' === l[0] || 'blue' === l) && (a.colour = 'single');
+  /* The low wattage long run COB is sold as two separate fixed colour products
+     — 3000K and 4000K — at the same 7.5 W/m. The long run path skips the colour
+     question entirely (isLongRun short-circuits it), so rather than silently
+     picking one, the kit offers the choice on the strip line itself. Guarded on
+     there being no colour answer, so every other path still shows exactly the
+     strip the recommendation named and nothing else. */
+  let stripPool = !a.colour && I(e) ? (Array.isArray(r) ? r : []).filter(I) : [e];
+  (stripPool.length || (stripPool = [e]),
+    (e = stripPool.find((t) => String(t.id) === String(n.strip)) || e));
   let c = {
+      w2700: '2700K extra warm white',
       w3000: '3000K warm white',
       w4000: '4000K natural white',
-      w5500: '5500K crisp white',
+      /* 5700K is the crisp white right across the 24V SMD range — the
+         brochure's printed 5500K, 6000K and 5000K were every one of them
+         corrected to it by hand. 6000K survives only on the 240V strip,
+         which is genuinely made in it. */
+      w5700: '5700K crisp white',
       w6000: '6000K cool white',
       blue: 'Blue',
     },
@@ -608,14 +657,16 @@ export const buildPackage = function (e, i, r, n = {}) {
     product: e,
     qty: u,
     sub: `${u} m run \xb7 ${c[l] ? c[l] + ' · ' : ''}${m.wpmTxt || m.wpm + 'W per metre'}`,
-    candidates: [e],
+    candidates: stripPool,
   }),
     'HILUMEN' === m.fam &&
       a.brightness &&
       v.push(
+        /* There IS a separate 20 W/m now, and the finder picks it when you ask
+           for bright — so stop telling people it does not exist. */
         'bright' === a.brightness
-          ? 'You picked "make it a feature" — this is still the same 12W/m, 2000+ lumens/metre wet-area strip (there\'s no separate higher-wattage version yet). For an extra-bright feature spot, some installers run two strips side by side; call us on (08) 9297 2969 if you\'d like that costed up.'
-          : 'Standard pick — this 12W/m, 2000+ lumens/metre strip is plenty bright for benchtops, niches and general wet-area use.',
+          ? `You picked "make it a feature" — this is the ${m.wpm}W/m High Lumen SMD, the brightest strip in the sealed IP65 wet-area range. It comes in 4000K natural and 5700K crisp only.`
+          : `Standard pick — this ${m.wpm}W/m IP65 strip is plenty bright for benchtops, niches and general wet-area use, and it comes in all four whites — 2700K, 3000K, 4000K and 5700K.`,
       ));
   let j = 'one';
   if ('240V' === p) {
@@ -834,18 +885,45 @@ export const buildStairKit = function () {
 export const channelPool = b;
 export const classify = c;
 export const isLongRun = n;
+/* The long run answer has to land on the LOW WATTAGE dotless COB and nothing
+   else. This used to be matched by name ("Long Run COB") and by the old
+   ST24V-15w-CCT-COB-ALL sku, and Magento has since dropped both: the catalogue
+   now lists it as "24V Dotless 7.5w/m 3000k Cob Strip Light / Metre" and
+   "...4000k...". With the old matches dead, the last fallback here was any
+   dotless COB, and the FIRST one in the feed is the 12 W/m — so the panel
+   promised 7.5 W/m and 20/40 m while the kit underneath was built from a 12 W/m
+   strip that only does 5/10 m. Lazar hit exactly that: "LONG RUN WHEN YOU ADD
+   WHOLE KIT IT COMES UP with 24v 12w/m".
+
+   So match on the thing that actually defines this product — watts per metre —
+   and never fall through to a strip that cannot do the run. If the catalogue
+   has no low wattage COB at all we return no strip, and the screen falls back
+   to "call us" rather than quoting a kit that will go dim at the far end. */
+function I(e) {
+  let t = String((e && e.name) || '');
+  return (
+    !/rgb/i.test(t) &&
+    /cob/i.test(t) &&
+    wattsPerMetre(e, 99) <= 8 &&
+    !/240\s*v/i.test(t) &&
+    'number' == typeof e.price
+  );
+}
 export const longRunInfo = function (e, t) {
-  let i =
-      e.find((e) => /long.?run/i.test(e.name) && /cob/i.test(e.name)) ||
-      e.find((e) => /long.?run/i.test(e.name)) ||
-      e.find((e) => 'ST24V-15w-CCT-COB-ALL' === e.sku) ||
-      e.find((e) => /dotless/i.test(e.name) && /cob/i.test(e.name) && !/rgb/i.test(e.name)) ||
+  let i = (Array.isArray(e) ? e : []).filter(I),
+    /* Warm 3000K first: it is the one the long run panel is written around and
+       the cheaper of the two. The kit screen offers the other as an option. */
+    r =
+      i.find((e) => /3000/.test(e.name)) ||
+      i.find((e) => /long.?run/i.test(e.name)) ||
+      i[0] ||
       null,
-    r = parseFloat(t.length) || 0;
+    n = parseFloat(t.length) || 0;
   return {
-    strip: i,
-    len: r,
-    tooShort: r > 0 && r < 5,
+    strip: r,
+    stripOptions: i,
+    len: n,
+    tooShort: n > 0 && n < 5,
     fromCove: 'cove' === t.place,
   };
 };
@@ -925,7 +1003,17 @@ export const pickRecommendation = function (e, t) {
                   ? (i -= 100)
                   : (i += 6)),
               'wet' === t.place
-                ? (i += 'HILUMEN' === o.fam ? 10 : -100)
+                ? /* The wet-area range is two strips in one family — the 12 W/m
+                     and the 20 W/m High Lumen SMD — and the brightness question
+                     is the whole point of asking. It was never scored, so both
+                     answers tied and the feed order handed out the 20 W/m
+                     either way: pick "Standard brightness — 12W/m" and you got
+                     a 20 W/m strip at the wrong price, in a colour the 20 W/m
+                     is not even made in. Score the answer the customer gave. */
+                  ((i += 'HILUMEN' === o.fam ? 10 : -100),
+                  t.brightness &&
+                    'HILUMEN' === o.fam &&
+                    (i += ('bright' === t.brightness ? o.wpm >= 18 : o.wpm <= 14) ? 6 : -20))
                 : 'cabinet' === t.place
                   ? (('CCTCOB' === o.fam || 'RGBCOB' === o.fam) && (i += 3), 'HILUMEN' === o.fam && (i += 2))
                   : 'cove' === t.place
@@ -972,6 +1060,12 @@ export const pickRecommendation = function (e, t) {
               'smart' === t.control &&
                 (n.includes('smart') || n.includes('wifi') || 'CCTCOB' === o.fam || n.includes('rgb')) &&
                 (i += 1),
+              /* Only the wet-area path asks about brightness. Everywhere else
+                 the 12 and 20 W/m High Lumen tie on every other test, and a tie
+                 is settled by whatever order the feed happens to be in — which
+                 was handing dry joinery the dearest strip in the family. Lead
+                 with the 12 W/m and keep the 20 W/m as an alternative. */
+              'HILUMEN' === o.fam && !t.brightness && o.wpm >= 18 && (i -= 1),
               a > o.dual && (i -= 4),
               a >= 10 && '240V' === o.fam && 'cove' === t.place && 'tight' !== t.space && (i += 3),
               i),
@@ -984,7 +1078,17 @@ export const pickRecommendation = function (e, t) {
     l = !1,
     d = parseFloat(t.length) || 0;
   if ('cove' === t.place) {
-    if ('tight' !== t.space && 'smart' !== t.control && 'cct' !== t.colour && d > 0 && d < 10)
+    /* How far the 240V recessed strip actually goes: 50 m for the fixed whites,
+       35 m for RGB. Past that there is no 240V answer, and the old code quietly
+       fell through to a 24V COB rated 5 m from one end and 10 m from both — so a
+       45 m RGB cove came back as a strip that cannot do 45 m, under a note that
+       said the run was too SHORT for 240V. Over the limit is a phone call. */
+    let m240 = 'rgb' === t.colour ? 35 : 50;
+    if ('tight' !== t.space && 'cct' !== t.colour && 'smart' !== t.control && d > m240)
+      ((a = `\uD83D\uDCDE A ${d}m recessed run is past what one 240V strip carries (${m240}m for ${'rgb' === t.colour ? 'RGB' : 'fixed-colour white'}), so it has to be split into sections and fed separately. Give us a quick call on (08) 9297 2969 and we'll map it out.`),
+        (o = o.slice(0, 2)),
+        (l = !0));
+    else if ('tight' !== t.space && 'smart' !== t.control && 'cct' !== t.colour && d > 0 && d < 10)
       ((a =
         "📞 Recessed-ceiling runs under 10 metres need a custom option — give us a quick call on (08) 9297 2969 and we'll spec it with you on the spot."),
         (o = o.slice(0, 2)),
@@ -1035,9 +1139,10 @@ export const summarise = function (e) {
         single: 'fixed white',
         cct: 'adjustable white',
         rgb: 'full-colour RGB',
+        w2700: '2700K extra warm white',
         w3000: '3000K warm white',
         w4000: '4000K natural white',
-        w5500: '5500K crisp white',
+        w5700: '5700K crisp white',
         w6000: '6000K cool white',
         blue: 'blue',
       }[e.colour] || '',
