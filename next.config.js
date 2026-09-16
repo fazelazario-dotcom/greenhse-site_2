@@ -14,12 +14,8 @@ const MAGENTO_PROXIES = [
   // Folder routes for the three real .html pages. The build gets these from
   // scripts/make-folder-routes.js (postbuild); dev serves the same content
   // through rewrites so /layout/ works identically in every run mode.
-  { source: '/layout-app',        destination: '/layout.html' },
-  { source: '/layout-app/',       destination: '/layout.html' },
   { source: '/layout-standalone', destination: '/layout-standalone.html' },
   { source: '/layout-standalone/',destination: '/layout-standalone.html' },
-  { source: '/layout-admin',      destination: '/layout-admin.html' },
-  { source: '/layout-admin/',     destination: '/layout-admin.html' },
   { source: '/light-lab',         destination: '/light-lab.html' },
   { source: '/light-lab/',        destination: '/light-lab.html' },
 ];

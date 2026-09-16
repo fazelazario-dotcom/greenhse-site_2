@@ -8,6 +8,7 @@ import ScrollManager from '../site/components/providers/ScrollManager';
 import Header from '../site/components/layout/Header';
 import Footer from '../site/components/layout/Footer';
 import Overlays from '../site/components/layout/Overlays';
+import SiteChrome from '../site/components/layout/SiteChrome';
 
 export const metadata = {
   metadataBase: new URL('https://greenhse.com'),
@@ -29,10 +30,16 @@ export default function RootLayout({ children }) {
           <StoreProvider>
             <AuthBootstrap />
             <ScrollManager />
-            <Header />
+            {/* The layout planner owns the whole window, so the site's header,
+                footer and overlays step aside on that route (SiteChrome). */}
+            <SiteChrome>
+              <Header />
+            </SiteChrome>
             {children}
-            <Footer />
-            <Overlays />
+            <SiteChrome>
+              <Footer />
+              <Overlays />
+            </SiteChrome>
           </StoreProvider>
         </StyledJsxRegistry>
         <Script id="tawk-to" strategy="lazyOnload">{`

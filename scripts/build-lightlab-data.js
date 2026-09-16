@@ -3,7 +3,7 @@
 
    Two sources, joined:
 
-     public/layout.html   the planner's PRODUCTS array. This is the only place
+     site/planner/data/products.js   the planner's PRODUCTS array. This is the only place
                           in the project where beam angle, wattage, lumens, IP
                           and cut-out have already been parsed out of the
                           Magento description HTML, so it is the spec source.
@@ -32,9 +32,10 @@ const OUT = path.join(ROOT, 'public', 'light-lab-data.json');
 
 /* ---------- the planner's parsed specs ---------- */
 function plannerProducts() {
-  const html = fs.readFileSync(path.join(ROOT, 'public', 'layout.html'), 'utf8');
+  /* The planner is a React route now; its catalogue is a module. */
+  const html = fs.readFileSync(path.join(ROOT, 'site', 'planner', 'data', 'products.js'), 'utf8');
   const i = html.indexOf('const PRODUCTS=[');
-  if (i < 0) throw new Error('build-lightlab-data: PRODUCTS not found in layout.html');
+  if (i < 0) throw new Error('build-lightlab-data: PRODUCTS not found in site/planner/data/products.js');
   const line = html.slice(i, html.indexOf('\n', i));
   return JSON.parse(line.slice(line.indexOf('['), line.lastIndexOf(']') + 1));
 }

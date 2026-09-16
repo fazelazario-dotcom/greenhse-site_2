@@ -1,19 +1,34 @@
 import * as api from './api';
 import * as asset from './asset';
+/* ---------------------------------------------------------------------------
+   THE QUESTIONS
+   Every answer maps to an exact product. Lazar, 15 Sep: "every single section
+   of the finder needs to be updated to exact and specific products so that
+   everything is actually correct and so that they know and actually get the
+   correct product no matter what they select." So the places are the
+   brochure's own application list, the colours offered on each path are only
+   the colours that strip is made in, and the recommendation is a lookup
+   table (see RESOLVE below), not a score. There is no "somewhere else" any
+   more: every place leads somewhere specific.
+   --------------------------------------------------------------------------- */
+function isCove240(e) {
+  return 'cove' === e.place && 'roomy' === e.space;
+}
 let r = [
   {
     key: 'place',
-    q: 'Where exactly is the strip light going?',
-    hint: "Simple rule: if steam or water can ever reach it, it needs the IP65 wet-area strip. Dry joinery (inside shelving & cabinets) doesn't need waterproofing at all.",
+    q: 'Where is the strip light going?',
+    hint: 'Pick the closest match — each one leads to the strip made for that job.',
     opts: [
-      ['Recessed ceiling / cove (a hidden shelf or bulkhead in the ceiling)', 'cove'],
-      ['Wet areas — kitchen benchtops, bathroom niches, outdoors (steam or water)', 'wet'],
-      ['Shelving & cabinets — dry inside joinery (no water can reach it)', 'cabinet'],
+      ['Recessed ceiling / cove — a hidden shelf or bulkhead in the ceiling', 'cove'],
+      ['Under kitchen cabinets / benchtop', 'kitchen'],
+      ['Bathroom niche, shower or other wet area', 'bathroom'],
+      ['Inside cabinets, shelving, bookcases, TV units (dry)', 'joinery'],
+      ['Outdoors — garden beds, pergolas, under decks, pools', 'outdoor'],
       ['Stairs or hallway', 'stairs'],
-      ['Long run strip light — one continuous line over about 10 metres', 'longrun'],
+      ['One long continuous line over 10 metres (indoors)', 'longrun'],
       ['Signage, curves or letters — a shape a straight strip will not follow', 'neon'],
-      ['Shop, display or food cabinet', 'display'],
-      ['Somewhere else', 'other'],
+      ['Shop display or food cabinet', 'display'],
     ],
   },
   {
@@ -27,62 +42,95 @@ let r = [
     ],
   },
   {
-    key: 'brightness',
-    q: 'How bright does this spot need to be?',
-    when: (e) => 'wet' === e.place,
-    hint: 'Both are the sealed IP65 wet-area strip. Standard is plenty for benchtops and niches. Go bright (20W/m) where you want it to really pop — a bright bathroom, a feature wall, or task light over a big bench.',
+    key: 'kind',
+    q: "What's in the cabinet?",
+    when: (e) => 'display' === e.place,
+    hint: 'Retail displays want true colour (CRI 90+). Fresh food wants the red and white mix that keeps meat looking fresh — a different strip.',
     opts: [
-      ['Standard brightness — 12W/m', 'standard'],
-      ['Bright — 20W/m (make it stand out) ⭐', 'bright'],
+      ['Retail — products, jewellery, clothing, bottles', 'retail'],
+      ['Fresh meat, deli or seafood', 'meat'],
     ],
   },
   {
     key: 'colour',
     q: 'What colour light do you want?',
-    when: (e) => !n(e),
+    /* Only the colours that strip is actually made in. Stairs is a kit and
+       the meat strip is one colour, so neither asks. */
+    when: (e) => 'stairs' !== e.place && !('display' === e.place && 'meat' === e.kind),
     hint: (e) =>
-      'cove' === e.place
-        ? '240V recessed strip comes in fixed colours: 3000K warm, 4000K natural, 6000K cool, blue — or full-colour RGB.'
-        : 'wet' === e.place
-          ? 'bright' === e.brightness
-            ? 'The 20W/m bright variant is only made in two colours — 4000K natural and 5700K crisp. Need a warm white? Go back and pick standard brightness.'
-            : 'Wet areas use the 24V High Lumen SMD — fixed single-colour whites only: 2700K and 3000K warm, 4000K natural, 5700K crisp. (No RGB or adjustable white in this range.)'
-          : 'Fixed whites come in 2700/3000K (warm & cosy), 4000K (natural) and 5700K (crisp). CCT = adjust warm↔cool (2700–6500K) with the remote. RGB = millions of colours — note its white is less natural than a dedicated white strip.',
+      isCove240(e)
+        ? '240V recessed strip comes in fixed colours: 3000K warm, 4000K natural, 6000K cool — or full-colour RGB.'
+        : 'cove' === e.place || 'longrun' === e.place
+          ? 'The long run COB is a fixed white — 3000K warm or 4000K natural.'
+          : 'kitchen' === e.place
+            ? 'The under-cabinet strip is the 12W/m High Lumen SMD, IP65 sealed, in four fixed whites.'
+            : 'bathroom' === e.place
+              ? 'Bathroom niches get the 20W/m High Lumen SMD (IP65) — 4000K or 5700K. Want it warmer? The 12W/m does 3000K.'
+              : 'joinery' === e.place
+                ? 'Fixed whites are dot-free COB. CCT = adjust warm ↔ cool (2700–6500K) with the remote. RGB = millions of colours.'
+                : 'outdoor' === e.place
+                  ? 'Outdoors is the IP67 silicone-sealed long run COB in 3000K warm, or the IP65 RGB COB for full colour.'
+                  : 'neon' === e.place
+                    ? 'Neon flex comes as adjustable white (3000–6000K) or full-colour RGB. Both are IP67 and run on Bluetooth.'
+                    : 'display' === e.place
+                      ? 'The 23W/m display strip is made in 4000K natural and 5700K crisp, CRI 90+.'
+                      : '',
     opts: (e) =>
-      'cove' === e.place
+      isCove240(e)
         ? [
             ['Warm white — 3000K', 'w3000'],
             ['Natural white — 4000K', 'w4000'],
             ['Cool white — 6000K', 'w6000'],
-            ['Blue', 'blue'],
             ['Full colour (RGB)', 'rgb'],
           ]
-        : 'wet' === e.place
-          ? /* The colours offered have to be the colours the strip is made in.
-               Off the brochure: the 12 W/m comes in 2700, 3000, 4000 and 5700K,
-               the 20 W/m in 4000 and 5700K only. This list used to offer 5500K
-               and 6000K — neither exists in this range — and left 2700K out. */
-            'bright' === e.brightness
+        : 'cove' === e.place || 'longrun' === e.place
+          ? [
+              ['Warm white — 3000K', 'w3000'],
+              ['Natural white — 4000K', 'w4000'],
+            ]
+          : 'kitchen' === e.place
             ? [
-                ['Natural white — 4000K', 'w4000'],
-                ['Crisp white — 5700K', 'w5700'],
-              ]
-            : [
                 ['Extra warm white — 2700K', 'w2700'],
                 ['Warm white — 3000K', 'w3000'],
                 ['Natural white — 4000K', 'w4000'],
                 ['Crisp white — 5700K', 'w5700'],
               ]
-          : [
-              ['One fixed white (pick warm, natural or cool)', 'single'],
-              ['Adjustable white — warm ↔ cool with the remote (CCT)', 'cct'],
-              ['Full colour (RGB) — millions of colours', 'rgb'],
-            ],
+            : 'bathroom' === e.place
+              ? [
+                  ['Natural white — 4000K', 'w4000'],
+                  ['Crisp white — 5700K', 'w5700'],
+                  ['Warm white — 3000K (the softer 12W/m strip)', 'w3000'],
+                ]
+              : 'joinery' === e.place
+                ? [
+                    ['Extra warm white — 2700K (dot-free COB)', 'w2700'],
+                    ['Warm white — 3000K (dot-free COB)', 'w3000'],
+                    ['Natural white — 4000K (dot-free COB)', 'w4000'],
+                    ['Crisp white — 5700K (High Lumen SMD)', 'w5700'],
+                    ['Adjustable white — warm ↔ cool with the remote (CCT)', 'cct'],
+                    ['Full colour (RGB) — millions of colours', 'rgb'],
+                  ]
+                : 'outdoor' === e.place
+                  ? [
+                      ['Warm white — 3000K (sealed IP67 long run COB)', 'w3000'],
+                      ['Full colour (RGB) — sealed IP65 COB', 'rgb'],
+                    ]
+                  : 'neon' === e.place
+                    ? [
+                        ['Adjustable white — 3000K to 6000K (CCT)', 'cct'],
+                        ['Full colour (RGB)', 'rgb'],
+                      ]
+                    : [
+                        ['Natural white — 4000K', 'w4000'],
+                        ['Crisp white — 5700K', 'w5700'],
+                      ],
   },
   {
     key: 'control',
     q: 'How do you want to control it?',
-    when: (e) => 'cove' !== e.place && !n(e),
+    /* 240V is remote-only, neon is Bluetooth, stairs is a kit with its own
+       controller — none of those get a choice. */
+    when: (e) => !isCove240(e) && 'stairs' !== e.place && 'neon' !== e.place,
     hint: "Either way you get a controller in the kit — it's the box that lets you dim the light and turn it on and off. The only difference is how you talk to it: a handheld remote, or your phone.",
     opts: [
       ['Simple — with a remote', 'simple'],
@@ -93,16 +141,24 @@ let r = [
     key: 'length',
     q: 'How many metres do you need?',
     input: !0,
+    when: (e) => 'stairs' !== e.place,
     hint: (e) =>
       n(e)
-        ? "Type your run length in metres. The Long Run COB is made for long runs — 5 metres and up. Shorter than that and we'll point you at a better-suited strip, so give us a call."
-        : 'cove' === e.place
+        ? "Type your run length in metres. The long run COB is made for long runs — 5 metres and up, 20m from one end, 40m fed from both. Shorter than 5m and we'll point you at a better-suited strip."
+        : isCove240(e)
           ? "Type your exact run length. 240V recessed strip: whites 10–50m, RGB 10–35m. Under 10 metres? We'll ask you to give us a quick call — (08) 9297 2969."
           : "Type your run length in metres. 24V strip feeds from one end up to 5m; 5–10m needs power from TWO points (e.g. two corners). Over 10 metres? We'll ask you to give us a quick call.",
   },
 ];
+/* The long run COB paths: the long run place itself, a recess too tight for
+   240V, and a white outdoor run (the IP67 sealed version of the same strip).
+   These get the dedicated long run screen with the datasheet on it. */
 function n(e) {
-  return 'longrun' === e.place || ('cove' === e.place && 'tight' === e.space);
+  return (
+    'longrun' === e.place ||
+    ('cove' === e.place && 'tight' === e.space) ||
+    ('outdoor' === e.place && 'rgb' !== e.colour)
+  );
 }
 let s = {
     /* Every card in the finder now shows the actual product rather than a
@@ -115,15 +171,25 @@ let s = {
       alt: '240V LED strip light reels, warm white and cool white',
       caption: '240V strip on the reel — the one that sits in a ceiling recess',
     },
-    wet: {
+    kitchen: {
+      src: asset.asset('/images/finder/place-kitchen.webp'),
+      alt: '24V High Lumen SMD 12W/m strip light on the reel, lit warm white',
+      caption: 'The 12W/m High Lumen SMD — the under-cabinet strip, IP65 sealed',
+    },
+    bathroom: {
       src: asset.asset('/images/finder/place-wet.webp'),
       alt: 'IP65 silicone sleeved 24V LED strip light on the reel',
-      caption: 'The IP65 sleeved strip — sealed the whole way along',
+      caption: 'The IP65 sleeved High Lumen SMD — sealed the whole way along',
     },
-    cabinet: {
+    joinery: {
       src: asset.asset('/images/finder/place-cabinet.webp'),
       alt: 'Dot-less COB LED strip light coiled and lit warm white',
       caption: 'Dot-less COB — one smooth line, no spots, for open joinery',
+    },
+    outdoor: {
+      src: asset.asset('/images/finder/place-outdoor.webp'),
+      alt: 'Sealed 24V RGB COB strip light on the reel',
+      caption: 'The sealed outdoor strips — IP67 long run COB in white, IP65 COB in full colour',
     },
     stairs: {
       src: asset.asset('/images/finder/place-stairs.webp'),
@@ -144,11 +210,6 @@ let s = {
       src: asset.asset('/images/finder/place-display.webp'),
       alt: 'High lumen high colour SMD display strip light, 240 LEDs per metre',
       caption: 'Display grade — 240 LEDs a metre, CRI 90+ for true colour',
-    },
-    other: {
-      src: asset.asset('/images/finder/place-other.webp'),
-      alt: 'Coiled COB LED strip light lit warm white',
-      caption: 'The everyday dot-less COB — the one most jobs end up using',
     },
   },
   /* The colour question has no thumbnails. Lazar: "these 2 images should not
@@ -214,6 +275,9 @@ function u(e) {
   let t = `${(e.specs || []).map((e) => e.value).join(' ')} ${e.name}`.toLowerCase().match(/ip\s?(\d{2})/);
   return t ? parseInt(t[1], 10) : 20;
 }
+/* buildPackage shadows `u` with the run length, so the IP parser needs a
+   second name to be reachable in there. */
+const ipRating = u;
 /* Watts per metre, read off the product name.
    The catalogue used to carry one strip per family, so each family could hard
    code its wattage. It now carries the same dotless COB at 7.5, 12 and 16 W/m
@@ -438,7 +502,10 @@ function h(e) {
               n = t.match(/(\d{4})\s*k/),
               s = n ? `${n[1]}K fixed` : '2700–6500K adjustable';
             return {
-              fam: 'CCTCOB',
+              /* A fixed-colour dotless COB (the 12 W/m 2700K) is not a CCT
+                 strip: it must not get the warm↔cool preview or the CCT
+                 controller. Only the adjustable one is CCTCOB. */
+              fam: n ? 'COB' : 'CCTCOB',
               wpm: e,
               wpmTxt: `24V dotless COB · ${e}W/m`,
               single: r.single,
@@ -629,7 +696,10 @@ export const buildPackage = function (e, i, r, n = {}) {
      picking one, the kit offers the choice on the strip line itself. Guarded on
      there being no colour answer, so every other path still shows exactly the
      strip the recommendation named and nothing else. */
+  /* Read before the transformer block below, which redeclares `a`. */
+  let wetSpot = 'outdoor' === a.place || 'bathroom' === a.place;
   let stripPool = !a.colour && I(e) ? (Array.isArray(r) ? r : []).filter(I) : [e];
+  /* (kept for a plan saved before the colour question existed on this path) */
   (stripPool.length || (stripPool = [e]),
     (e = stripPool.find((t) => String(t.id) === String(n.strip)) || e));
   let c = {
@@ -668,6 +738,12 @@ export const buildPackage = function (e, i, r, n = {}) {
           ? `You picked "make it a feature" — this is the ${m.wpm}W/m High Lumen SMD, the brightest strip in the sealed IP65 wet-area range. It comes in 4000K natural and 5700K crisp only.`
           : `Standard pick — this ${m.wpm}W/m IP65 strip is plenty bright for benchtops, niches and general wet-area use, and it comes in all four whites — 2700K, 3000K, 4000K and 5700K.`,
       ));
+  'outdoor' === a.place &&
+    v.push(
+      'LONGRUN' === m.fam
+        ? 'Going outside, so this is supplied as the IP67 silicone-injected version of the strip — sealed the whole way along. Rain and a hose are no problem.'
+        : 'Going outside, so this is the IP65 sleeved version — sealed against rain and splashes.',
+    );
   let j = 'one';
   if ('240V' === p) {
     let e = {
@@ -705,7 +781,11 @@ export const buildPackage = function (e, i, r, n = {}) {
           };
         })
         .sort((e, t) => e.watts - t.watts),
-      a = k('transformer', i, (o.find((e) => e.watts >= s) || o[o.length - 1])?.t);
+      /* Outside, or in a bathroom, the driver has to be a sealed one: pick
+         from the IP65/IP67 transformers when there is one big enough. */
+      sealed = wetSpot ? o.filter((e) => ipRating(e.t) >= 65) : [],
+      pick = (sealed.length ? sealed : o).find((e) => e.watts >= s) || (sealed.length ? sealed : o)[(sealed.length ? sealed : o).length - 1],
+      a = k('transformer', i, pick?.t);
     (u <= m.single
       ? (y.push({
           key: 'transformer',
@@ -748,7 +828,7 @@ export const buildPackage = function (e, i, r, n = {}) {
       v.push(
         "Heads up: 240V strip is REMOTE-control only — it can't be made smart or run from the app. We've included the remote instead.",
       );
-    let e = f(C, w ? ['4-zone', 'rgb'] : ['cct', 'hand', 'single']),
+    let e = f(C, w ? ['4-zone', 'rgb'] : ['single colour', 'single', 'hand']),
       t = k('remote', C, e);
     (y.push({
       key: 'remote',
@@ -758,10 +838,33 @@ export const buildPackage = function (e, i, r, n = {}) {
       candidates: C,
     }),
       v.push('No controller box needed (or possible) with 240V strip — the remote does everything.'));
+  } else if ('NEON' === m.fam) {
+    /* Neon flex runs on Bluetooth from the phone — the brochure: "Bluetooth
+       Control (No WiFi required)". No controller box, no remote. */
+    v.push(
+      'Neon flex is controlled over Bluetooth straight from the phone — no WiFi, no controller box and no remote needed. The data cable joins several lengths together so one phone runs the lot.',
+    );
   } else {
     let e = g(r, 'controller').filter((e) => /rgb/i.test(e.name) === w && !/garage|door/i.test(e.name));
+    /* A plain RGB COB wants the plain RGB controller. The Magic / SPI one
+       drives addressable strip and does nothing useful on a 4-wire RGB. */
+    if (w && 'SPI' !== m.fam && !/neon/i.test(s)) {
+      let plain = e.filter((e) => !/magic|spi|dmx|addressable/i.test(e.name));
+      plain.length && (e = plain);
+    }
     if (e.length) {
-      let t = e.find((e) => (/smart/i.test(e.name) && !/non-smart/i.test(e.name)) === x) || e[0],
+      /* The controller has to match the strip: an adjustable-white COB needs
+         the dual-white controller or the remote's warm↔cool buttons do
+         nothing; a fixed white gets the single-colour one. Smart or not
+         follows the control answer. */
+      let isSmart = (e) => /smart|wifi/i.test(e.name) && !/non-smart/i.test(e.name),
+        wantCct = 'cct' === a.colour || 'CCTCOB' === m.fam,
+        pool = e.filter((e) => isSmart(e) === x),
+        t =
+          (pool.length ? pool : e).find((e) => (wantCct ? /dual white|cct/i : /single colour/i).test(e.name) && (wantCct || !/dual/i.test(e.name))) ||
+          (pool.length ? pool : e).find((e) => (wantCct ? /dual white|cct/i : /single colour/i).test(e.name)) ||
+          pool[0] ||
+          e[0],
         i = k('controller', e, t),
         r = x
           ? 'run everything from the phone app'
@@ -779,7 +882,7 @@ export const buildPackage = function (e, i, r, n = {}) {
       });
     }
     if (!x) {
-      let e = f(C, w ? ['4-zone', 'rgb'] : ['cct', 'hand', 'single']),
+      let e = f(C, w ? ['4-zone', 'rgb'] : 'cct' === a.colour || 'CCTCOB' === m.fam ? ['cct adjustable', 'cct', 'hand'] : ['single colour', 'single', 'hand']),
         t = k('remote', C, e);
       y.push({
         key: 'remote',
@@ -911,11 +1014,13 @@ function I(e) {
 }
 export const longRunInfo = function (e, t) {
   let i = (Array.isArray(e) ? e : []).filter(I),
-    /* Warm 3000K first: it is the one the long run panel is written around and
-       the cheaper of the two. The kit screen offers the other as an option. */
+    /* The colour question is asked on every long run path now, so this lands
+       on the exact SKU: 4000K → the 4000K roll, otherwise 3000K. Outdoors is
+       3000K only (the IP67 sealed version is not made in 4000K). The by-role
+       lookup goes first; the wattage filter is the fallback for a rename. */
     r =
-      i.find((e) => /3000/.test(e.name)) ||
-      i.find((e) => /long.?run/i.test(e.name)) ||
+      ('w4000' === t.colour && 'outdoor' !== t.place ? role(e, 'lr4000') : role(e, 'lr3000')) ||
+      i.find((e) => ('w4000' === t.colour ? /4000/ : /3000/).test(e.name)) ||
       i[0] ||
       null,
     n = parseFloat(t.length) || 0;
@@ -925,214 +1030,155 @@ export const longRunInfo = function (e, t) {
     len: n,
     tooShort: n > 0 && n < 5,
     fromCove: 'cove' === t.place,
+    fromOutdoor: 'outdoor' === t.place,
   };
 };
 export const photoForQuestion = function (e, t, i = []) {
   if (!e) return null;
   if ('space' === e.key && t.place) return s[t.place] || null;
   if ('colour' !== e.key && t.colour) {
-    let e = (function (e, t) {
-      if (!Array.isArray(t) || !t.length) return null;
-      if ('cove' === e.place) {
-        let i = 'rgb' === e.colour;
-        return (
-          t.find((e) => /240v/i.test(e.name) && i === /rgb/i.test(e.name)) ||
-          t.find((e) => /240v/i.test(e.name)) ||
-          null
-        );
-      }
-      return 'wet' === e.place
-        ? t.find((e) => /high lumen/i.test(e.name)) || null
-        : 'rgb' === e.colour
-          ? t.find((e) => /rgb/i.test(e.name) && /cob/i.test(e.name)) || null
-          : (('cct' === e.colour || 'single' === e.colour) &&
-              t.find((e) => /cob/i.test(e.name) && !/rgb/i.test(e.name))) ||
-            null;
-    })(t, i);
-    return e?.image
-      ? {
-          src: e.image,
-          alt: e.name,
-          caption: e.name,
-        }
-      : null;
+    let r = RESOLVE(t),
+      p = r ? role(i, r[0]) : n(t) ? longRunInfo(i, t).strip : null;
+    return p?.image ? { src: p.image, alt: p.name, caption: p.name } : null;
   }
   return null;
 };
+/* ---------------------------------------------------------------------------
+   THE PRODUCT TABLE
+   One entry per strip Greenhse sells, keyed by the job it does. The SKU is
+   the primary match; the name pattern is the fallback for the day Magento
+   renames a SKU again (which is what broke the long run answer in R53). A
+   role that finds nothing in the feed resolves to null, and the screen says
+   "call us" rather than quoting the wrong strip.
+   --------------------------------------------------------------------------- */
+let ROLES = {
+  v240white: { sku: 'ST240V-PRO', rx: /240\s*v.*pro/i },
+  v240rgb: { sku: 'ST240V-RGB', rx: /240\s*v.*rgb/i },
+  lr3000: { sku: 'ST24V-7.5 3000k COB', rx: /7\.5\s*w.*3000.*cob/i },
+  lr4000: { sku: 'ST24V-7.5 4000k COB-1', rx: /7\.5\s*w.*4000.*cob/i },
+  cob2700: { sku: 'ST24V-12- 2700k COB', rx: /dotless.*12\s*w.*2700/i },
+  cctcob: { sku: 'ST24V-16 CCT-1', rx: /16\s*w.*cct.*cob/i },
+  rgbcob20: { sku: 'ST24V-16w-RGB-COB', rx: /rgb.*cob.*16\s*w/i },
+  rgbcob65: { sku: 'ST24V-15w-RGB-COB-1', rx: /rgb.*cob.*15\s*w/i },
+  smd12: { sku: 'st24v-12w-SMD', rx: /high lumen smd.*12\s*w/i },
+  smd20: { sku: 'st24v-20w-SMD-1', rx: /high lumen smd.*20\s*w/i },
+  display23: { sku: 'st24v-23w-SMD-1-1', rx: /display.*23\s*w/i },
+  meat: { sku: 'MEAT-IP68-14W/m', rx: /fresh meat/i },
+  neoncct: { sku: 'NEON-CCT-6x12', rx: /neon.*cct/i },
+  neonrgb: { sku: 'NEON-RGB-SPI-IP66', rx: /neon.*rgb/i },
+  spi: { sku: 'RGBW-SPI-4000K-IP54', rx: /rgbw.*spi/i },
+};
+function role(products, key) {
+  let d = ROLES[key];
+  if (!d || !Array.isArray(products)) return null;
+  let bySku = products.find((p) => p.sku === d.sku && 'number' == typeof p.price);
+  if (bySku) return bySku;
+  return products.find((p) => d.rx.test(p.name || '') && 'number' == typeof p.price) || null;
+}
+/* Which role each combination of answers leads to. Read it as a table:
+   [primary role, alternative roles, note]. A null primary means the screen
+   asks them to call. Everything here is straight off the brochure's
+   application and colour rows, with Lazar's handwritten corrections. */
+function RESOLVE(t) {
+  let c = t.colour;
+  switch (t.place) {
+    case 'cove':
+      if ('roomy' !== t.space) return null; /* tight recess = long run path */
+      return 'rgb' === c
+        ? ['v240rgb', [], 'Recessed ceilings = long-run 240V strip, kept simple: $60 driver included, one power feed, RGB up to 35m from a single feed.']
+        : ['v240white', [], 'Recessed ceilings = long-run 240V strip, kept simple: $60 driver included, one power feed, fixed-colour white up to 50m from a single feed.'];
+    case 'kitchen':
+      return [
+        'smd12',
+        'w3000' === c ? ['lr3000'] : 'w4000' === c ? ['lr4000'] : 'w2700' === c ? ['cob2700'] : [],
+        'Under kitchen cabinets the brochure pick is the 12W/m High Lumen SMD — IP65 sealed against benchtop steam and splashes, 2000+ lumens a metre. Want a dot-free line instead of a row of LEDs? The COB alternative below does that.',
+      ];
+    case 'bathroom':
+      return 'w3000' === c
+        ? ['smd12', ['smd20'], 'Warm white is only made in the 12W/m High Lumen SMD — still IP65 and sealed, just softer than the 20W/m.']
+        : ['smd20', ['smd12'], 'Bathroom niches and short lengths get the 20W/m High Lumen SMD — IP65 sealed, the brightest strip in the wet-area range.'];
+    case 'joinery':
+      return 'cct' === c
+        ? ['cctcob', [], 'Adjustable white in joinery is the 16W/m CCT COB — dot-free, 2700K to 6500K from the remote. Needs an aluminium channel.']
+        : 'rgb' === c
+          ? ['rgbcob20', ['spi'], 'Full colour in joinery is the 16W/m RGB COB — dot-free, IP20. Want chasing and animated effects? The addressable RGBW SPI is the alternative.']
+          : 'w2700' === c
+            ? ['cob2700', ['lr3000'], '2700K extra-warm is the 12W/m dot-free COB.']
+            : 'w5700' === c
+              ? ['smd12', [], '5700K crisp white is made in the High Lumen SMD only — in an aluminium channel with a diffuser it reads dot-free.']
+              : 'w4000' === c
+                ? ['lr4000', ['smd12'], '4000K in joinery is the 7.5W/m dot-free COB — one smooth line, low power, 20m from one feed.']
+                : ['lr3000', ['smd12'], '3000K in joinery is the 7.5W/m dot-free COB — one smooth line, low power, 20m from one feed.'];
+    case 'outdoor':
+      return 'rgb' === c
+        ? ['rgbcob65', ['neonrgb'], 'Outdoor full colour is the 15W/m RGB COB in its IP65 heat-shrink sleeve. Neon flex RGB (IP67) is the alternative where it needs to bend.']
+        : null; /* white outdoors = long run path (IP67 sealed) */
+    case 'neon':
+      return 'rgb' === c
+        ? ['neonrgb', [], '12x12mm Neon Flex RGB, IP67 — side-bends to follow a letter or a curve, Bluetooth control.']
+        : ['neoncct', [], '6x12mm Neon Side Bend Flex CCT, IP67 — adjustable 3000K to 6000K, Bluetooth control.'];
+    case 'display':
+      return 'meat' === t.kind
+        ? ['meat', [], 'Fresh meat, deli and seafood cabinets get the Fresh Meat strip — a red and white mix that keeps produce looking fresh, IP68 so it can be hosed down.']
+        : ['display23', ['smd20'], 'Retail displays get the 23W/m High Colour SMD — 240 LEDs a metre, CRI 90+, up to 3800 lumens a metre.'];
+    default:
+      return null;
+  }
+}
+/* How far each family goes before it needs a second feed, and past which
+   length it is a phone call. 240V: 10 to 50m white, 10 to 35m RGB. Every 24V
+   strip except the long run COB: 5m one feed, 10m both ends, past 10m call. */
+function lengthGate(t, primary) {
+  let d = parseFloat(t.length) || 0;
+  if (!d) return null;
+  if ('cove' === t.place && 'roomy' === t.space) {
+    let max = 'rgb' === t.colour ? 35 : 50;
+    if (d < 10)
+      return "📞 Recessed-ceiling runs under 10 metres need a custom option — give us a quick call on (08) 9297 2969 and we'll spec it with you on the spot.";
+    if (d > max)
+      return `📞 A ${d}m recessed run is past what one 240V strip carries (${max}m for ${'rgb' === t.colour ? 'RGB' : 'fixed-colour white'}), so it has to be split into sections and fed separately. Give us a quick call on (08) 9297 2969 and we'll map it out.`;
+    return null;
+  }
+  let f = primary ? h(primary) : null;
+  if (f && d > (f.dual || 10))
+    return "📞 Runs over 10 metres need power planned at several points — give us a quick call on (08) 9297 2969 and we'll design it with you.";
+  return null;
+}
 export const pickRecommendation = function (e, t) {
-  var i, r;
-  let n =
-      ((i = e),
-      (r = t),
-      i
-        /* Neon flex is sold by the metre and lives on this page, but it is
-           named "Neon Flex" and "Neon Side Bend Flex" with the word strip
-           nowhere in it, so the old filter dropped both before anything was
-           scored and the signage answer came back as a rigid COB strip. */
-        .filter(
-          (e) =>
-            'strip' === c(e) &&
-            /strip|cob|linear|neon|flex/i.test(e.name) &&
-            !/suspension|modular/i.test(e.name),
-        )
-        .map((e) => {
-          var t;
-          let i, n, s, o, a;
-          return {
-            p: e,
-            s:
-              ((t = r) &&
-                t.colour &&
-                ('w' === t.colour[0] || 'blue' === t.colour) &&
-                (t = {
-                  ...t,
-                  colour: 'single',
-                }),
-              (i = 2),
-              (n = (e.name || '').toLowerCase()),
-              (s = u(e)),
-              (o = h(e)),
-              (a = parseInt(t.length) || 0),
-              '240V' === o.fam &&
-                ('cove' !== t.place ||
-                'tight' === t.space ||
-                'smart' === t.control ||
-                'cct' === t.colour ||
-                (a && a < (o.min || 5)) ||
-                (a && a > o.single)
-                  ? (i -= 100)
-                  : (i += 6)),
-              'wet' === t.place
-                ? /* The wet-area range is two strips in one family — the 12 W/m
-                     and the 20 W/m High Lumen SMD — and the brightness question
-                     is the whole point of asking. It was never scored, so both
-                     answers tied and the feed order handed out the 20 W/m
-                     either way: pick "Standard brightness — 12W/m" and you got
-                     a 20 W/m strip at the wrong price, in a colour the 20 W/m
-                     is not even made in. Score the answer the customer gave. */
-                  ((i += 'HILUMEN' === o.fam ? 10 : -100),
-                  t.brightness &&
-                    'HILUMEN' === o.fam &&
-                    (i += ('bright' === t.brightness ? o.wpm >= 18 : o.wpm <= 14) ? 6 : -20))
-                : 'cabinet' === t.place
-                  ? (('CCTCOB' === o.fam || 'RGBCOB' === o.fam) && (i += 3), 'HILUMEN' === o.fam && (i += 2))
-                  : 'cove' === t.place
-                    ? ('CCTCOB' === o.fam || 'HILUMEN' === o.fam) && (i += 2)
-                    : /* Signage and curves: only the neon flex bends on its
-                         side, so nothing else is a real answer here. */
-                      'neon' === t.place
-                      ? (i += 'NEON' === o.fam ? 14 : -100)
-                      : /* A display or food cabinet wants colour accuracy
-                           before brightness. The 23W/m high colour display
-                           strip is the pick; the fresh meat strip is the
-                           specialist answer for a butcher or deli. */
-                        'display' === t.place
-                        ? (i +=
-                            'DISPLAY' === o.fam
-                              ? 12
-                              : 'MEAT' === o.fam
-                                ? 6
-                                : 'HILUMEN' === o.fam
-                                  ? 3
-                                  : 'NEON' === o.fam
-                                    ? -100
-                                    : 0)
-                        : /* Anywhere else, the specialist strips are the wrong
-                             thing to lead with even though they would work. */
-                          (('NEON' === o.fam || 'MEAT' === o.fam || 'SPI' === o.fam) && (i -= 6),
-                          s <= 24 && (i += 1)),
-              'rgb' === t.colour
-                ? n.includes('rgb')
-                  ? (i += 6)
-                  : (i -= 8)
-                : 'cct' === t.colour
-                  ? 'CCTCOB' === o.fam
-                    ? (i += 8)
-                    : n.includes('cct') || n.includes('dual')
-                      ? (i += 6)
-                      : (i -= 100)
-                  : 'single' === t.colour &&
-                    ('CCTCOB' === o.fam || 'RGBCOB' === o.fam || n.includes('cob') || n.includes('rgb')
-                      ? (i -= 100)
-                      : 'HILUMEN' === o.fam
-                        ? (i += 8)
-                        : (i += 4)),
-              'smart' === t.control &&
-                (n.includes('smart') || n.includes('wifi') || 'CCTCOB' === o.fam || n.includes('rgb')) &&
-                (i += 1),
-              /* Only the wet-area path asks about brightness. Everywhere else
-                 the 12 and 20 W/m High Lumen tie on every other test, and a tie
-                 is settled by whatever order the feed happens to be in — which
-                 was handing dry joinery the dearest strip in the family. Lead
-                 with the 12 W/m and keep the 20 W/m as an alternative. */
-              'HILUMEN' === o.fam && !t.brightness && o.wpm >= 18 && (i -= 1),
-              a > o.dual && (i -= 4),
-              a >= 10 && '240V' === o.fam && 'cove' === t.place && 'tight' !== t.space && (i += 3),
-              i),
-          };
-        })
-        .sort((e, t) => t.s - e.s)),
-    s = n.filter((e) => e.s > 0).slice(0, 3),
-    o = (s.length ? s : n.slice(0, 3)).map((e) => e.p),
-    a = null,
-    l = !1,
-    d = parseFloat(t.length) || 0;
-  if ('cove' === t.place) {
-    /* How far the 240V recessed strip actually goes: 50 m for the fixed whites,
-       35 m for RGB. Past that there is no 240V answer, and the old code quietly
-       fell through to a 24V COB rated 5 m from one end and 10 m from both — so a
-       45 m RGB cove came back as a strip that cannot do 45 m, under a note that
-       said the run was too SHORT for 240V. Over the limit is a phone call. */
-    let m240 = 'rgb' === t.colour ? 35 : 50;
-    if ('tight' !== t.space && 'cct' !== t.colour && 'smart' !== t.control && d > m240)
-      ((a = `\uD83D\uDCDE A ${d}m recessed run is past what one 240V strip carries (${m240}m for ${'rgb' === t.colour ? 'RGB' : 'fixed-colour white'}), so it has to be split into sections and fed separately. Give us a quick call on (08) 9297 2969 and we'll map it out.`),
-        (o = o.slice(0, 2)),
-        (l = !0));
-    else if ('tight' !== t.space && 'smart' !== t.control && 'cct' !== t.colour && d > 0 && d < 10)
-      ((a =
-        "📞 Recessed-ceiling runs under 10 metres need a custom option — give us a quick call on (08) 9297 2969 and we'll spec it with you on the spot."),
-        (o = o.slice(0, 2)),
-        (l = !0));
-    else {
-      let e = o.filter((e) => /240v/i.test(e.name));
-      if (e.length) {
-        let i = 'rgb' === t.colour,
-          r = e.filter((e) => i === /rgb/i.test(e.name));
-        ((o = (r.length ? r : e).slice(0, 1)),
-          (a = `Recessed ceilings = long-run 240V strip, kept simple: $60 driver included, one power feed, minimum 10m (${i ? 'RGB up to 35m' : 'fixed-colour white up to 50m'}). Under 10m? Call us on (08) 9297 2969.`));
-      } else {
-        let e =
-          'smart' === t.control
-            ? "240V strip is remote-only — it can't be run from the app"
-            : 'cct' === t.colour
-              ? "240V is fixed colour — it can't do adjustable white"
-              : '240V comes in 10m+ runs only — yours is shorter (want 240V anyway? Call us on (08) 9297 2969)';
-        a = `Normally a recessed ceiling gets 240V strip — but ${e}. These 24V picks are the right fit instead:`;
-      }
-    }
-  } else
-    d > 10 &&
-      ((a =
-        "📞 Runs over 10 metres need power planned at several points — give us a quick call on (08) 9297 2969 and we'll design it with you."),
-      (o = o.slice(0, 2)),
-      (l = !0));
-  return {
-    primary: l ? null : o[0],
-    alts: l ? o.slice(0, 2) : o.slice(1, 3),
-    note: a,
-    callOnly: l,
-  };
+  let r = RESOLVE(t);
+  if (!r)
+    return {
+      primary: null,
+      alts: [],
+      note: "📞 Give us a quick call on (08) 9297 2969 and we'll match the right strip to this one.",
+      callOnly: !0,
+    };
+  let [pk, ak, note] = r,
+    primary = role(e, pk),
+    alts = ak.map((k) => role(e, k)).filter(Boolean);
+  if (!primary)
+    return {
+      primary: null,
+      alts,
+      note: "📞 That strip isn't showing in the catalogue right now — call us on (08) 9297 2969 and we'll sort it on the spot.",
+      callOnly: !0,
+    };
+  let gate = lengthGate(t, primary);
+  return gate ? { primary: null, alts: [primary].concat(alts).slice(0, 2), note: gate, callOnly: !0 } : { primary, alts, note, callOnly: !1 };
 };
 export const stripFacts = h;
 export const summarise = function (e) {
   let t =
       {
-        cabinet: 'under your cabinets',
         cove: 'in your ceiling recess',
-        wet: 'in your wet area',
+        kitchen: 'under your kitchen cabinets',
+        bathroom: 'in your bathroom / wet area',
+        joinery: 'inside your joinery',
+        outdoor: 'outdoors',
         stairs: 'on your stairs / hallway',
         longrun: 'along your long run',
-        other: 'in your spot',
+        neon: 'for your signage or feature shape',
+        display: 'display' === e.place && 'meat' === e.kind ? 'in your food cabinet' : 'in your display cabinet',
       }[e.place] || 'in your spot',
     i =
       {
