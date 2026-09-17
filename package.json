@@ -1,16 +1,25 @@
 {
-  "name": "greenhse-layout-app",
+  "name": "greenhse-site",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/fetch-catalog.js && node scripts/build-blog-list.js && node scripts/build-lightlab-data.js",
     "build": "next build",
-    "start": "npx serve out"
+    "start": "next start",
+    "preview": "node scripts/serve.js",
+    "postbuild": "node scripts/make-folder-routes.js && node scripts/build-sitemap.js"
   },
   "dependencies": {
-    "@netlify/blobs": "^11.0.3",
     "next": "14.2.15",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "@netlify/blobs": "^11.0.3",
+    "@reduxjs/toolkit": "^2.5.0",
+    "react-redux": "^9.2.0",
+    "axios": "^1.7.9",
+    "prop-types": "^15.8.1",
+    "hoist-non-react-statics": "^3.3.2",
+    "use-sync-external-store": "^1.4.0"
   }
 }

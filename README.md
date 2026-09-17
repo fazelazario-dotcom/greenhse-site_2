@@ -1,61 +1,58 @@
-# Greenhse Layout App
+# Greenhse Technologies — website
 
-The lighting layout planner and its staff admin page, on their own. Next.js 14
-(App Router, static export), React 18, four Netlify functions for storing the
-plans customers submit. No HTML pages — everything is React.
+Next.js 14 (App Router, static export). Deploys to Netlify from `main`.
 
-## Run it
+This build is the demolights.greenhse.com design and pages, rebuilt as source
+in this project — every page, the product catalogue, cart, checkout and
+account area — plus this site's own blog (`/blog/`) and layout planner
+(`/layout-app/`).
 
 ```
 npm install
-npm run dev        # http://localhost:3000/layout-app/
-npm run build      # writes the static site to out/
+npm run build      # fetches the catalogue, builds every page into out/
+npm run preview    # serves out/ at http://localhost:8080 with the Magento proxy
+npm run dev        # development server at http://localhost:3000
 ```
 
-The `/api/*` endpoints are Netlify functions, so they only work on Netlify
-(or with `netlify dev`). Without them the planner still runs fully — only
-Save/Submit and the admin page need the backend.
+## Where things are
 
-## Deploy on Netlify
+| Folder | What |
+| --- | --- |
+| `app/` | One route file per page. `app/layout.js` is the shared shell (store, header, page, footer, overlays). |
+| `site/pages/` | The page components: homepage, each category page, products, cart, checkout, account, contact, about, installation, policies. |
+| `site/components/` | Header, footer, product card, product detail, quick view, finders, forms, cart drawer, cookie notice. |
+| `site/lib/` | Data: `api.jsx` (catalogue feeds, product shaping, forms), `productsApi.jsx` (lookups), `cartApi.jsx`, `customerApi.jsx`, `ordersApi.jsx`, `nav.jsx` (menus), `storage.jsx`. |
+| `site/store/` | Redux slices: cart, user, wishlist, catalogue, finder products, UI. |
+| `data/catalog.json` | Snapshot of the product feeds, refreshed by `scripts/fetch-catalog.js` on every build (product pages are built from it). |
+| `data/site.json` | This site's blog posts: `bodyHtml` (the rewritten post, 600 to 1000 words), `bodyHtmlOriginal` (the Magento original, kept for reference), `hero` (the header photograph, from `public/images/hero/`), `lede`, `date`. Rendered by `lib/blog.js` (clean-up, link mapping, no dashes) and `components/BlogPost.jsx`; styles in `app/_styles/blog.css`; the list at `/blog/` in `app/blog/page.js`; the homepage journal reads `data/blog-list.json`, written by `scripts/build-blog-list.js` on every build. To add a post: add an entry to `data/site.json` (HTML fragment with `p, h2, h3, ul, ol, li, strong, em, a, img, table`), pick a `hero` from `public/images/hero/`, put pictures in `public/blog/img/`, and build. |
+| `public/layout.html` | The layout planner (`/layout-app/`), with `layout-standalone.html` and `layout-admin.html`. |
+| `netlify/functions/` | Layout planner submissions, drafts and tracking. |
+| `public/_redirects` | Magento proxy (`/mag/*`) and redirects from old addresses. |
 
-1. New site from this repo. `netlify.toml` already sets the build command
-   (`npm run build`), the publish folder (`out`) and the functions folder.
-2. Site configuration → Environment variables → add `ADMIN_KEY` (any long
-   secret). The admin page and the tracking endpoint refuse everything
-   without it.
-3. Deploy. Netlify Blobs needs no setup — the functions create the stores.
+## How the backend is reached
 
-Routes: `/layout-app/` (the planner) and `/layout-admin/` (staff, asks for the
-admin key). `/layout-app/?qa=1` runs the planner's built-in test suite.
+- **Products, categories, finders**: `https://www.getestimate.greenhse.com/api/product.php?id=<category>` and `categories.php` — public, read-only, CORS-open. Same feeds the live demo uses.
+- **Cart, sign-in, account, orders, checkout**: Magento on greenhse.com, through the site's own `/mag/*` proxy (Netlify `_redirects`; `scripts/serve.js` and `next.config.js` give `preview`/`dev` the same proxy). The proxy is needed because greenhse.com only accepts demolights.greenhse.com as a browser origin.
+- **Orders list**: Magento GraphQL with the customer's own token (the demo used an admin token in the browser — removed).
+- **Product images**: served through images.weserv.nl, as on the demo.
+- **Forms** (quote, enquiry, contact, subscribe): the same endpoints as the demo.
 
-## What is where
+## Light Lab — `/light-lab/`
 
-| Path | What |
-|---|---|
-| `app/layout-app/page.js` | the planner route |
-| `app/layout-admin/page.js` | the admin route |
-| `site/planner/LayoutPlanner.jsx` | planner component (JSX shell + `planner.css`) |
-| `site/planner/engine/` | the planner's logic: `core.js` (canvas, rooms, fittings, schedule, export), `home.js` (start screen, tutorial, save/submit), `qa.js` (`?qa=1` suite), `track.js` (usage pings), `lifecycle.js` (mount/unmount bookkeeping) |
-| `site/planner/data/` | `products.js` (the fittings the planner offers), `art.js` (drawings/icons) |
-| `site/planner/admin/` | `LayoutAdmin.jsx`, `admin.js`, `admin.css` |
-| `netlify/functions/` | `submit-layout.mjs` (POST /api/submit-layout), `layouts.mjs` (GET/DELETE /api/layouts, admin key), `draft.mjs` (POST /api/draft), `track.mjs` (POST /api/track) |
-| `public/img/` | product photos the planner shows (referenced from `products.js`) |
-| `public/fonts/`, `app/_styles/fonts.css` | Poppins and JetBrains Mono |
-| `site/components/layout/SiteChrome.jsx` | only needed when merged into the main site (below) |
+`public/light-lab.html` + `public/light-lab.js`, a standalone app served at
+`/light-lab/` by `scripts/make-folder-routes.js`, the same way the planner is.
+It is deliberately not a Next route.
 
-## Merging into the main greenhse site
+The customer loads a photo of their own room, drops real fittings into it,
+turns them on and sees the light. Everything runs in the browser and the photo
+is never uploaded; only a small preview goes with a sent list.
 
-Copy these across unchanged, keeping the same paths:
-
-- `site/planner/` (whole folder)
-- `app/layout-app/`, `app/layout-admin/`
-- `netlify/functions/`
-- `public/img/` (add to the site's existing `public/img/`)
-- `site/components/layout/SiteChrome.jsx`
-
-Then in the site's `app/layout.js` wrap the header and the footer/overlays in
-`<SiteChrome>…</SiteChrome>` so they step aside on the two planner routes,
-add the `[functions]` block from `netlify.toml` to the site's own
-`netlify.toml`, add `@netlify/blobs` to the site's `package.json`, and set
-`ADMIN_KEY` on the site. The fonts and `app/layout.js` / `app/page.js` in this
-repo are only for running it standalone — the main site already has its own.
+- Catalogue: `public/light-lab-data.json`, written at `prebuild` by
+  `scripts/build-lightlab-data.js` from `public/layout.html` (parsed specs) and
+  `data/catalog.json` (live price, photo, product page). Joined by Magento
+  url_key, not by SKU.
+- Self test: `/light-lab/?qa=1`. Baseline **62/62**.
+- Quote requests post to `/.netlify/functions/submit-layout` with
+  `jobType: 'Light Lab'`, so they land in the same admin list as the planner's.
+- The lighting is an impression, not a photometric simulation, and the page
+  says so in three places. Keep it that way.

@@ -1,21 +1,21 @@
+# Next.js static export. `next build` writes the finished site to out/ and
+# Netlify serves it from the CDN - no server runtime, same operational model
+# as the static build. public/_redirects carries the Magento proxies and the
+# 301s from every old .html address.
 [build]
   command = "npm run build"
   publish = "out"
 
-# Layout-app submissions: four serverless functions store customer plans in
-# Netlify Blobs. Each declares its own path (/api/submit-layout, /api/layouts,
-# /api/draft, /api/track). The staff endpoints are guarded by the ADMIN_KEY
-# environment variable — set it in Site configuration → Environment variables.
+# Layout-app submissions: two serverless functions store customer plans in
+# Netlify Blobs (POST /api/submit-layout) and serve them back to staff
+# (GET/DELETE /api/layouts, guarded by the ADMIN_KEY environment variable —
+# set it in Site configuration → Environment variables). The staff view is
+# /layout-admin.html on the deployed site.
 [functions]
   directory = "netlify/functions"
 
 [[headers]]
   for = "/img/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
-
-[[headers]]
-  for = "/fonts/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
